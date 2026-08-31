@@ -4,6 +4,7 @@ const productosRoutes = require("./routes/productos");
 const usuariosRoutes = require("./routes/usuarios");
 const ventasRoutes = require("./routes/ventas");
 const pagosRoutes = require("./routes/pagos");
+const categoriasRoutes = require("./routes/categorias");
 
 const app = express();
 const PORT = 3000;
@@ -13,6 +14,7 @@ app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/ventas", ventasRoutes);
 app.use("/api/pagos", pagosRoutes);
+app.use("/api/categorias", categoriasRoutes);
 
 app.get("/", (req, res) => {
     res.json({
