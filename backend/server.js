@@ -3,6 +3,7 @@ const conexion = require("./db");
 const productosRoutes = require("./routes/productos");
 const usuariosRoutes = require("./routes/usuarios");
 const ventasRoutes = require("./routes/ventas");
+const pagosRoutes = require("./routes/pagos");
 
 const app = express();
 const PORT = 3000;
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/ventas", ventasRoutes);
+app.use("/api/pagos", pagosRoutes);
 
 app.get("/", (req, res) => {
     res.json({
