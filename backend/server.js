@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const conexion = require("./db");
 const productosRoutes = require("./routes/productos");
@@ -5,6 +7,7 @@ const usuariosRoutes = require("./routes/usuarios");
 const ventasRoutes = require("./routes/ventas");
 const pagosRoutes = require("./routes/pagos");
 const categoriasRoutes = require("./routes/categorias");
+const reportesRoutes = require("./routes/reportes");
 
 const {
     verificarToken,
@@ -12,7 +15,7 @@ const {
 } = require("./middleware/auth");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use("/api/productos", productosRoutes);
@@ -20,6 +23,7 @@ app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/ventas", ventasRoutes);
 app.use("/api/pagos", pagosRoutes);
 app.use("/api/categorias", categoriasRoutes);
+app.use("/api/reportes", reportesRoutes);
 
 app.get("/", (req, res) => {
     res.json({

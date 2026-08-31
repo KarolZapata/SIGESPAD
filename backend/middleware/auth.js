@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = "SIGESPAD_SECRET_2026";
+// La clave se obtiene desde el archivo .env
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // =====================================================
 // MIDDLEWARE - Verificar autenticación
