@@ -6,6 +6,11 @@ const ventasRoutes = require("./routes/ventas");
 const pagosRoutes = require("./routes/pagos");
 const categoriasRoutes = require("./routes/categorias");
 
+const {
+    verificarToken,
+    verificarRol
+} = require("./middleware/auth");
+
 const app = express();
 const PORT = 3000;
 
@@ -21,6 +26,32 @@ app.get("/", (req, res) => {
         mensaje: "Backend de SIGESPAD funcionando correctamente"
     });
 });
+
+// =====================================================
+// RUTA DE PRUEBA - Usuario autenticado
+// =====================================================
+app.get("/api/auth/verificar", verificarToken, (req, res) => {
+    res.json({
+        mensaje: "Autenticación correcta",
+        usuario: req.usuario
+    });
+});
+
+
+// =====================================================
+// RUTA DE PRUEBA - Solo administrador
+// =====================================================
+app.get(
+    "/api/auth/admin",
+    verificarToken,
+    verificarRol("ADMINISTRADOR"),
+    (req, res) => {
+        res.json({
+            mensaje: "Acceso autorizado para administrador",
+            usuario: req.usuario
+        });
+    }
+);
 
 app.listen(PORT, () => {
     console.log(`Servidor SIGESPAD ejecutándose en http://localhost:${PORT}`);
