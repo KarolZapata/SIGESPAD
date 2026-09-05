@@ -1,34 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [correo, setCorreo] = useState("");
-  const [password, setPassword] = useState("");
+  const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const iniciarSesion = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const respuesta = await api.post("/usuarios/login", {
-        correo,
-        password,
-      });
+      console.log("DATOS ENVIADOS:", {
+  correo,
+  contrasena,
+});
 
+const respuesta = await api.post("/usuarios/login", {
+  correo,
+  contrasena,
+});
+
+console.log("RESPUESTA DEL BACKEND:", respuesta.data);
       const { token, usuario } = respuesta.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("usuario", JSON.stringify(usuario));
+      login(usuario, token);
 
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
+
       setError(
-        error.response?.data?.mensaje ||
+        error.response?.data?.error ||
         "Correo o contraseña incorrectos"
       );
     }
@@ -39,7 +47,9 @@ function Login() {
       <div className="login-card">
         <h1>SIGESPAD</h1>
 
-        <p>Sistema de Gestión para Papelería y Miscelánea</p>
+        <p>
+          Sistema de Gestión para Papelería y Miscelánea
+        </p>
 
         <form onSubmit={iniciarSesion}>
           <label>Correo electrónico</label>
@@ -57,12 +67,16 @@ function Login() {
           <input
             type="password"
             placeholder="Ingrese su contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={contrasena}
+            onChange={(e) => setContrasena(e.target.value)}
             required
           />
 
-          {error && <p className="error">{error}</p>}
+          {error && (
+            <p className="error">
+              {error}
+            </p>
+          )}
 
           <button type="submit">
             Iniciar sesión

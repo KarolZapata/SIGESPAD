@@ -45,6 +45,50 @@ router.get(
     }
 );
 
+// =====================================================
+// GET - PRODUCTOS PÚBLICOS
+// No requiere autenticación
+// =====================================================
+router.get(
+    "/publicos",
+    (req, res) => {
+
+        const sql = `
+            SELECT
+                id_producto,
+                nombre,
+                descripcion,
+                categoria,
+                precio,
+                precio_mayorista,
+                stock,
+                estado
+            FROM productos
+            WHERE estado = 1
+            ORDER BY nombre ASC
+        `;
+
+        conexion.query(
+            sql,
+            (error, resultados) => {
+
+                if (error) {
+                    console.error(
+                        "Error al obtener productos públicos:",
+                        error.message
+                    );
+
+                    return res.status(500).json({
+                        error:
+                            "Error al obtener los productos"
+                    });
+                }
+
+                res.json(resultados);
+            }
+        );
+    }
+);
 
 // =====================================================
 // GET - Obtener producto por ID

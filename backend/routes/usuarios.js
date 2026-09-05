@@ -10,7 +10,7 @@ const {
     verificarRol
 } = require("../middleware/auth");
 
-const JWT_SECRET = "SIGESPAD_SECRET_2026";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 
 // =====================================================
@@ -113,6 +113,135 @@ router.post("/login", (req, res) => {
     );
 });
 
+// =====================================================
+// POST - REGISTRO DE CLIENTE
+// RUTA PÚBLICA
+// =====================================================
+router.post(
+    "/registro",
+    async (req, res) => {
+
+        const {
+            nombre,
+            correo,
+            contrasena
+        } = req.body;
+
+        // Validar campos obligatorios
+        if (
+            !nombre ||
+            !correo ||
+            !contrasena
+        ) {
+            return res.status(400).json({
+                error: "Nombre, correo y contraseña son obligatorios"
+            });
+        }
+
+        // Validar contraseña mínima
+        if (contrasena.length < 6) {
+            return res.status(400).json({
+                error: "La contraseña debe tener al menos 6 caracteres"
+            });
+        }
+
+        try {
+
+            // Verificar si el correo ya existe
+            const sqlVerificar = `
+                SELECT id_usuario
+                FROM usuarios
+                WHERE correo = ?
+            `;
+
+            conexion.query(
+                sqlVerificar,
+                [correo],
+                async (error, resultados) => {
+
+                    if (error) {
+                        console.error(
+                            "Error al verificar correo:",
+                            error.message
+                        );
+
+                        return res.status(500).json({
+                            error: "Error al registrar el cliente"
+                        });
+                    }
+
+                    if (resultados.length > 0) {
+                        return res.status(400).json({
+                            error: "El correo ya está registrado"
+                        });
+                    }
+
+                    // Encriptar contraseña
+                    const contrasenaHash =
+                        await bcrypt.hash(
+                            contrasena,
+                            10
+                        );
+
+                    // Crear cliente
+                    const sqlInsertar = `
+                        INSERT INTO usuarios
+                        (
+                            nombre,
+                            correo,
+                            contraseña,
+                            rol,
+                            estado
+                        )
+                        VALUES (?, ?, ?, 'CLIENTE', 1)
+                    `;
+
+                    conexion.query(
+                        sqlInsertar,
+                        [
+                            nombre,
+                            correo,
+                            contrasenaHash
+                        ],
+                        (error, resultado) => {
+
+                            if (error) {
+
+                                console.error(
+                                    "Error al registrar cliente:",
+                                    error.message
+                                );
+
+                                return res.status(500).json({
+                                    error: "Error al registrar el cliente"
+                                });
+                            }
+
+                            res.status(201).json({
+                                mensaje:
+                                    "Cliente registrado correctamente",
+                                id_usuario:
+                                    resultado.insertId
+                            });
+                        }
+                    );
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Error al encriptar contraseña:",
+                error.message
+            );
+
+            res.status(500).json({
+                error:
+                    "Error interno del servidor"
+            });
+        }
+    }
+);
 
 // =====================================================
 // GET - OBTENER TODOS LOS USUARIOS

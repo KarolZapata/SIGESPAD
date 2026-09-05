@@ -262,6 +262,7 @@ router.post(
                                 id_producto,
                                 nombre,
                                 precio,
+                                precio_mayorista,
                                 stock,
                                 estado
                             FROM productos
@@ -315,23 +316,42 @@ router.post(
                                 }
 
 
-                                const subtotal =
-                                    Number(producto.precio) *
-                                    Number(cantidad);
+                                const cantidadNumerica = Number(cantidad);
 
+// =====================================================
+// PRECIO SEGÚN CANTIDAD
+// 1 a 5 unidades  → precio normal
+// 6 o más         → precio mayorista
+// =====================================================
+
+                                let precioUnitario;
+
+                                if (
+                                    cantidadNumerica >= 6 &&
+                                    producto.precio_mayorista !== null
+                                ) {
+                                    precioUnitario =
+                                        Number(producto.precio_mayorista);
+                                } else {
+                                    precioUnitario =
+                                        Number(producto.precio);
+                                }
+
+                                const subtotal =
+                                    precioUnitario *
+                                    cantidadNumerica;
 
                                 total += subtotal;
-
 
                                 detallesProcesados.push({
                                     id_producto:
                                         producto.id_producto,
 
                                     cantidad:
-                                        Number(cantidad),
+                                        cantidadNumerica,
 
                                     precio_unitario:
-                                        Number(producto.precio),
+                                        precioUnitario,
 
                                     subtotal:
                                         subtotal
