@@ -1,0 +1,113 @@
+.productos-page {
+  min-height: 100vh;
+  background: #f5f6f8;
+  padding: 40px;
+}
+
+.productos-header {
+  max-width: 1200px;
+  margin: 0 auto 30px;
+}
+
+.productos-header h1 {
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.productos-header p {
+  color: #666;
+}
+
+.productos-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.producto-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.producto-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.producto-imagen {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background: #eee;
+}
+
+.producto-contenido {
+  padding: 20px;
+}
+
+.producto-contenido h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #222;
+}
+
+.producto-descripcion {
+  color: #666;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.producto-categoria {
+  font-size: 13px;
+  color: #777;
+  margin: 12px 0;
+}
+
+.precio-normal {
+  font-size: 21px;
+  font-weight: bold;
+  color: #222;
+}
+
+.precio-mayorista {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #16803c;
+  font-weight: bold;
+}
+
+.producto-stock {
+  margin: 12px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.btn-carrito {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: #222;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-carrito:hover {
+  background: #444;
+}
+
+@media (max-width: 600px) {
+  .productos-page {
+    padding: 20px;
+  }
+
+  .productos-grid {
+    grid-template-columns: 1fr;
+  }
+}
