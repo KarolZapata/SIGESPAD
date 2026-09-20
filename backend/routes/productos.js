@@ -55,17 +55,22 @@ router.get(
 
         const sql = `
             SELECT
-                id_producto,
-                nombre,
-                descripcion,
-                categoria,
-                precio,
-                precio_mayorista,
-                stock,
-                estado
-            FROM productos
-            WHERE estado = 1
-            ORDER BY nombre ASC
+                p.id_producto,
+                p.codigo,
+                p.nombre,
+                p.descripcion,
+                p.categoria,
+                p.precio,
+                p.precio_mayorista,
+                p.stock,
+                p.estado,
+                pi.nombre_imagen,
+                pi.orden
+            FROM productos p
+            LEFT JOIN producto_imagenes pi
+                ON p.id_producto = pi.id_producto
+            WHERE p.estado = 1
+            ORDER BY p.nombre ASC, pi.orden ASC
         `;
 
         conexion.query(
@@ -84,11 +89,115 @@ router.get(
                     });
                 }
 
-                res.json(resultados);
+                const productos = [];
+
+                resultados.forEach((fila) => {
+
+                    let producto = productos.find(
+                        (p) =>
+                            p.id_producto === fila.id_producto
+                    );
+
+                    if (!producto) {
+
+                        producto = {
+                            id_producto: fila.id_producto,
+                            codigo: fila.codigo,
+                            nombre: fila.nombre,
+                            descripcion: fila.descripcion,
+                            categoria: fila.categoria,
+                            precio: fila.precio,
+                            precio_mayorista:
+                                fila.precio_mayorista,
+                            stock: fila.stock,
+                            estado: fila.estado,
+                            imagenes: []
+                        };
+
+                        productos.push(producto);
+                    }
+
+                    if (fila.nombre_imagen) {
+                        producto.imagenes.push({
+                            nombre: fila.nombre_imagen,
+                            orden: fila.orden
+                        });
+                    }
+                });
+
+                res.json(productos);
             }
         );
     }
 );
+
+// =====================================================
+// GET - Producto público por ID
+// No requiere autenticación
+// =====================================================
+router.get("/publicos/:id", (req, res) => {
+    const { id } = req.params;
+
+    const sql = `
+        SELECT
+            p.id_producto,
+            p.codigo,
+            p.nombre,
+            p.descripcion,
+            p.categoria,
+            p.precio,
+            p.precio_mayorista,
+            p.stock,
+            p.estado,
+            pi.nombre_imagen,
+            pi.orden
+        FROM productos p
+        LEFT JOIN producto_imagenes pi
+            ON p.id_producto = pi.id_producto
+        WHERE p.id_producto = ?
+        AND p.estado = 1
+        ORDER BY pi.orden ASC
+    `;
+
+    conexion.query(sql, [id], (error, resultados) => {
+        if (error) {
+            console.error(
+                "Error al obtener el producto público:",
+                error.message
+            );
+
+            return res.status(500).json({
+                error: "Error al obtener el producto"
+            });
+        }
+
+        if (resultados.length === 0) {
+            return res.status(404).json({
+                error: "Producto no encontrado"
+            });
+        }
+
+        const producto = {
+            id_producto: resultados[0].id_producto,
+            codigo: resultados[0].codigo,
+            nombre: resultados[0].nombre,
+            descripcion: resultados[0].descripcion,
+            categoria: resultados[0].categoria,
+            precio: resultados[0].precio,
+            precio_mayorista: resultados[0].precio_mayorista,
+            stock: resultados[0].stock,
+            estado: resultados[0].estado,
+            imagenes: resultados
+                .filter(fila => fila.nombre_imagen)
+                .map(fila => ({
+                    nombre: fila.nombre_imagen,
+                    orden: fila.orden
+                }))
+        };
+
+        res.json(producto);
+    });
+});
 
 // =====================================================
 // GET - Obtener producto por ID

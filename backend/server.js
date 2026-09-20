@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const conexion = require("./db");
 const productosRoutes = require("./routes/productos");
 const usuariosRoutes = require("./routes/usuarios");
@@ -20,6 +21,20 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// =====================================================
+// IMÁGENES DE PRODUCTOS
+// =====================================================
+app.use(
+    "/imagenes-productos",
+    express.static(
+        path.join(__dirname, "../Catalogo/imagenes_productos")
+    )
+);
+
+// =====================================================
+// RUTAS DE LA API
+// =====================================================
 app.use("/api/productos", productosRoutes);
 app.use("/api/usuarios", usuariosRoutes);
 app.use("/api/ventas", ventasRoutes);
@@ -36,13 +51,16 @@ app.get("/", (req, res) => {
 // =====================================================
 // RUTA DE PRUEBA - Usuario autenticado
 // =====================================================
-app.get("/api/auth/verificar", verificarToken, (req, res) => {
-    res.json({
-        mensaje: "Autenticación correcta",
-        usuario: req.usuario
-    });
-});
-
+app.get(
+    "/api/auth/verificar",
+    verificarToken,
+    (req, res) => {
+        res.json({
+            mensaje: "Autenticación correcta",
+            usuario: req.usuario
+        });
+    }
+);
 
 // =====================================================
 // RUTA DE PRUEBA - Solo administrador
@@ -59,6 +77,11 @@ app.get(
     }
 );
 
+// =====================================================
+// INICIAR SERVIDOR
+// =====================================================
 app.listen(PORT, () => {
-    console.log(`Servidor SIGESPAD ejecutándose en http://localhost:${PORT}`);
+    console.log(
+        `Servidor SIGESPAD ejecutándose en http://localhost:${PORT}`
+    );
 });

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useCart } from "../context/CartContext";
 import "./Productos.css";
 
 function Productos() {
   const { agregarAlCarrito } = useCart();
+  const navigate = useNavigate();
+
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -25,6 +28,10 @@ function Productos() {
     } finally {
       setCargando(false);
     }
+  };
+
+  const verProducto = (idProducto) => {
+    navigate(`/productos/${idProducto}`);
   };
 
   if (cargando) {
@@ -52,67 +59,89 @@ function Productos() {
       ) : (
         <div className="productos-grid">
 
-          {productos.map((producto) => (
+          {productos.map((producto) => {
 
-            <div
-              className="producto-card"
-              key={producto.id_producto}
-            >
+            const imagenPrincipal =
+              producto.imagenes &&
+              producto.imagenes.length > 0
+                ? `http://localhost:3000/imagenes-productos/${producto.imagenes[0].nombre}`
+                : "https://placehold.co/600x400?text=Producto";
 
-              <img
-                className="producto-imagen"
-                src="https://placehold.co/600x400?text=Producto"
-                alt={producto.nombre}
-              />
+            return (
+              <div
+                className="producto-card"
+                key={producto.id_producto}
+              >
 
-              <div className="producto-contenido">
+                {/* Imagen del producto */}
+                <img
+                  className="producto-imagen"
+                  src={imagenPrincipal}
+                  alt={producto.nombre}
+                  onClick={() =>
+                    verProducto(producto.id_producto)
+                  }
+                />
 
-                <h2>
-                  {producto.nombre}
-                </h2>
+                <div className="producto-contenido">
 
-                <p className="producto-descripcion">
-                  {producto.descripcion}
-                </p>
+                  {/* Nombre */}
+                  <h2>
+                    {producto.nombre}
+                  </h2>
 
-                <p className="producto-categoria">
-                  Categoría: {producto.categoria}
-                </p>
+                  {/* Categoría */}
+                  <p className="producto-categoria">
+                    {producto.categoria}
+                  </p>
 
-                <p className="precio-normal">
-                  $
-                  {Number(
-                    producto.precio
-                  ).toLocaleString("es-CO")}
-                </p>
-
-                {producto.precio_mayorista !== null && (
-                  <p className="precio-mayorista">
-                    Precio mayorista desde 6 unidades: $
+                  {/* Precio normal */}
+                  <p className="precio-normal">
+                    Precio: $
                     {Number(
-                      producto.precio_mayorista
+                      producto.precio
                     ).toLocaleString("es-CO")}
                   </p>
-                )}
 
-                <p className="producto-stock">
-                  Stock disponible: {producto.stock}
+                {/* Precio mayorista */}
+                <p className="precio-mayorista">
+                    Mayorista: $
+                    {Number(producto.precio_mayorista).toLocaleString("es-CO")}
                 </p>
 
-                <button
-                  className="btn-carrito"
-                  onClick={() =>
-                    agregarAlCarrito(producto)
-                  }
-                >
-                  Agregar al carrito
-                </button>
+                  {/* Stock */}
+                  <p className="producto-stock">
+                    Stock disponible: {producto.stock}
+                  </p>
+
+                  {/* Botones */}
+                  <div className="producto-acciones">
+
+                    <button
+                      className="btn-ver-producto"
+                      onClick={() =>
+                        verProducto(producto.id_producto)
+                      }
+                    >
+                      Ver producto
+                    </button>
+
+                    <button
+                      className="btn-carrito"
+                      onClick={() =>
+                        agregarAlCarrito(producto)
+                      }
+                    >
+                      Agregar al carrito
+                    </button>
+
+                  </div>
+
+                </div>
 
               </div>
-
-            </div>
-
-          ))}
+            );
+          })}
 
         </div>
       )}

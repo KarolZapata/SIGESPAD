@@ -1,0 +1,179 @@
+/* =====================================================
+   CATEGORÍAS
+   ===================================================== */
+
+.categorias-page {
+    min-height: 100vh;
+
+    padding: 45px 30px 70px;
+
+   background: transparent;
+}
+
+.categorias-header {
+    max-width: 1100px;
+
+    margin: 0 auto 45px;
+
+    text-align: center;
+}
+
+.categorias-header h1 {
+    margin: 0 0 10px;
+
+    font-size: 36px;
+
+    color: #102b4e;
+}
+
+.categorias-header p {
+    margin: 0;
+
+    color: #697586;
+
+    font-size: 16px;
+}
+
+.categorias-header::after {
+    content: "";
+
+    display: block;
+
+    width: 70px;
+
+    height: 3px;
+
+    margin: 18px auto 0;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        to right,
+        #b8860b,
+        #e1b84b,
+        #b8860b
+    );
+}
+
+/* =====================================================
+   GRID
+   ===================================================== */
+
+.categorias-grid {
+    max-width: 1100px;
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(230px, 1fr)
+        );
+
+    gap: 25px;
+}
+
+/* =====================================================
+   TARJETA CATEGORÍA
+   ===================================================== */
+
+.categoria-card {
+    position: relative;
+
+    min-height: 190px;
+
+    padding: 30px 25px;
+
+    border: 1px solid #e2e5ea;
+
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    cursor: pointer;
+
+    text-align: center;
+
+    box-shadow:
+        0 5px 18px rgba(16, 43, 78, 0.07);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.categoria-card:hover {
+    transform: translateY(-6px);
+
+    border-color: #d5b35a;
+
+    box-shadow:
+        0 12px 28px rgba(16, 43, 78, 0.13);
+}
+
+/* =====================================================
+   ICONO
+   ===================================================== */
+
+.categoria-icono {
+    width: 55px;
+
+    height: 55px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #102b4e;
+
+    color: #e1b84b;
+
+    font-size: 25px;
+
+    box-shadow:
+        0 5px 12px rgba(16, 43, 78, 0.18);
+}
+
+.categoria-card h2 {
+    margin: 0 0 10px;
+
+    color: #102b4e;
+
+    font-size: 19px;
+}
+
+.categoria-card span {
+    color: #9a7117;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 600px) {
+
+    .categorias-page {
+        padding: 35px 18px 50px;
+    }
+
+    .categorias-header h1 {
+        font-size: 29px;
+    }
+
+    .categorias-grid {
+        grid-template-columns: 1fr;
+    }
+}

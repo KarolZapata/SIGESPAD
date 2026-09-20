@@ -1,116 +1,164 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 const CartContext = createContext();
 
-export function CartProvider({ children }) {
-  const [carrito, setCarrito] = useState(() => {
+const obtenerCarritoGuardado = () => {
+  try {
     const carritoGuardado = localStorage.getItem("carrito");
 
-    return carritoGuardado
-      ? JSON.parse(carritoGuardado)
-      : [];
-  });
-
-  const guardarCarrito = (nuevoCarrito) => {
-    setCarrito(nuevoCarrito);
-
-    localStorage.setItem(
-      "carrito",
-      JSON.stringify(nuevoCarrito)
-    );
-  };
-
-  const agregarAlCarrito = (producto) => {
-    console.log("PRODUCTO AGREGADO:", producto);
-
-    const productoExistente = carrito.find(
-      (item) =>
-        item.id_producto === producto.id_producto
-    );
-
-    let nuevoCarrito;
-
-    if (productoExistente) {
-      nuevoCarrito = carrito.map((item) =>
-        item.id_producto === producto.id_producto
-          ? {
-              ...item,
-              cantidad: item.cantidad + 1,
-            }
-          : item
-      );
-    } else {
-      nuevoCarrito = [
-        ...carrito,
-        {
-          ...producto,
-          cantidad: 1,
-        },
-      ];
+    if (!carritoGuardado) {
+      return [];
     }
 
-    guardarCarrito(nuevoCarrito);
+    const carritoParseado = JSON.parse(carritoGuardado);
+
+    return Array.isArray(carritoParseado)
+      ? carritoParseado
+      : [];
+  } catch (error) {
+    console.error("Error al cargar el carrito:", error);
+    return [];
+  }
+};
+
+export function CartProvider({ children }) {
+  const [carrito, setCarrito] = useState(
+    obtenerCarritoGuardado
+  );
+
+  // Guardar automáticamente cada cambio del carrito
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "carrito",
+        JSON.stringify(carrito)
+      );
+    } catch (error) {
+      console.error(
+        "Error al guardar el carrito:",
+        error
+      );
+    }
+  }, [carrito]);
+
+
+  // Agregar un producto o aumentar su cantidad
+  const agregarAlCarrito = (producto, cantidadAgregar = 1) => {
+    const cantidad = Number(cantidadAgregar);
+
+    if (!Number.isInteger(cantidad) || cantidad < 1) {
+      return;
+    }
+
+    setCarrito((carritoActual) => {
+      const idProducto = String(producto.id_producto);
+
+      const existente = carritoActual.find(
+        (item) => String(item.id_producto) === idProducto
+      );
+
+      if (existente) {
+        return carritoActual.map((item) =>
+          String(item.id_producto) === idProducto
+            ? {
+                ...item,
+                cantidad: Number(item.cantidad) + cantidad,
+              }
+            : item
+        );
+      }
+
+      return [
+        ...carritoActual,
+        {
+          ...producto,
+          cantidad,
+        },
+      ];
+    });
   };
 
+  // Aumentar cantidad
   const aumentarCantidad = (id_producto) => {
-    const nuevoCarrito = carrito.map((item) =>
-      item.id_producto === id_producto
-        ? {
-            ...item,
-            cantidad: item.cantidad + 1,
-          }
-        : item
-    );
-
-    guardarCarrito(nuevoCarrito);
-  };
-
-  const disminuirCantidad = (id_producto) => {
-    const nuevoCarrito = carrito
-      .map((item) =>
-        item.id_producto === id_producto
+    setCarrito((carritoActual) =>
+      carritoActual.map((item) =>
+        String(item.id_producto) ===
+        String(id_producto)
           ? {
               ...item,
-              cantidad: item.cantidad - 1,
+              cantidad: Number(item.cantidad) + 1,
             }
           : item
       )
-      .filter((item) => item.cantidad > 0);
-
-    guardarCarrito(nuevoCarrito);
-  };
-
-  const eliminarDelCarrito = (id_producto) => {
-    const nuevoCarrito = carrito.filter(
-      (item) =>
-        item.id_producto !== id_producto
     );
-
-    guardarCarrito(nuevoCarrito);
   };
 
+  // Disminuir cantidad
+  const disminuirCantidad = (id_producto) => {
+    setCarrito((carritoActual) =>
+      carritoActual
+        .map((item) =>
+          String(item.id_producto) ===
+          String(id_producto)
+            ? {
+                ...item,
+                cantidad: Number(item.cantidad) - 1,
+              }
+            : item
+        )
+        .filter((item) => item.cantidad > 0)
+    );
+  };
+
+  // Eliminar completamente un producto
+const eliminarDelCarrito = (id_producto) => {
+  setCarrito((carritoActual) =>
+    carritoActual.filter(
+      (item) =>
+        String(item.id_producto) !==
+        String(id_producto)
+    )
+  );
+};
+
+  // Vaciar el carrito
   const vaciarCarrito = () => {
-    guardarCarrito([]);
+    setCarrito([]);
   };
 
+  // Obtener precio según cantidad
   const obtenerPrecio = (producto) => {
+    const cantidad = Number(producto.cantidad);
+
+    const precioMayorista =
+      producto.precio_mayorista;
+
     if (
-      producto.cantidad >= 6 &&
-      producto.precio_mayorista !== null
+      cantidad >= 6 &&
+      precioMayorista !== null &&
+      precioMayorista !== undefined &&
+      precioMayorista !== ""
     ) {
-      return Number(producto.precio_mayorista);
+      return Number(precioMayorista);
     }
 
     return Number(producto.precio);
   };
 
+  // Obtener subtotal de un producto
   const obtenerSubtotal = (producto) => {
     return (
       obtenerPrecio(producto) *
-      producto.cantidad
+      Number(producto.cantidad)
     );
   };
 
+  // Obtener total de compra
   const obtenerTotal = () => {
     return carrito.reduce(
       (total, producto) =>
@@ -119,9 +167,10 @@ export function CartProvider({ children }) {
     );
   };
 
+  // Sumar las unidades de todos los productos
   const cantidadProductos = carrito.reduce(
     (total, producto) =>
-      total + producto.cantidad,
+      total + Number(producto.cantidad),
     0
   );
 
