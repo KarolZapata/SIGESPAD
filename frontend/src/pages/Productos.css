@@ -343,3 +343,102 @@
         height: 280px;
     }
 }
+
+
+/* =====================================================
+   BUSCADOR DEL CATÁLOGO
+   ===================================================== */
+
+.productos-buscador {
+    max-width: 650px;
+    margin: 0 auto 20px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.productos-buscador input {
+    flex: 1;
+    min-width: 0;
+
+    padding: 14px 18px;
+
+    border: 1px solid #d5dbe3;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #102b4e;
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.productos-buscador input::placeholder {
+    color: #929baa;
+}
+
+.productos-buscador input:focus {
+    border-color: #b8860b;
+
+    box-shadow:
+        0 0 0 3px rgba(184, 134, 11, 0.12);
+}
+
+.btn-limpiar-busqueda {
+    padding: 13px 16px;
+
+    border: 1px solid #c8a84e;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #9a7117;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.btn-limpiar-busqueda:hover {
+    background: #fffaf0;
+}
+
+.productos-resultados {
+    max-width: 1200px;
+    margin: 0 auto 20px;
+
+    color: #697586;
+    font-size: 14px;
+}
+
+.productos-mensaje {
+    max-width: 1200px;
+    margin: 25px auto;
+
+    color: #697586;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Buscador adaptable a celulares */
+@media (max-width: 600px) {
+    .productos-buscador {
+        gap: 8px;
+    }
+
+    .productos-buscador input {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    .btn-limpiar-busqueda {
+        padding: 12px;
+        font-size: 13px;
+    }
+}

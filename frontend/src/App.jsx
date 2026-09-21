@@ -1,10 +1,8 @@
-
 import {
   BrowserRouter,
   Routes,
   Route,
   Navigate,
-  Link,
 } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -12,35 +10,20 @@ import Productos from "./pages/Productos";
 import Carrito from "./pages/Carrito";
 import Categorias from "./pages/Categorias";
 import DetalleProducto from "./pages/DetalleProducto";
+import Dashboard from "./pages/Dashboard";
+import AdministrarProductos from "./pages/AdministrarProductos";
+import AdministrarCategorias from "./pages/AdministrarCategorias";
+import Inventario from "./pages/Inventario";
+import Usuarios from "./pages/Usuarios";
+import Ventas from "./pages/Ventas";
+import Reportes from "./pages/Reportes";
+
+import Navegacion from "./components/Navegacion";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { CartProvider, useCart } from "./context/CartContext";
-
-import logo from "./assets/logo.jpeg";
+import { CartProvider } from "./context/CartContext";
 
 import "./App.css";
-
-function Dashboard() {
-  const { usuario, logout } = useAuth();
-
-  return (
-    <div>
-      <h1>Dashboard SIGESPAD</h1>
-
-      <p>
-        Bienvenido, {usuario?.nombre}
-      </p>
-
-      <p>
-        Rol: {usuario?.rol}
-      </p>
-
-      <button onClick={logout}>
-        Cerrar sesión
-      </button>
-    </div>
-  );
-}
 
 function RutaProtegida({ children }) {
   const { autenticado } = useAuth();
@@ -52,70 +35,14 @@ function RutaProtegida({ children }) {
   return children;
 }
 
-function Navegacion() {
-  const { cantidadProductos } = useCart();
+function RutaAdministrador({ children }) {
+  const { usuario } = useAuth();
 
-  return (
-    <header className="navbar">
-      <div className="navbar-contenido">
+  if (!usuario || usuario.rol !== "ADMINISTRADOR") {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-        {/* LOGO */}
-        <Link
-          to="/productos"
-          className="navbar-logo"
-        >
-          <img
-            src={logo}
-            alt="Papelería San Diego"
-          />
-        </Link>
-
-        {/* MENÚ */}
-        <nav className="navbar-menu">
-          <Link
-            to="/productos"
-            className="navbar-link"
-          >
-            Productos
-          </Link>
-
-          <Link
-            to="/categorias"
-            className="navbar-link"
-          >
-            Categorías
-          </Link>
-
-          <Link
-            to="/carrito"
-            className="navbar-carrito"
-          >
-            <span className="carrito-icono">
-              🛒
-            </span>
-
-            <span>
-              Carrito
-            </span>
-
-            {cantidadProductos > 0 && (
-              <span className="carrito-contador">
-                {cantidadProductos}
-              </span>
-            )}
-          </Link>
-
-          {/* INICIAR SESIÓN */}
-          <Link
-            to="/login"
-            className="navbar-link"
-          >
-            Iniciar sesión
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
+  return children;
 }
 
 function App() {
@@ -126,43 +53,104 @@ function App() {
           <Navegacion />
 
           <Routes>
-            {/* Página principal: catálogo */}
             <Route
               path="/"
               element={<Navigate to="/productos" replace />}
             />
 
-            {/* Inicio de sesión */}
             <Route
               path="/login"
               element={<Login />}
             />
 
-            {/* Catálogo */}
             <Route
               path="/productos"
               element={<Productos />}
             />
 
-            {/* Detalle del producto */}
             <Route
               path="/productos/:id"
               element={<DetalleProducto />}
             />
 
-            {/* Categorías */}
+            <Route
+              path="/administrar-productos"
+              element={
+                <RutaProtegida>
+                  <RutaAdministrador>
+                    <AdministrarProductos />
+                  </RutaAdministrador>
+                </RutaProtegida>
+              }
+            />
+
             <Route
               path="/categorias"
               element={<Categorias />}
             />
 
-            {/* Carrito */}
+            <Route
+              path="/administrar-categorias"
+              element={
+                <RutaProtegida>
+                  <RutaAdministrador>
+                    <AdministrarCategorias />
+                  </RutaAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            <Route
+              path="/inventario"
+              element={
+                <RutaProtegida>
+                  <RutaAdministrador>
+                    <Inventario />
+                  </RutaAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            <Route
+              path="/usuarios"
+              element={
+                <RutaProtegida>
+                  <RutaAdministrador>
+                    <Usuarios />
+                  </RutaAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            {/* Ventas: acceso exclusivo del administrador */}
+            <Route
+              path="/ventas"
+              element={
+                <RutaProtegida>
+                  <RutaAdministrador>
+                    <Ventas />
+                  </RutaAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            {/* Reportes: acceso exclusivo del administrador */}
+            <Route
+              path="/reportes"
+              element={
+                <RutaProtegida>
+                  <RutaAdministrador>
+                    <Reportes />
+                  </RutaAdministrador>
+                </RutaProtegida>
+              }
+            />
+
             <Route
               path="/carrito"
               element={<Carrito />}
             />
 
-            {/* Dashboard protegido */}
             <Route
               path="/dashboard"
               element={
@@ -170,6 +158,11 @@ function App() {
                   <Dashboard />
                 </RutaProtegida>
               }
+            />
+
+            <Route
+              path="*"
+              element={<Navigate to="/productos" replace />}
             />
           </Routes>
         </CartProvider>

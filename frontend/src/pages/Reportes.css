@@ -1,0 +1,259 @@
+
+.reportes-page {
+  padding: 24px;
+  color: #263238;
+}
+
+.reportes-header {
+  margin-bottom: 28px;
+}
+
+.reportes-header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.reportes-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.reportes-resumen h2,
+.reporte-seccion h2 {
+  margin-bottom: 8px;
+  font-size: 21px;
+}
+
+.reportes-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 18px;
+}
+
+.reporte-tarjeta {
+  min-width: 0;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.reporte-tarjeta h3 {
+  margin: 0 0 14px;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.reporte-tarjeta p {
+  margin: 0;
+  color: #1f2937;
+  font-size: 26px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.reporte-seccion {
+  margin-top: 34px;
+}
+
+.reporte-seccion > p {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.reportes-filtros {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.reportes-filtros div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reportes-filtros label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.reportes-filtros input {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.btn-limpiar-reportes {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #e5e7eb;
+  color: #263238;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-limpiar-reportes:hover {
+  background: #d1d5db;
+}
+
+.reporte-grafico {
+  width: 100%;
+  height: 320px;
+  margin: 24px 0;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.reportes-tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.reportes-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.reportes-tabla th,
+.reportes-tabla td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.reportes-tabla th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.reportes-tabla tbody tr:hover {
+  background: #f9fafb;
+}
+
+.reportes-mensaje {
+  margin: 20px 0;
+  padding: 14px 18px;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.reportes-mensaje.error {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.stock-critico {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.stock-bajo-etiqueta {
+  display: inline-block;
+  padding: 5px 10px;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .reportes-page {
+    padding: 16px;
+  }
+
+  .reportes-tarjetas {
+    grid-template-columns: 1fr;
+  }
+
+  .reportes-filtros {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reportes-filtros input,
+  .btn-limpiar-reportes {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .reporte-grafico {
+    padding: 8px;
+  }
+}
+
+/* ================================
+   MOVIMIENTOS DE INVENTARIO
+================================ */
+
+.movimiento-etiqueta {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.movimiento-entrada {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.movimiento-salida {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+/* Tabla de movimientos */
+
+.reportes-tabla-contenedor {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.reportes-tabla td {
+  vertical-align: middle;
+}
+
+/* Adaptación para pantallas pequeñas */
+
+@media (max-width: 600px) {
+  .movimiento-etiqueta {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .reportes-tabla th,
+  .reportes-tabla td {
+    padding: 10px 12px;
+  }
+}
+
+.reportes-filtros-movimientos select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #1f2937;
+  font: inherit;
+  font-size: 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+}

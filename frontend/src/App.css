@@ -1,3 +1,4 @@
+
 /* =====================================================
    IDENTIDAD VISUAL
    PAPELERÍA SAN DIEGO
@@ -13,7 +14,6 @@ html {
 
 body {
     position: relative;
-
     margin: 0;
     min-height: 100vh;
 
@@ -23,7 +23,6 @@ body {
         sans-serif;
 
     background: #f7f8fa;
-
     color: #102b4e;
 }
 
@@ -43,9 +42,7 @@ body::before {
     background-size: min(55vw, 480px);
 
     opacity: 0.07;
-
     pointer-events: none;
-
     z-index: 0;
 }
 
@@ -54,7 +51,6 @@ body::before {
 #root {
     position: relative;
     z-index: 1;
-
     min-height: 100vh;
 }
 
@@ -64,15 +60,12 @@ body::before {
 
 .navbar {
     position: sticky;
-
     top: 0;
-
     z-index: 1000;
 
     width: 100%;
 
     background: #ffffff;
-
     border-bottom: 1px solid #e7e9ed;
 
     box-shadow:
@@ -81,19 +74,14 @@ body::before {
 
 .navbar-contenido {
     max-width: 1250px;
-
     min-height: 88px;
 
     margin: 0 auto;
-
     padding: 8px 30px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
     gap: 30px;
 }
 
@@ -103,19 +91,15 @@ body::before {
 
 .navbar-logo {
     display: flex;
-
     align-items: center;
-
     text-decoration: none;
 }
 
 .navbar-logo img {
     width: 145px;
-
     height: 72px;
 
     object-fit: contain;
-
     display: block;
 }
 
@@ -125,9 +109,7 @@ body::before {
 
 .navbar-menu {
     display: flex;
-
     align-items: center;
-
     gap: 8px;
 }
 
@@ -137,14 +119,16 @@ body::before {
     padding: 10px 15px;
 
     text-decoration: none;
-
     color: #102b4e;
 
     font-size: 15px;
-
     font-weight: 600;
 
+    border: none;
     border-radius: 8px;
+    background: transparent;
+
+    cursor: pointer;
 
     transition:
         color 0.2s ease,
@@ -153,7 +137,6 @@ body::before {
 
 .navbar-link:hover {
     color: #9a7117;
-
     background: #fffaf0;
 }
 
@@ -163,14 +146,11 @@ body::before {
     content: "";
 
     position: absolute;
-
     left: 15px;
     right: 15px;
-
     bottom: 4px;
 
     height: 2px;
-
     background: #c8a84e;
 
     transform: scaleX(0);
@@ -189,25 +169,19 @@ body::before {
 
 .navbar-carrito {
     display: flex;
-
     align-items: center;
-
     gap: 8px;
 
     margin-left: 8px;
-
     padding: 10px 17px;
 
     text-decoration: none;
-
     color: #ffffff;
-
     background: #102b4e;
 
     border-radius: 9px;
 
     font-size: 14px;
-
     font-weight: 600;
 
     box-shadow:
@@ -221,7 +195,6 @@ body::before {
 
 .navbar-carrito:hover {
     background: #17436f;
-
     transform: translateY(-1px);
 
     box-shadow:
@@ -234,52 +207,192 @@ body::before {
 
 .carrito-contador {
     min-width: 21px;
-
     height: 21px;
 
     padding: 0 5px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     border-radius: 50%;
 
     background: #d5a928;
-
     color: #ffffff;
 
     font-size: 11px;
-
     font-weight: 700;
+}
+
+/* =====================================================
+   DASHBOARD
+   ===================================================== */
+
+.dashboard {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+    padding: 40px 30px;
+}
+
+/* Encabezado del panel */
+
+.dashboard-encabezado {
+    margin-bottom: 35px;
+    padding-bottom: 22px;
+
+    border-bottom: 1px solid #e2e6ec;
+}
+
+.dashboard-encabezado h1 {
+    margin: 0 0 12px;
+
+    color: #102b4e;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.dashboard-encabezado p {
+    margin: 6px 0;
+
+    color: #52647a;
+    font-size: 15px;
+}
+
+/* Contenido y título de opciones */
+
+.dashboard-contenido h2 {
+    margin: 0 0 22px;
+
+    color: #102b4e;
+    font-size: 22px;
+}
+
+/* =====================================================
+   TARJETAS DEL DASHBOARD
+   ===================================================== */
+
+.dashboard-opciones {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(230px, 1fr));
+
+    gap: 22px;
+}
+
+.dashboard-opcion {
+    min-height: 150px;
+
+    padding: 25px;
+
+    background: #ffffff;
+    border: 1px solid #e2e6ec;
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 12px rgba(16, 43, 78, 0.05);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.dashboard-opcion:hover {
+    transform: translateY(-3px);
+
+    border-color: #c8a84e;
+
+    box-shadow:
+        0 8px 20px rgba(16, 43, 78, 0.10);
+}
+
+.dashboard-opcion h3 {
+    margin: 0 0 12px;
+
+    color: #102b4e;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.dashboard-opcion p {
+    margin: 0;
+
+    color: #52647a;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* =====================================================
+   BOTÓN CERRAR SESIÓN DEL DASHBOARD
+   ===================================================== */
+
+.dashboard-cerrar-sesion {
+    margin-top: 32px;
+    padding: 11px 20px;
+
+    color: #ffffff;
+    background: #102b4e;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.dashboard-cerrar-sesion:hover {
+    background: #17436f;
+    transform: translateY(-1px);
 }
 
 /* =====================================================
    RESPONSIVE
    ===================================================== */
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
+    .navbar-contenido {
+        gap: 15px;
+        padding: 8px 20px;
+    }
 
+    .navbar-logo img {
+        width: 120px;
+    }
+
+    .navbar-menu {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .dashboard {
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 700px) {
     body::before {
         background-size: min(75vw, 360px);
         background-position: center center;
-
         opacity: 0.055;
     }
 
     .navbar-contenido {
         min-height: 75px;
-
         padding: 6px 15px;
-
         gap: 10px;
     }
 
     .navbar-logo img {
         width: 105px;
-
         height: 60px;
     }
 
@@ -289,7 +402,6 @@ body::before {
 
     .navbar-link {
         padding: 8px;
-
         font-size: 13px;
     }
 
@@ -300,13 +412,33 @@ body::before {
 
     .navbar-carrito {
         margin-left: 3px;
-
         padding: 9px 11px;
-
         font-size: 13px;
     }
 
     .carrito-icono {
         font-size: 15px;
+    }
+
+    .dashboard {
+        padding: 25px 15px;
+    }
+
+    .dashboard-encabezado h1 {
+        font-size: 25px;
+    }
+
+    .dashboard-contenido h2 {
+        font-size: 20px;
+    }
+
+    .dashboard-opciones {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .dashboard-opcion {
+        min-height: auto;
+        padding: 20px;
     }
 }

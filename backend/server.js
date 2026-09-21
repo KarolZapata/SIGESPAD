@@ -10,6 +10,7 @@ const ventasRoutes = require("./routes/ventas");
 const pagosRoutes = require("./routes/pagos");
 const categoriasRoutes = require("./routes/categorias");
 const reportesRoutes = require("./routes/reportes");
+const inventarioRoutes = require("./routes/inventario");
 
 const {
     verificarToken,
@@ -41,6 +42,7 @@ app.use("/api/ventas", ventasRoutes);
 app.use("/api/pagos", pagosRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/reportes", reportesRoutes);
+app.use("/api/inventario", inventarioRoutes);
 
 app.get("/", (req, res) => {
     res.json({

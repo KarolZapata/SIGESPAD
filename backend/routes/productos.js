@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-
 const conexion = require("../db");
-
+const uploadImagenes = require("../middleware/uploadImagenes");
+const fs = require("fs");
+const path = require("path");
 const {
     verificarToken,
     verificarRol
@@ -246,119 +247,228 @@ router.get(
 
 
 // =====================================================
-// POST - Crear producto
+// POST - Crear producto con imágenes
 // SOLO ADMINISTRADOR
 // =====================================================
 router.post(
     "/",
     verificarToken,
     verificarRol("ADMINISTRADOR"),
+    uploadImagenes.array("imagenes", 10),
     (req, res) => {
 
         const {
+            codigo,
             nombre,
             descripcion,
             categoria,
             precio,
+            precio_mayorista,
             stock,
             stock_minimo
         } = req.body;
 
+        const archivos = req.files || [];
 
-        // Validar nombre y precio
-        if (!nombre || precio === undefined) {
-            return res.status(400).json({
-                error: "El nombre y el precio son obligatorios"
-            });
-        }
-
-
-        // Validar precio
-        if (Number(precio) < 0) {
-            return res.status(400).json({
-                error: "El precio no puede ser negativo"
-            });
-        }
-
-
-        // Validar stock
+        // Validar campos obligatorios
         if (
-            stock !== undefined &&
-            Number(stock) < 0
+            !codigo ||
+            !nombre ||
+            precio === undefined ||
+            precio === ""
         ) {
+            eliminarArchivosSubidos(archivos);
+
             return res.status(400).json({
-                error: "El stock no puede ser negativo"
+                error: "El código, nombre y precio son obligatorios"
             });
         }
 
-
-        // Validar stock mínimo
+        // Validar precios
         if (
-            stock_minimo !== undefined &&
-            Number(stock_minimo) < 0
+            !Number.isFinite(Number(precio)) ||
+            Number(precio) < 0
         ) {
+            eliminarArchivosSubidos(archivos);
+
             return res.status(400).json({
-                error: "El stock mínimo no puede ser negativo"
+                error: "El precio debe ser un número válido y no negativo"
             });
         }
 
+        if (
+            precio_mayorista !== undefined &&
+            precio_mayorista !== "" &&
+            (
+                !Number.isFinite(Number(precio_mayorista)) ||
+                Number(precio_mayorista) < 0
+            )
+        ) {
+            eliminarArchivosSubidos(archivos);
 
-        const sql = `
+            return res.status(400).json({
+                error: "El precio mayorista debe ser válido y no negativo"
+            });
+        }
+
+        const cantidadStock = stock === undefined || stock === ""
+            ? 0
+            : Number(stock);
+
+        const minimoStock = stock_minimo === undefined || stock_minimo === ""
+            ? 5
+            : Number(stock_minimo);
+
+        if (
+            !Number.isInteger(cantidadStock) ||
+            cantidadStock < 0 ||
+            !Number.isInteger(minimoStock) ||
+            minimoStock < 0
+        ) {
+            eliminarArchivosSubidos(archivos);
+
+            return res.status(400).json({
+                error: "El stock y el stock mínimo deben ser enteros no negativos"
+            });
+        }
+
+        const sqlProducto = `
             INSERT INTO productos
             (
+                codigo,
                 nombre,
                 descripcion,
                 categoria,
                 precio,
+                precio_mayorista,
                 stock,
                 stock_minimo
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-
-        const valores = [
-            nombre,
+        const valoresProducto = [
+            codigo.trim(),
+            nombre.trim(),
             descripcion || null,
             categoria || null,
             Number(precio),
-            stock !== undefined
-                ? Number(stock)
-                : 0,
-            stock_minimo !== undefined
-                ? Number(stock_minimo)
-                : 5
+            precio_mayorista === undefined || precio_mayorista === ""
+                ? null
+                : Number(precio_mayorista),
+            cantidadStock,
+            minimoStock
         ];
 
+        conexion.beginTransaction((error) => {
+            if (error) {
+                eliminarArchivosSubidos(archivos);
 
-        conexion.query(
-            sql,
-            valores,
-            (error, resultado) => {
-
-                if (error) {
-                    console.error(
-                        "Error al crear producto:",
-                        error.message
-                    );
-
-                    return res.status(500).json({
-                        error: "Error al crear el producto"
-                    });
-                }
-
-
-                res.status(201).json({
-                    mensaje:
-                        "Producto creado correctamente",
-                    id_producto:
-                        resultado.insertId
+                return res.status(500).json({
+                    error: "No se pudo iniciar la operación"
                 });
             }
-        );
+
+            conexion.query(
+                sqlProducto,
+                valoresProducto,
+                (error, resultado) => {
+
+                    if (error) {
+                        return conexion.rollback(() => {
+                            eliminarArchivosSubidos(archivos);
+
+                            if (error.code === "ER_DUP_ENTRY") {
+                                return res.status(409).json({
+                                    error: "Ya existe un producto con ese código"
+                                });
+                            }
+
+                            console.error("Error al crear producto:", error.message);
+
+                            return res.status(500).json({
+                                error: "Error al crear el producto"
+                            });
+                        });
+                    }
+
+                    const idProducto = resultado.insertId;
+
+                    if (archivos.length === 0) {
+                        return conexion.commit((errorCommit) => {
+                            if (errorCommit) {
+                                return conexion.rollback(() => {
+                                    res.status(500).json({
+                                        error: "No se pudo guardar el producto"
+                                    });
+                                });
+                            }
+
+                            res.status(201).json({
+                                mensaje: "Producto creado correctamente",
+                                id_producto: idProducto
+                            });
+                        });
+                    }
+
+                    const valoresImagenes = archivos.map((archivo, indice) => [
+                        idProducto,
+                        archivo.filename,
+                        indice + 1
+                    ]);
+
+                    const sqlImagenes = `
+                        INSERT INTO producto_imagenes
+                        (id_producto, nombre_imagen, orden)
+                        VALUES ?
+                    `;
+
+                    conexion.query(
+                        sqlImagenes,
+                        [valoresImagenes],
+                        (errorImagenes) => {
+
+                            if (errorImagenes) {
+                                return conexion.rollback(() => {
+                                    eliminarArchivosSubidos(archivos);
+
+                                    console.error(
+                                        "Error al guardar imágenes:",
+                                        errorImagenes.message
+                                    );
+
+                                    res.status(500).json({
+                                        error: "No se pudieron guardar las imágenes"
+                                    });
+                                });
+                            }
+
+                            conexion.commit((errorCommit) => {
+                                if (errorCommit) {
+                                    return conexion.rollback(() => {
+                                        eliminarArchivosSubidos(archivos);
+
+                                        res.status(500).json({
+                                            error: "No se pudo completar el registro"
+                                        });
+                                    });
+                                }
+
+                                res.status(201).json({
+                                    mensaje: "Producto e imágenes creados correctamente",
+                                    id_producto: idProducto,
+                                    imagenes: archivos.map(
+                                        archivo => archivo.filename
+                                    )
+                                });
+                            });
+                        }
+                    );
+                }
+            );
+        });
     }
 );
-
 
 // =====================================================
 // PUT - Actualizar producto
@@ -377,53 +487,71 @@ router.put(
             descripcion,
             categoria,
             precio,
+            precio_mayorista,
             stock,
             stock_minimo
         } = req.body;
 
-
         // Validar campos obligatorios
-        if (!nombre || precio === undefined) {
+        if (
+            !nombre ||
+            precio === undefined ||
+            precio === ""
+        ) {
             return res.status(400).json({
-                error:
-                    "El nombre y el precio son obligatorios"
+                error: "El nombre y el precio son obligatorios"
             });
         }
 
-
-        // Validar precio
-        if (Number(precio) < 0) {
+        // Validar precio de venta
+        if (
+            !Number.isFinite(Number(precio)) ||
+            Number(precio) < 0
+        ) {
             return res.status(400).json({
-                error:
-                    "El precio no puede ser negativo"
+                error: "El precio debe ser un número válido y no negativo"
             });
         }
 
+        // Validar precio mayorista, si se envía
+        if (
+            precio_mayorista !== undefined &&
+            precio_mayorista !== "" &&
+            (
+                !Number.isFinite(Number(precio_mayorista)) ||
+                Number(precio_mayorista) < 0
+            )
+        ) {
+            return res.status(400).json({
+                error: "El precio mayorista debe ser válido y no negativo"
+            });
+        }
 
         // Validar stock
         if (
             stock === undefined ||
+            stock === "" ||
+            !Number.isInteger(Number(stock)) ||
             Number(stock) < 0
         ) {
             return res.status(400).json({
-                error:
-                    "El stock no puede ser negativo"
+                error: "El stock debe ser un entero no negativo"
             });
         }
-
 
         // Validar stock mínimo
         if (
             stock_minimo === undefined ||
+            stock_minimo === "" ||
+            !Number.isInteger(Number(stock_minimo)) ||
             Number(stock_minimo) < 0
         ) {
             return res.status(400).json({
-                error:
-                    "El stock mínimo no puede ser negativo"
+                error: "El stock mínimo debe ser un entero no negativo"
             });
         }
 
-
+        // Actualizar los datos del producto
         const sql = `
             UPDATE productos
             SET
@@ -431,22 +559,24 @@ router.put(
                 descripcion = ?,
                 categoria = ?,
                 precio = ?,
+                precio_mayorista = ?,
                 stock = ?,
                 stock_minimo = ?
             WHERE id_producto = ?
         `;
 
-
         const valores = [
-            nombre,
+            nombre.trim(),
             descripcion || null,
             categoria || null,
             Number(precio),
+            precio_mayorista === undefined || precio_mayorista === ""
+                ? null
+                : Number(precio_mayorista),
             Number(stock),
             Number(stock_minimo),
             id
         ];
-
 
         conexion.query(
             sql,
@@ -459,30 +589,31 @@ router.put(
                         error.message
                     );
 
+                    // Código duplicado, si aplica alguna restricción
+                    if (error.code === "ER_DUP_ENTRY") {
+                        return res.status(409).json({
+                            error: "Ya existe un producto con esos datos"
+                        });
+                    }
+
                     return res.status(500).json({
-                        error:
-                            "Error al actualizar el producto"
+                        error: "Error al actualizar el producto"
                     });
                 }
-
 
                 if (resultado.affectedRows === 0) {
                     return res.status(404).json({
-                        error:
-                            "Producto no encontrado"
+                        error: "Producto no encontrado"
                     });
                 }
 
-
                 res.json({
-                    mensaje:
-                        "Producto actualizado correctamente"
+                    mensaje: "Producto actualizado correctamente"
                 });
             }
         );
     }
 );
-
 
 // =====================================================
 // DELETE - Desactivar producto
@@ -644,5 +775,29 @@ router.get(
     }
 );
 
+function eliminarArchivosSubidos(archivos) {
+    const carpetaImagenes = path.join(
+        __dirname,
+        "../../Catalogo/imagenes_productos"
+    );
+
+    archivos.forEach((archivo) => {
+        const rutaArchivo = path.join(
+            carpetaImagenes,
+            path.basename(archivo.filename)
+        );
+
+        if (fs.existsSync(rutaArchivo)) {
+            fs.unlink(rutaArchivo, (error) => {
+                if (error) {
+                    console.error(
+                        "No se pudo eliminar el archivo:",
+                        error.message
+                    );
+                }
+            });
+        }
+    });
+}
 
 module.exports = router;

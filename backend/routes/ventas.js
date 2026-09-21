@@ -324,183 +324,212 @@ router.post(
 // 6 o más         → precio mayorista
 // =====================================================
 
-                                let precioUnitario;
+let precioUnitario;
 
-                                if (
-                                    cantidadNumerica >= 6 &&
-                                    producto.precio_mayorista !== null
-                                ) {
-                                    precioUnitario =
-                                        Number(producto.precio_mayorista);
-                                } else {
-                                    precioUnitario =
-                                        Number(producto.precio);
-                                }
+if (
+    cantidadNumerica >= 6 &&
+    producto.precio_mayorista !== null
+) {
+    precioUnitario =
+        Number(producto.precio_mayorista);
+} else {
+    precioUnitario =
+        Number(producto.precio);
+}
 
-                                const subtotal =
-                                    precioUnitario *
-                                    cantidadNumerica;
+const subtotal =
+    precioUnitario *
+    cantidadNumerica;
 
-                                total += subtotal;
+total += subtotal;
 
-                                detallesProcesados.push({
-                                    id_producto:
-                                        producto.id_producto,
+detallesProcesados.push({
+    id_producto:
+        producto.id_producto,
 
-                                    cantidad:
-                                        cantidadNumerica,
+    cantidad:
+        cantidadNumerica,
 
-                                    precio_unitario:
-                                        precioUnitario,
+    precio_unitario:
+        precioUnitario,
 
-                                    subtotal:
-                                        subtotal
-                                });
+    subtotal:
+        subtotal
+});
 
+procesados++;
 
-                                procesados++;
+if (
+    procesados ===
+    detalles.length
+) {
 
+    const sqlVenta = `
+        INSERT INTO ventas
+        (
+            id_usuario,
+            total,
+            estado
+        )
+        VALUES
+        (?, ?, 'COMPLETADA')
+    `;
 
-                                if (
-                                    procesados ===
-                                    detalles.length
-                                ) {
+    conexion.query(
+        sqlVenta,
+        [
+            id_usuario,
+            total
+        ],
+        (
+            error,
+            resultadoVenta
+        ) => {
 
-                                    const sqlVenta = `
-                                        INSERT INTO ventas
+            if (error) {
+                return rollback(
+                    "Error al crear la venta",
+                    500
+                );
+            }
+
+            const idVenta =
+                resultadoVenta.insertId;
+
+            let insertados = 0;
+
+            detallesProcesados.forEach(
+                (item) => {
+
+                    const sqlDetalle = `
+                        INSERT INTO detalle_venta
+                        (
+                            id_venta,
+                            id_producto,
+                            cantidad,
+                            precio_unitario,
+                            subtotal
+                        )
+                        VALUES
+                        (?, ?, ?, ?, ?)
+                    `;
+
+                    conexion.query(
+                        sqlDetalle,
+                        [
+                            idVenta,
+                            item.id_producto,
+                            item.cantidad,
+                            item.precio_unitario,
+                            item.subtotal
+                        ],
+                        (error) => {
+
+                            if (error) {
+                                return rollback(
+                                    "Error al crear el detalle de la venta",
+                                    500
+                                );
+                            }
+
+                            const sqlStock = `
+                                UPDATE productos
+                                SET stock = stock - ?
+                                WHERE id_producto = ?
+                            `;
+
+                            conexion.query(
+                                sqlStock,
+                                [
+                                    item.cantidad,
+                                    item.id_producto
+                                ],
+                                (error) => {
+
+                                    if (error) {
+                                        return rollback(
+                                            "Error al actualizar el stock",
+                                            500
+                                        );
+                                    }
+
+                                    // Registrar salida en el historial
+                                    const sqlMovimiento = `
+                                        INSERT INTO movimientos_inventario
                                         (
-                                            id_usuario,
-                                            total,
-                                            estado
+                                            id_producto,
+                                            tipo,
+                                            cantidad,
+                                            stock_anterior,
+                                            stock_nuevo,
+                                            motivo,
+                                            id_venta
                                         )
-                                        VALUES
-                                        (?, ?, 'COMPLETADA')
+                                        SELECT
+                                            ?,
+                                            'SALIDA',
+                                            ?,
+                                            stock + ?,
+                                            stock,
+                                            'Venta',
+                                            ?
+                                        FROM productos
+                                        WHERE id_producto = ?
                                     `;
 
-
                                     conexion.query(
-                                        sqlVenta,
+                                        sqlMovimiento,
                                         [
-                                            id_usuario,
-                                            total
+                                            item.id_producto,
+                                            item.cantidad,
+                                            item.cantidad,
+                                            idVenta,
+                                            item.id_producto
                                         ],
-                                        (
-                                            error,
-                                            resultadoVenta
-                                        ) => {
+                                        (error) => {
 
                                             if (error) {
                                                 return rollback(
-                                                    "Error al crear la venta",
+                                                    "Error al registrar el movimiento de inventario",
                                                     500
                                                 );
                                             }
 
+                                            insertados++;
 
-                                            const idVenta =
-                                                resultadoVenta.insertId;
+                                            if (
+                                                insertados ===
+                                                detallesProcesados.length
+                                            ) {
 
+                                                conexion.commit(
+                                                    (error) => {
 
-                                            let insertados = 0;
+                                                        if (error) {
+                                                            return rollback(
+                                                                "Error al confirmar la venta",
+                                                                500
+                                                            );
+                                                        }
 
+                                                        res.status(201).json({
+                                                            mensaje:
+                                                                "Venta creada correctamente",
 
-                                            detallesProcesados.forEach(
-                                                (item) => {
+                                                            id_venta:
+                                                                idVenta,
 
-                                                    const sqlDetalle = `
-                                                        INSERT INTO detalle_venta
-                                                        (
-                                                            id_venta,
-                                                            id_producto,
-                                                            cantidad,
-                                                            precio_unitario,
-                                                            subtotal
-                                                        )
-                                                        VALUES
-                                                        (?, ?, ?, ?, ?)
-                                                    `;
+                                                            id_usuario:
+                                                                id_usuario,
 
-
-                                                    conexion.query(
-                                                        sqlDetalle,
-                                                        [
-                                                            idVenta,
-                                                            item.id_producto,
-                                                            item.cantidad,
-                                                            item.precio_unitario,
-                                                            item.subtotal
-                                                        ],
-                                                        (error) => {
-
-                                                            if (error) {
-                                                                return rollback(
-                                                                    "Error al crear el detalle de la venta",
-                                                                    500
-                                                                );
-                                                            }
-
-
-                                                            const sqlStock = `
-                                                                UPDATE productos
-                                                                SET stock =
-                                                                    stock - ?
-                                                                WHERE id_producto = ?
-                                                            `;
-
-
-                                                            conexion.query(
-                                                                sqlStock,
-                                                                [
-                                                                    item.cantidad,
-                                                                    item.id_producto
-                                                                ],
-                                                                (error) => {
-
-                                                                    if (error) {
-                                                                        return rollback(
-                                                                            "Error al actualizar el stock",
-                                                                            500
-                                                                        );
-                                                                    }
-
-
-                                                                    insertados++;
-
-
-                                                                    if (
-                                                                        insertados ===
-                                                                        detallesProcesados.length
-                                                                    ) {
-
-                                                                        conexion.commit(
-                                                                            (error) => {
-
-                                                                                if (error) {
-                                                                                    return rollback(
-                                                                                        "Error al confirmar la venta",
-                                                                                        500
-                                                                                    );
-                                                                                }
-
-
-                                                                                res.status(
-                                                                                    201
-                                                                                ).json({
-                                                                                    mensaje:
-                                                                                        "Venta creada correctamente",
-
-                                                                                    id_venta:
-                                                                                        idVenta,
-
-                                                                                    id_usuario:
-                                                                                        id_usuario,
-
-                                                                                    total:
-                                                                                        total
-                                                                                });
+                                                            total:
+                                                                total
+                                                                                        });
+                                                                                    }
+                                                                                );
                                                                             }
-                                                                        );
-                                                                    }
+                                                                        }
+                                                                    );
                                                                 }
                                                             );
                                                         }
@@ -510,15 +539,18 @@ router.post(
                                         }
                                     );
                                 }
-                            }
-                        );
-                    });
-                });
-            }
-        );
-    }
-);
+                            }   // cierra callback (error, productos)
+                        );      // cierra conexion.query(sqlProducto...
 
+                    });         // cierra detalles.forEach
+
+                });             // cierra conexion.beginTransaction
+
+            }                   // cierra callback (error, usuarios)
+        );                      // cierra conexion.query(sqlUsuario...
+
+    }                           // cierra handler (req, res)
+);                              // cierra router.post
 
 // =====================================================
 // PUT - ACTUALIZAR ESTADO DE UNA VENTA
@@ -584,7 +616,7 @@ router.put(
 
 
                 // Si se cancela una venta completada,
-                // devolver el stock.
+                // devolver el stock y registrar los movimientos.
                 if (
                     estado === "CANCELADA" &&
                     estadoAnterior === "COMPLETADA"
@@ -627,61 +659,109 @@ router.put(
                                     }
 
 
-                                    let actualizados = 0;
+                                    // Procesar los detalles uno por uno
+                                    // para registrar correctamente el stock.
+                                    function procesarDetalle(indice) {
+
+                                        if (
+                                            indice >= detalles.length
+                                        ) {
+                                            actualizarEstado();
+                                            return;
+                                        }
 
 
-                                    if (
-                                        detalles.length === 0
-                                    ) {
-                                        actualizarEstado();
-                                        return;
+                                        const detalle =
+                                            detalles[indice];
+
+
+                                        const sqlStock = `
+                                            UPDATE productos
+                                            SET stock = stock + ?
+                                            WHERE id_producto = ?
+                                        `;
+
+
+                                        conexion.query(
+                                            sqlStock,
+                                            [
+                                                detalle.cantidad,
+                                                detalle.id_producto
+                                            ],
+                                            (error) => {
+
+                                                if (error) {
+                                                    return conexion.rollback(
+                                                        () => {
+                                                            res.status(500).json({
+                                                                error:
+                                                                    "Error al devolver el stock"
+                                                            });
+                                                        }
+                                                    );
+                                                }
+
+
+                                                // Registrar la entrada
+                                                // correspondiente a la cancelación.
+                                                const sqlMovimiento = `
+                                                    INSERT INTO movimientos_inventario (
+                                                        id_producto,
+                                                        tipo,
+                                                        cantidad,
+                                                        stock_anterior,
+                                                        stock_nuevo,
+                                                        motivo,
+                                                        id_venta
+                                                    )
+                                                    SELECT
+                                                        id_producto,
+                                                        'ENTRADA',
+                                                        ?,
+                                                        stock - ?,
+                                                        stock,
+                                                        'Cancelación de venta',
+                                                        ?
+                                                    FROM productos
+                                                    WHERE id_producto = ?
+                                                `;
+
+
+                                                conexion.query(
+                                                    sqlMovimiento,
+                                                    [
+                                                        detalle.cantidad,
+                                                        detalle.cantidad,
+                                                        id,
+                                                        detalle.id_producto
+                                                    ],
+                                                    (error) => {
+
+                                                        if (error) {
+                                                            return conexion.rollback(
+                                                                () => {
+                                                                    res.status(500).json({
+                                                                        error:
+                                                                            "Error al registrar el movimiento de inventario"
+                                                                    });
+                                                                }
+                                                            );
+                                                        }
+
+
+                                                        // Continuar con el siguiente producto.
+                                                        procesarDetalle(
+                                                            indice + 1
+                                                        );
+                                                    }
+                                                );
+                                            }
+                                        );
                                     }
 
 
-                                    detalles.forEach(
-                                        (detalle) => {
-
-                                            const sqlStock = `
-                                                UPDATE productos
-                                                SET stock =
-                                                    stock + ?
-                                                WHERE id_producto = ?
-                                            `;
-
-
-                                            conexion.query(
-                                                sqlStock,
-                                                [
-                                                    detalle.cantidad,
-                                                    detalle.id_producto
-                                                ],
-                                                (error) => {
-
-                                                    if (error) {
-                                                        return conexion.rollback(
-                                                            () => {
-                                                                res.status(500).json({
-                                                                    error:
-                                                                        "Error al devolver el stock"
-                                                                });
-                                                            }
-                                                        );
-                                                    }
-
-
-                                                    actualizados++;
-
-
-                                                    if (
-                                                        actualizados ===
-                                                        detalles.length
-                                                    ) {
-                                                        actualizarEstado();
-                                                    }
-                                                }
-                                            );
-                                        }
-                                    );
+                                    // Iniciar el procesamiento.
+                                    procesarDetalle(0);
 
 
                                     function actualizarEstado() {
@@ -779,7 +859,6 @@ router.put(
     }
 );
 
-
 // =====================================================
 // DELETE - CANCELAR UNA VENTA
 // SOLO ADMINISTRADOR
@@ -821,10 +900,10 @@ router.delete(
                 }
 
 
-                if (
-                    ventas[0].estado ===
-                    "CANCELADA"
-                ) {
+                const estadoActual = ventas[0].estado;
+
+
+                if (estadoActual === "CANCELADA") {
                     return res.status(400).json({
                         error:
                             "La venta ya está cancelada"
@@ -832,61 +911,101 @@ router.delete(
                 }
 
 
-                const sqlDetalles = `
-                    SELECT
-                        id_producto,
-                        cantidad
-                    FROM detalle_venta
-                    WHERE id_venta = ?
-                `;
+                // Si la venta está pendiente, se cancela
+                // sin devolver stock porque no se había descontado.
+                if (estadoActual === "PENDIENTE") {
+
+                    const sqlCancelar = `
+                        UPDATE ventas
+                        SET estado = 'CANCELADA'
+                        WHERE id_venta = ?
+                    `;
 
 
-                conexion.beginTransaction(
-                    (error) => {
+                    conexion.query(
+                        sqlCancelar,
+                        [id],
+                        (error) => {
 
-                        if (error) {
-                            return res.status(500).json({
-                                error:
-                                    "No se pudo iniciar la operación"
+                            if (error) {
+                                return res.status(500).json({
+                                    error:
+                                        "Error al cancelar la venta"
+                                });
+                            }
+
+
+                            res.json({
+                                mensaje:
+                                    "Venta cancelada correctamente"
                             });
                         }
+                    );
+
+                    return;
+                }
 
 
-                        conexion.query(
-                            sqlDetalles,
-                            [id],
-                            (error, detalles) => {
+                // Si la venta está completada,
+                // devolver stock y registrar movimientos.
+                if (estadoActual === "COMPLETADA") {
 
-                                if (error) {
-                                    return conexion.rollback(
-                                        () => {
-                                            res.status(500).json({
-                                                error:
-                                                    "Error al consultar los detalles"
-                                            });
+                    conexion.beginTransaction(
+                        (error) => {
+
+                            if (error) {
+                                return res.status(500).json({
+                                    error:
+                                        "No se pudo iniciar la operación"
+                                });
+                            }
+
+
+                            const sqlDetalles = `
+                                SELECT
+                                    id_producto,
+                                    cantidad
+                                FROM detalle_venta
+                                WHERE id_venta = ?
+                            `;
+
+
+                            conexion.query(
+                                sqlDetalles,
+                                [id],
+                                (error, detalles) => {
+
+                                    if (error) {
+                                        return conexion.rollback(
+                                            () => {
+                                                res.status(500).json({
+                                                    error:
+                                                        "Error al consultar los detalles"
+                                                });
+                                            }
+                                        );
+                                    }
+
+
+                                    // Procesar los detalles uno por uno
+                                    // para mantener el orden de las operaciones.
+                                    function procesarDetalle(indice) {
+
+                                        if (
+                                            indice >= detalles.length
+                                        ) {
+                                            cancelarVenta();
+                                            return;
                                         }
-                                    );
-                                }
 
 
-                                let actualizados = 0;
+                                        const detalle =
+                                            detalles[indice];
 
-
-                                if (
-                                    detalles.length === 0
-                                ) {
-                                    cancelarVenta();
-                                    return;
-                                }
-
-
-                                detalles.forEach(
-                                    (detalle) => {
 
                                         const sqlStock = `
                                             UPDATE productos
-                                            SET stock =
-                                                stock + ?
+                                            SET stock = stock + ?
                                             WHERE id_producto = ?
                                         `;
 
@@ -911,75 +1030,132 @@ router.delete(
                                                 }
 
 
-                                                actualizados++;
+                                                // Registrar la entrada
+                                                // por cancelación de la venta.
+                                                const sqlMovimiento = `
+                                                    INSERT INTO movimientos_inventario (
+                                                        id_producto,
+                                                        tipo,
+                                                        cantidad,
+                                                        stock_anterior,
+                                                        stock_nuevo,
+                                                        motivo,
+                                                        id_venta
+                                                    )
+                                                    SELECT
+                                                        id_producto,
+                                                        'ENTRADA',
+                                                        ?,
+                                                        stock - ?,
+                                                        stock,
+                                                        'Cancelación de venta',
+                                                        ?
+                                                    FROM productos
+                                                    WHERE id_producto = ?
+                                                `;
 
 
-                                                if (
-                                                    actualizados ===
-                                                    detalles.length
-                                                ) {
-                                                    cancelarVenta();
-                                                }
+                                                conexion.query(
+                                                    sqlMovimiento,
+                                                    [
+                                                        detalle.cantidad,
+                                                        detalle.cantidad,
+                                                        id,
+                                                        detalle.id_producto
+                                                    ],
+                                                    (error) => {
+
+                                                        if (error) {
+                                                            return conexion.rollback(
+                                                                () => {
+                                                                    res.status(500).json({
+                                                                        error:
+                                                                            "Error al registrar el movimiento de inventario"
+                                                                    });
+                                                                }
+                                                            );
+                                                        }
+
+
+                                                        // Continuar con el siguiente detalle.
+                                                        procesarDetalle(
+                                                            indice + 1
+                                                        );
+                                                    }
+                                                );
                                             }
                                         );
                                     }
-                                );
 
 
-                                function cancelarVenta() {
-
-                                    const sqlCancelar = `
-                                        UPDATE ventas
-                                        SET estado = 'CANCELADA'
-                                        WHERE id_venta = ?
-                                    `;
+                                    // Iniciar el procesamiento de productos.
+                                    procesarDetalle(0);
 
 
-                                    conexion.query(
-                                        sqlCancelar,
-                                        [id],
-                                        (error) => {
+                                    function cancelarVenta() {
 
-                                            if (error) {
-                                                return conexion.rollback(
-                                                    () => {
-                                                        res.status(500).json({
-                                                            error:
-                                                                "Error al cancelar la venta"
+                                        const sqlCancelar = `
+                                            UPDATE ventas
+                                            SET estado = 'CANCELADA'
+                                            WHERE id_venta = ?
+                                        `;
+
+
+                                        conexion.query(
+                                            sqlCancelar,
+                                            [id],
+                                            (error) => {
+
+                                                if (error) {
+                                                    return conexion.rollback(
+                                                        () => {
+                                                            res.status(500).json({
+                                                                error:
+                                                                    "Error al cancelar la venta"
+                                                            });
+                                                        }
+                                                    );
+                                                }
+
+
+                                                conexion.commit(
+                                                    (error) => {
+
+                                                        if (error) {
+                                                            return conexion.rollback(
+                                                                () => {
+                                                                    res.status(500).json({
+                                                                        error:
+                                                                            "Error al confirmar la cancelación"
+                                                                    });
+                                                                }
+                                                            );
+                                                        }
+
+
+                                                        res.json({
+                                                            mensaje:
+                                                                "Venta cancelada correctamente"
                                                         });
                                                     }
                                                 );
                                             }
-
-
-                                            conexion.commit(
-                                                (error) => {
-
-                                                    if (error) {
-                                                        return conexion.rollback(
-                                                            () => {
-                                                                res.status(500).json({
-                                                                    error:
-                                                                        "Error al confirmar la cancelación"
-                                                                });
-                                                            }
-                                                        );
-                                                    }
-
-
-                                                    res.json({
-                                                        mensaje:
-                                                            "Venta cancelada correctamente"
-                                                    });
-                                                }
-                                            );
-                                        }
-                                    );
+                                        );
+                                    }
                                 }
-                            }
-                        );
-                    }
-                );
+                            );
+                        }
+                    );
+
+                    return;
+                }
+
+
+                // Si el estado no es reconocido, no realizar cambios.
+                return res.status(400).json({
+                    error:
+                        "No se puede cancelar una venta con este estado"
+                });
             }
         );
     }

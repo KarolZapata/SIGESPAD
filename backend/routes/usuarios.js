@@ -461,33 +461,23 @@ router.post(
 );
 
 
-// =====================================================
-// PUT - ACTUALIZAR USUARIO
-// SOLO ADMINISTRADOR
-// =====================================================
+
+ // =====================================================
+ // PUT - ACTUALIZAR USUARIO
+ // SOLO ADMINISTRADOR
+ // =====================================================
 router.put(
     "/:id",
     verificarToken,
     verificarRol("ADMINISTRADOR"),
     async (req, res) => {
-
         const { id } = req.params;
+        const { nombre, correo, contrasena, rol } = req.body;
 
-        const {
-            nombre,
-            correo,
-            contrasena,
-            rol
-        } = req.body;
-
-        if (
-            !nombre ||
-            !correo ||
-            !contrasena ||
-            !rol
-        ) {
+        // Validar campos obligatorios (la contraseña es opcional)
+        if (!nombre || !correo || !rol) {
             return res.status(400).json({
-                error: "Todos los campos son obligatorios"
+                error: "Nombre, correo y rol son obligatorios"
             });
         }
 
@@ -502,90 +492,102 @@ router.put(
             });
         }
 
-        if (contrasena.length < 6) {
+        // Solo cambiar la contraseña si se proporcionó una nueva
+        const cambiarContrasena =
+            typeof contrasena === "string" &&
+            contrasena.length > 0;
+
+        if (cambiarContrasena && contrasena.length < 6) {
             return res.status(400).json({
                 error: "La contraseña debe tener al menos 6 caracteres"
             });
         }
 
         try {
+            let sql;
+            let parametros;
 
-            const contrasenaHash =
-                await bcrypt.hash(
+            if (cambiarContrasena) {
+                const contrasenaHash = await bcrypt.hash(
                     contrasena,
                     10
                 );
 
-            const sql = `
-                UPDATE usuarios
-                SET
-                    nombre = ?,
-                    correo = ?,
-                    contraseña = ?,
-                    rol = ?
-                WHERE id_usuario = ?
-            `;
+                sql = `
+                    UPDATE usuarios
+                    SET
+                        nombre = ?,
+                        correo = ?,
+                        contraseña = ?,
+                        rol = ?
+                    WHERE id_usuario = ?
+                `;
 
-            conexion.query(
-                sql,
-                [
+                parametros = [
                     nombre,
                     correo,
                     contrasenaHash,
                     rol,
                     id
-                ],
+                ];
+            } else {
+                sql = `
+                    UPDATE usuarios
+                    SET
+                        nombre = ?,
+                        correo = ?,
+                        rol = ?
+                    WHERE id_usuario = ?
+                `;
+
+                parametros = [
+                    nombre,
+                    correo,
+                    rol,
+                    id
+                ];
+            }
+
+            conexion.query(
+                sql,
+                parametros,
                 (error, resultado) => {
-
                     if (error) {
-
                         console.error(
                             "Error al actualizar usuario:",
                             error.message
                         );
 
-                        if (
-                            error.code ===
-                            "ER_DUP_ENTRY"
-                        ) {
+                        if (error.code === "ER_DUP_ENTRY") {
                             return res.status(400).json({
-                                error:
-                                    "El correo ya está registrado"
+                                error: "El correo ya está registrado"
                             });
                         }
 
                         return res.status(500).json({
-                            error:
-                                "Error al actualizar el usuario"
+                            error: "Error al actualizar el usuario"
                         });
                     }
 
-                    if (
-                        resultado.affectedRows === 0
-                    ) {
+                    if (resultado.affectedRows === 0) {
                         return res.status(404).json({
-                            error:
-                                "Usuario no encontrado"
+                            error: "Usuario no encontrado"
                         });
                     }
 
                     res.json({
-                        mensaje:
-                            "Usuario actualizado correctamente"
+                        mensaje: "Usuario actualizado correctamente"
                     });
                 }
             );
-
         } catch (error) {
-
             console.error(
                 "Error interno:",
                 error.message
             );
 
             res.status(500).json({
-                error:
-                    "Error interno del servidor"
+                error: "Error interno del servidor"
             });
         }
     }
