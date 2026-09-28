@@ -1,0 +1,257 @@
+.pagos-page {
+  padding: 28px;
+  color: #263238;
+}
+
+.pagos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.pagos-etiqueta {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: #b58900;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.pagos-header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.pagos-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.pagos-btn-volver {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #e5e7eb;
+  color: #263238;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pagos-btn-volver:hover {
+  background: #d1d5db;
+}
+
+.pagos-seccion {
+  margin-top: 24px;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.pagos-seccion h2 {
+  margin: 0 0 18px;
+  font-size: 20px;
+}
+
+.pagos-buscador {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.pagos-buscador div,
+.pagos-formulario div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pagos-buscador label,
+.pagos-formulario label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pagos-buscador input,
+.pagos-formulario input,
+.pagos-formulario select {
+  min-width: 220px;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.pagos-btn-principal {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #12345b;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pagos-btn-principal:hover {
+  background: #0d2948;
+}
+
+.pagos-btn-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pagos-mensaje {
+  margin: 18px 0;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.pagos-mensaje.exitoso {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.pagos-mensaje.error {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.pagos-mensaje.informacion {
+  color: #1e40af;
+  background: #dbeafe;
+}
+
+.pagos-resumen {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(180px, 1fr)
+  );
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.pago-resumen-card {
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.pago-resumen-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.pago-resumen-card strong {
+  color: #1f2937;
+  font-size: 18px;
+}
+
+.pago-resumen-card.pendiente {
+  border-color: #f59e0b;
+}
+
+.pagos-formulario {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagos-vacio {
+  margin: 0;
+  padding: 14px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  color: #6b7280;
+}
+
+.pagos-tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.pagos-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.pagos-tabla th,
+.pagos-tabla td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pagos-tabla th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.pagos-tabla tbody tr:hover {
+  background: #f9fafb;
+}
+
+.pago-estado {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pago-estado.confirmado {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.pago-estado.pendiente {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.pago-estado.anulado {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+@media (max-width: 700px) {
+  .pagos-page {
+    padding: 16px;
+  }
+
+  .pagos-header {
+    flex-direction: column;
+  }
+
+  .pagos-btn-volver {
+    width: 100%;
+  }
+
+  .pagos-buscador,
+  .pagos-formulario {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagos-buscador input,
+  .pagos-formulario input,
+  .pagos-formulario select,
+  .pagos-btn-principal {
+    width: 100%;
+  }
+}

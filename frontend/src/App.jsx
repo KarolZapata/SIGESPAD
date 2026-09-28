@@ -17,6 +17,10 @@ import Inventario from "./pages/Inventario";
 import Usuarios from "./pages/Usuarios";
 import Ventas from "./pages/Ventas";
 import Reportes from "./pages/Reportes";
+import RegistrarVenta from "./pages/RegistrarVenta";
+import Pagos from "./pages/Pagos";
+import VentasVendedor from "./pages/VentasVendedor";
+import Comprobantes from "./pages/Comprobantes";
 
 import Navegacion from "./components/Navegacion";
 
@@ -45,6 +49,19 @@ function RutaAdministrador({ children }) {
   return children;
 }
 
+function RutaVendedorOAdministrador({ children }) {
+  const { usuario } = useAuth();
+
+  if (
+    !usuario ||
+    (usuario.rol !== "VENDEDOR" && usuario.rol !== "ADMINISTRADOR")
+  ) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -53,6 +70,11 @@ function App() {
           <Navegacion />
 
           <Routes>
+
+            {/* =====================================================
+                RUTAS GENERALES
+            ===================================================== */}
+
             <Route
               path="/"
               element={<Navigate to="/productos" replace />}
@@ -74,6 +96,20 @@ function App() {
             />
 
             <Route
+              path="/categorias"
+              element={<Categorias />}
+            />
+
+            <Route
+              path="/carrito"
+              element={<Carrito />}
+            />
+
+            {/* =====================================================
+                RUTAS EXCLUSIVAS DEL ADMINISTRADOR
+            ===================================================== */}
+
+            <Route
               path="/administrar-productos"
               element={
                 <RutaProtegida>
@@ -82,11 +118,6 @@ function App() {
                   </RutaAdministrador>
                 </RutaProtegida>
               }
-            />
-
-            <Route
-              path="/categorias"
-              element={<Categorias />}
             />
 
             <Route
@@ -122,7 +153,6 @@ function App() {
               }
             />
 
-            {/* Ventas: acceso exclusivo del administrador */}
             <Route
               path="/ventas"
               element={
@@ -134,7 +164,6 @@ function App() {
               }
             />
 
-            {/* Reportes: acceso exclusivo del administrador */}
             <Route
               path="/reportes"
               element={
@@ -146,10 +175,57 @@ function App() {
               }
             />
 
+            {/* =====================================================
+                RUTAS DEL VENDEDOR Y ADMINISTRADOR
+            ===================================================== */}
+
             <Route
-              path="/carrito"
-              element={<Carrito />}
+              path="/registrar-venta"
+              element={
+                <RutaProtegida>
+                  <RutaVendedorOAdministrador>
+                    <RegistrarVenta />
+                  </RutaVendedorOAdministrador>
+                </RutaProtegida>
+              }
             />
+
+            <Route
+              path="/ventas-vendedor"
+              element={
+                <RutaProtegida>
+                  <RutaVendedorOAdministrador>
+                    <VentasVendedor />
+                  </RutaVendedorOAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            <Route
+              path="/comprobantes"
+              element={
+                <RutaProtegida>
+                  <RutaVendedorOAdministrador>
+                    <Comprobantes />
+                  </RutaVendedorOAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            <Route
+              path="/pagos"
+              element={
+                <RutaProtegida>
+                  <RutaVendedorOAdministrador>
+                    <Pagos />
+                  </RutaVendedorOAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            {/* =====================================================
+                DASHBOARD
+            ===================================================== */}
 
             <Route
               path="/dashboard"
@@ -160,10 +236,15 @@ function App() {
               }
             />
 
+            {/* =====================================================
+                RUTA NO ENCONTRADA
+            ===================================================== */}
+
             <Route
               path="*"
               element={<Navigate to="/productos" replace />}
             />
+
           </Routes>
         </CartProvider>
       </AuthProvider>

@@ -1,0 +1,277 @@
+.comprobantes-page {
+  padding: 28px;
+  color: #263238;
+}
+
+.comprobantes-header {
+  margin-bottom: 24px;
+}
+
+.comprobantes-etiqueta {
+  color: #b8860b;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.comprobantes-header h1 {
+  margin: 6px 0 8px;
+  color: #102f56;
+  font-size: 28px;
+}
+
+.comprobantes-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.comprobantes-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+
+.comprobantes-selector label {
+  font-weight: 600;
+}
+
+.comprobantes-selector select {
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+}
+
+.comprobantes-mensaje {
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
+
+.comprobantes-mensaje.error {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.comprobante {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 32px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.comprobante-encabezado {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #102f56;
+}
+
+.comprobante-encabezado h2 {
+  margin: 0 0 6px;
+  color: #102f56;
+}
+
+.comprobante-encabezado p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.comprobante-numero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.comprobante-numero strong {
+  color: #102f56;
+}
+
+.comprobante-numero span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.comprobante-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 22px 0;
+}
+
+.comprobante-info div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.comprobante-info span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.comprobante-info strong {
+  color: #263238;
+}
+
+.comprobante-detalles,
+.comprobante-pago {
+  margin-top: 20px;
+}
+
+.comprobante-detalles h3,
+.comprobante-pago h3 {
+  margin-bottom: 12px;
+  color: #102f56;
+}
+
+.comprobante table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.comprobante th,
+.comprobante td {
+  padding: 11px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.comprobante th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+.comprobante-totales {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.comprobante-totales div {
+  display: flex;
+  justify-content: space-between;
+  gap: 50px;
+  min-width: 280px;
+}
+
+.comprobante-totales span {
+  color: #6b7280;
+}
+
+.comprobante-totales strong {
+  color: #102f56;
+}
+
+.comprobante-footer {
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.comprobante-footer p {
+  margin: 0 0 5px;
+  font-weight: 600;
+}
+
+.comprobante-footer small {
+  color: #6b7280;
+}
+
+.comprobante-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px auto;
+}
+
+.comprobante-acciones button {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #102f56;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comprobante-acciones button:first-child {
+  background: #e5e7eb;
+  color: #263238;
+}
+
+@media (max-width: 700px) {
+  .comprobantes-page {
+    padding: 16px;
+  }
+
+  .comprobante {
+    padding: 18px;
+  }
+
+  .comprobante-encabezado {
+    flex-direction: column;
+  }
+
+  .comprobante-numero {
+    align-items: flex-start;
+  }
+
+  .comprobante-info {
+    grid-template-columns: 1fr;
+  }
+
+  .comprobante {
+    overflow-x: auto;
+  }
+
+  .comprobante table {
+    min-width: 650px;
+  }
+
+  .comprobante-acciones {
+    flex-direction: column;
+  }
+
+  .comprobante-acciones button {
+    width: 100%;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-imprimir,
+  .comprobantes-header,
+  .comprobantes-selector,
+  .comprobantes-mensaje {
+    display: none !important;
+  }
+
+  .comprobantes-page {
+    padding: 0;
+  }
+
+  .comprobante {
+    max-width: none;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+  }
+}

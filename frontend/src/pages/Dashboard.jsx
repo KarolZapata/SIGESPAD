@@ -41,26 +41,31 @@ const opcionesPorRol = {
     },
   ],
 
-  VENDEDOR: [
+    VENDEDOR: [
     {
-      titulo: "Registrar venta",
-      descripcion: "Registrar las ventas presenciales.",
+        titulo: "Registrar venta",
+        descripcion: "Registrar las ventas presenciales.",
+        ruta: "/registrar-venta",
     },
     {
-      titulo: "Ventas",
-      descripcion:
-        "Consultar la información de las ventas según sus permisos.",
+        titulo: "Ventas",
+        descripcion:
+        "Consultar la información de las ventas registradas.",
+        ruta: "/ventas-vendedor",
     },
     {
-      titulo: "Pagos",
-      descripcion:
+        titulo: "Pagos",
+        descripcion:
         "Registrar pagos y gestionar su confirmación.",
+        ruta: "/pagos",
     },
     {
-      titulo: "Comprobantes",
-      descripcion: "Generar comprobantes de las ventas.",
+        titulo: "Comprobantes",
+        descripcion:
+        "Consultar e imprimir comprobantes de las ventas.",
+        ruta: "/comprobantes",
     },
-  ],
+    ],
 
   CLIENTE: [
     {
