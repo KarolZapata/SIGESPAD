@@ -1,0 +1,541 @@
+/* =====================================================
+   RECUPERAR CONTRASEÑA SIGESPAD
+   ===================================================== */
+
+.recuperacion-container {
+    min-height: calc(100vh - 88px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 45px 25px;
+
+    background: #f4f7fb;
+
+    position: relative;
+    z-index: 2;
+}
+
+
+/* =====================================================
+   TARJETA PRINCIPAL
+   ===================================================== */
+
+.recuperacion-card {
+    width: 760px;
+    max-width: 100%;
+    min-height: 430px;
+
+    display: grid;
+    grid-template-columns: 45% 55%;
+
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 15px 40px rgba(15, 48, 86, 0.16);
+}
+
+
+/* =====================================================
+   PANEL IZQUIERDO
+   ===================================================== */
+
+.recuperacion-brand {
+    background: #15385f;
+
+    color: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 45px 35px;
+}
+
+
+/* =====================================================
+   ÍCONO
+   ===================================================== */
+
+.recuperacion-brand-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1.5px solid #f4bd22;
+    border-radius: 50%;
+
+    color: #f4bd22;
+
+    font-size: 25px;
+
+    margin-bottom: 18px;
+}
+
+
+/* =====================================================
+   NOMBRE
+   ===================================================== */
+
+.recuperacion-brand h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 32px;
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =====================================================
+   LÍNEA DORADA
+   ===================================================== */
+
+.recuperacion-brand-line {
+    width: 45px;
+    height: 3px;
+
+    background: #f4bd22;
+
+    margin: 10px 0 18px;
+}
+
+
+/* =====================================================
+   DESCRIPCIÓN
+   ===================================================== */
+
+.recuperacion-brand p {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    max-width: 220px;
+}
+
+
+/* =====================================================
+   PAPELERÍA SAN DIEGO
+   ===================================================== */
+
+.recuperacion-brand-small {
+    margin-top: 30px !important;
+
+    color: #f4bd22 !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+/* =====================================================
+   PANEL DERECHO
+   ===================================================== */
+
+.recuperacion-form-container {
+    background: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    padding: 45px 55px;
+}
+
+
+/* =====================================================
+   TÍTULO
+   ===================================================== */
+
+.recuperacion-form-container h2 {
+    margin: 0 0 8px;
+
+    color: #15385f;
+
+    font-size: 27px;
+
+    font-weight: 700;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   SUBTÍTULO
+   ===================================================== */
+
+.recuperacion-subtitle {
+    margin: 0 0 30px;
+
+    color: #718096;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   FORMULARIO
+   ===================================================== */
+
+.recuperacion-form {
+    width: 100%;
+}
+
+
+/* =====================================================
+   GRUPO
+   ===================================================== */
+
+.recuperacion-form-group {
+    margin-bottom: 18px;
+}
+
+
+/* =====================================================
+   LABEL
+   ===================================================== */
+
+.recuperacion-form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #15385f;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+.recuperacion-input {
+    width: 100%;
+
+    height: 44px;
+
+    padding: 0 14px;
+
+    border: 1px solid #ccd6e2;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #15385f;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 13px;
+
+    outline: none;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.recuperacion-input:focus {
+    border-color: #15385f;
+
+    box-shadow:
+        0 0 0 3px rgba(21, 56, 95, 0.08);
+}
+
+
+.recuperacion-input::placeholder {
+    color: #a0aec0;
+}
+
+
+/* =====================================================
+   MENSAJE DE ÉXITO
+   ===================================================== */
+
+.recuperacion-mensaje-exito {
+    margin: 0 0 15px;
+
+    padding: 10px 12px;
+
+    background: #f0fff4;
+
+    border: 1px solid #c6f6d5;
+
+    border-radius: 6px;
+
+    color: #276749;
+
+    font-size: 12px;
+
+    text-align: center;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   MENSAJE DE ERROR
+   ===================================================== */
+
+.recuperacion-mensaje-error {
+    margin: 0 0 15px;
+
+    padding: 10px 12px;
+
+    background: #fff5f5;
+
+    border: 1px solid #fed7d7;
+
+    border-radius: 6px;
+
+    color: #c53030;
+
+    font-size: 12px;
+
+    text-align: center;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   BOTÓN ENVIAR
+   ===================================================== */
+
+.recuperacion-submit {
+    width: 100%;
+
+    height: 44px;
+
+    margin-top: 5px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #15385f;
+
+    color: #ffffff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.1s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.recuperacion-submit:hover {
+    background: #0f2d4d;
+
+    box-shadow:
+        0 5px 12px rgba(21, 56, 95, 0.18);
+}
+
+
+.recuperacion-submit:active {
+    transform: scale(0.99);
+}
+
+
+/* =====================================================
+   BOTÓN CONTINUAR
+   ===================================================== */
+
+.recuperacion-continuar {
+    width: 100%;
+
+    height: 42px;
+
+    margin-top: 12px;
+
+    border: 1px solid #15385f;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #15385f;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.recuperacion-continuar:hover {
+    background: #15385f;
+
+    color: #ffffff;
+}
+
+
+/* =====================================================
+   VOLVER AL LOGIN
+   ===================================================== */
+
+.recuperacion-volver {
+    display: block;
+
+    width: 100%;
+
+    margin-top: 17px;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #15385f;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition: color 0.2s ease;
+}
+
+
+.recuperacion-volver:hover {
+    color: #c18f00;
+
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   PIE
+   ===================================================== */
+
+.recuperacion-footer {
+    margin-top: 30px;
+
+    padding-top: 17px;
+
+    border-top: 1px solid #e2e8f0;
+
+    color: #a0aec0;
+
+    font-size: 10px;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    .recuperacion-container {
+        min-height: calc(100vh - 75px);
+
+        padding: 30px 15px;
+    }
+
+
+    .recuperacion-card {
+        width: 430px;
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .recuperacion-brand {
+        min-height: 230px;
+
+        padding: 30px 25px;
+    }
+
+
+    .recuperacion-brand-icon {
+        width: 50px;
+        height: 50px;
+
+        font-size: 21px;
+
+        margin-bottom: 12px;
+    }
+
+
+    .recuperacion-brand h1 {
+        font-size: 27px;
+    }
+
+
+    .recuperacion-brand-small {
+        margin-top: 18px !important;
+    }
+
+
+    .recuperacion-form-container {
+        padding: 35px 30px;
+    }
+}

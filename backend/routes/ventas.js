@@ -57,6 +57,47 @@ router.get(
 // ADMINISTRADOR Y VENDEDOR
 // =====================================================
 router.get(
+    "/mis-compras",
+    verificarToken,
+    verificarRol("CLIENTE"),
+    (req, res) => {
+
+        const id_usuario = req.usuario.id_usuario;
+
+        const sql = `
+            SELECT
+                v.id_venta,
+                v.fecha_venta,
+                v.total,
+                v.estado
+            FROM ventas v
+            WHERE v.id_usuario = ?
+            ORDER BY v.fecha_venta DESC
+        `;
+
+        conexion.query(
+            sql,
+            [id_usuario],
+            (error, ventas) => {
+
+                if (error) {
+                    console.error(
+                        "Error al consultar mis compras:",
+                        error.message
+                    );
+
+                    return res.status(500).json({
+                        error: "Error al obtener las compras"
+                    });
+                }
+
+                res.json(ventas);
+            }
+        );
+    }
+);
+
+router.get(
     "/:id",
     verificarToken,
     verificarRol("ADMINISTRADOR", "VENDEDOR"),

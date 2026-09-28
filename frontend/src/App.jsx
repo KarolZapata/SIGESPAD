@@ -21,6 +21,9 @@ import RegistrarVenta from "./pages/RegistrarVenta";
 import Pagos from "./pages/Pagos";
 import VentasVendedor from "./pages/VentasVendedor";
 import Comprobantes from "./pages/Comprobantes";
+import MisCompras from "./pages/MisCompras";
+import RecuperarContrasena from "./pages/RecuperarContrasena";
+import RestablecerContrasena from "./pages/RestablecerContrasena";
 
 import Navegacion from "./components/Navegacion";
 
@@ -103,6 +106,16 @@ function App() {
             <Route
               path="/carrito"
               element={<Carrito />}
+            />
+
+            <Route
+                path="/recuperar-contrasena"
+                element={<RecuperarContrasena />}
+            />
+
+            <Route
+                path="/restablecer-contrasena"
+                element={<RestablecerContrasena />}
             />
 
             {/* =====================================================
@@ -226,6 +239,14 @@ function App() {
             {/* =====================================================
                 DASHBOARD
             ===================================================== */}
+            <Route
+              path="/mis-compras"
+              element={
+                <RutaProtegida>
+                  <MisCompras />
+                </RutaProtegida>
+              }
+            />
 
             <Route
               path="/dashboard"

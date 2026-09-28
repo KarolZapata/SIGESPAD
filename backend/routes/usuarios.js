@@ -11,6 +11,7 @@ const {
 } = require("../middleware/auth");
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const nodemailer = require("nodemailer");
 
 
 // =====================================================
@@ -242,6 +243,358 @@ router.post(
         }
     }
 );
+
+// =====================================================
+// POST - SOLICITAR RECUPERACIÓN DE CONTRASEÑA
+// RUTA PÚBLICA
+// =====================================================
+
+router.post("/solicitar-recuperacion", (req, res) => {
+
+    const { correo } = req.body;
+
+    if (!correo) {
+        return res.status(400).json({
+            error: "El correo es obligatorio"
+        });
+    }
+
+    const sql = `
+        SELECT id_usuario, nombre, correo
+        FROM usuarios
+        WHERE correo = ?
+        AND estado = 1
+    `;
+
+    conexion.query(
+        sql,
+        [correo],
+        async (error, resultados) => {
+
+            if (error) {
+                console.error(
+                    "Error al buscar usuario:",
+                    error.message
+                );
+
+                return res.status(500).json({
+                    error: "Error al procesar la solicitud"
+                });
+            }
+
+            // Por seguridad no revelamos si el correo existe
+            if (resultados.length === 0) {
+                return res.json({
+                    mensaje:
+                        "Si el correo está registrado, recibirás un código de recuperación."
+                });
+            }
+
+            const usuario = resultados[0];
+
+            // Generar código de 6 dígitos
+            const codigo = Math.floor(
+                100000 + Math.random() * 900000
+            ).toString();
+
+            // Código válido durante 15 minutos
+            const expiracion = new Date(
+                Date.now() + 15 * 60 * 1000
+            );
+
+            const sqlActualizar = `
+                UPDATE usuarios
+                SET
+                    codigo_recuperacion = ?,
+                    codigo_recuperacion_expira = ?
+                WHERE id_usuario = ?
+            `;
+
+            conexion.query(
+                sqlActualizar,
+                [
+                    codigo,
+                    expiracion,
+                    usuario.id_usuario
+                ],
+                async (error) => {
+
+                    if (error) {
+                        console.error(
+                            "Error al guardar código:",
+                            error.message
+                        );
+
+                        return res.status(500).json({
+                            error:
+                                "No fue posible generar el código"
+                        });
+                    }
+
+                    try {
+
+                        await transporter.sendMail({
+                            from: `"SIGESPAD" <${process.env.CORREO_RECUPERACION}>`,
+                            to: usuario.correo,
+                            subject:
+                                "Código para recuperar tu contraseña - SIGESPAD",
+                            html: `
+                                <div style="
+                                    font-family: Arial, sans-serif;
+                                    max-width: 500px;
+                                    margin: auto;
+                                    padding: 30px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 10px;
+                                ">
+
+                                    <h2 style="color:#12345b;">
+                                        Recuperación de contraseña
+                                    </h2>
+
+                                    <p>
+                                        Hola ${usuario.nombre},
+                                    </p>
+
+                                    <p>
+                                        Recibimos una solicitud para
+                                        restablecer tu contraseña de SIGESPAD.
+                                    </p>
+
+                                    <p>
+                                        Tu código de recuperación es:
+                                    </p>
+
+                                    <div style="
+                                        font-size: 32px;
+                                        font-weight: bold;
+                                        letter-spacing: 8px;
+                                        text-align: center;
+                                        margin: 25px 0;
+                                        color:#12345b;
+                                    ">
+                                        ${codigo}
+                                    </div>
+
+                                    <p>
+                                        Este código es válido durante
+                                        <strong>15 minutos</strong>.
+                                    </p>
+
+                                    <p>
+                                        Si no solicitaste este cambio,
+                                        puedes ignorar este mensaje.
+                                    </p>
+
+                                    <hr>
+
+                                    <small>
+                                        SIGESPAD - Gestión para
+                                        Papelería San Diego
+                                    </small>
+
+                                </div>
+                            `
+                        });
+
+                        return res.json({
+                            mensaje:
+                                "Si el correo está registrado, recibirás un código de recuperación."
+                        });
+
+                    } catch (error) {
+
+                        console.error(
+                            "Error enviando correo:",
+                            error.message
+                        );
+
+                        return res.status(500).json({
+                            error:
+                                "No fue posible enviar el correo de recuperación"
+                        });
+                    }
+                }
+            );
+        }
+    );
+});
+
+// =====================================================
+// POST - SOLICITAR RECUPERACIÓN DE CONTRASEÑA
+// RUTA PÚBLICA
+// =====================================================
+
+router.post("/solicitar-recuperacion", (req, res) => {
+
+    const { correo } = req.body;
+
+    if (!correo) {
+        return res.status(400).json({
+            error: "El correo es obligatorio"
+        });
+    }
+
+    const sql = `
+        SELECT id_usuario, nombre, correo
+        FROM usuarios
+        WHERE correo = ?
+        AND estado = 1
+    `;
+
+    conexion.query(
+        sql,
+        [correo],
+        async (error, resultados) => {
+
+            if (error) {
+                console.error(
+                    "Error al buscar usuario:",
+                    error.message
+                );
+
+                return res.status(500).json({
+                    error: "Error al procesar la solicitud"
+                });
+            }
+
+            // Por seguridad no revelamos si el correo existe
+            if (resultados.length === 0) {
+                return res.json({
+                    mensaje:
+                        "Si el correo está registrado, recibirás un código de recuperación."
+                });
+            }
+
+            const usuario = resultados[0];
+
+            // Generar código de 6 dígitos
+            const codigo = Math.floor(
+                100000 + Math.random() * 900000
+            ).toString();
+
+            // Código válido durante 15 minutos
+            const expiracion = new Date(
+                Date.now() + 15 * 60 * 1000
+            );
+
+            const sqlActualizar = `
+                UPDATE usuarios
+                SET
+                    codigo_recuperacion = ?,
+                    codigo_recuperacion_expira = ?
+                WHERE id_usuario = ?
+            `;
+
+            conexion.query(
+                sqlActualizar,
+                [
+                    codigo,
+                    expiracion,
+                    usuario.id_usuario
+                ],
+                async (error) => {
+
+                    if (error) {
+                        console.error(
+                            "Error al guardar código:",
+                            error.message
+                        );
+
+                        return res.status(500).json({
+                            error:
+                                "No fue posible generar el código"
+                        });
+                    }
+
+                    try {
+
+                        await transporter.sendMail({
+                            from: `"SIGESPAD" <${process.env.CORREO_RECUPERACION}>`,
+                            to: usuario.correo,
+                            subject:
+                                "Código para recuperar tu contraseña - SIGESPAD",
+                            html: `
+                                <div style="
+                                    font-family: Arial, sans-serif;
+                                    max-width: 500px;
+                                    margin: auto;
+                                    padding: 30px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 10px;
+                                ">
+
+                                    <h2 style="color:#12345b;">
+                                        Recuperación de contraseña
+                                    </h2>
+
+                                    <p>
+                                        Hola ${usuario.nombre},
+                                    </p>
+
+                                    <p>
+                                        Recibimos una solicitud para
+                                        restablecer tu contraseña de SIGESPAD.
+                                    </p>
+
+                                    <p>
+                                        Tu código de recuperación es:
+                                    </p>
+
+                                    <div style="
+                                        font-size: 32px;
+                                        font-weight: bold;
+                                        letter-spacing: 8px;
+                                        text-align: center;
+                                        margin: 25px 0;
+                                        color:#12345b;
+                                    ">
+                                        ${codigo}
+                                    </div>
+
+                                    <p>
+                                        Este código es válido durante
+                                        <strong>15 minutos</strong>.
+                                    </p>
+
+                                    <p>
+                                        Si no solicitaste este cambio,
+                                        puedes ignorar este mensaje.
+                                    </p>
+
+                                    <hr>
+
+                                    <small>
+                                        SIGESPAD - Gestión para
+                                        Papelería San Diego
+                                    </small>
+
+                                </div>
+                            `
+                        });
+
+                        return res.json({
+                            mensaje:
+                                "Si el correo está registrado, recibirás un código de recuperación."
+                        });
+
+                    } catch (error) {
+
+                        console.error(
+                            "Error enviando correo:",
+                            error.message
+                        );
+
+                        return res.status(500).json({
+                            error:
+                                "No fue posible enviar el correo de recuperación"
+                        });
+                    }
+                }
+            );
+        }
+    );
+});
 
 // =====================================================
 // GET - OBTENER TODOS LOS USUARIOS

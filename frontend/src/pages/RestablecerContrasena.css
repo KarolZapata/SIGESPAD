@@ -1,0 +1,288 @@
+/* =====================================================
+   RESTABLECER CONTRASEÑA
+   ===================================================== */
+
+.recuperar-container {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 20px;
+  background: #f4f7fb;
+  box-sizing: border-box;
+}
+
+.recuperar-card {
+  width: 900px;
+  min-height: 500px;
+  display: grid;
+  grid-template-columns: 45% 55%;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(15, 52, 91, 0.15);
+}
+
+/* =====================================================
+   PANEL IZQUIERDO
+   ===================================================== */
+
+.recuperar-info {
+  background: #12365d;
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  padding: 50px 35px;
+  box-sizing: border-box;
+}
+
+.recuperar-icono {
+  width: 58px;
+  height: 58px;
+
+  border: 1px solid #f5bd24;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #f5bd24;
+  font-size: 28px;
+
+  margin-bottom: 20px;
+}
+
+.recuperar-info h1 {
+  margin: 0;
+
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.recuperar-linea {
+  width: 45px;
+  height: 3px;
+  background: #f5bd24;
+  margin: 12px 0 18px;
+}
+
+.recuperar-info p {
+  margin: 0;
+
+  max-width: 230px;
+
+  font-size: 14px;
+  line-height: 1.6;
+  color: #ffffff;
+}
+
+.recuperar-negocio {
+  margin-top: 35px !important;
+
+  font-size: 11px !important;
+  font-weight: 700;
+
+  letter-spacing: 1.5px;
+
+  color: #f5bd24 !important;
+}
+
+/* =====================================================
+   PANEL DERECHO
+   ===================================================== */
+
+.recuperar-formulario {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 50px 65px;
+  box-sizing: border-box;
+}
+
+.recuperar-contenido {
+  width: 100%;
+  max-width: 360px;
+}
+
+.recuperar-contenido h2 {
+  margin: 0 0 8px;
+
+  color: #12365d;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.recuperar-descripcion {
+  margin: 0 0 30px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  text-align: center;
+}
+
+/* =====================================================
+   FORMULARIO
+   ===================================================== */
+
+.recuperar-form {
+  width: 100%;
+}
+
+.recuperar-label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #12365d;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recuperar-input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 14px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+
+  background: white;
+
+  font-size: 14px;
+
+  box-sizing: border-box;
+
+  outline: none;
+
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.recuperar-input:focus {
+  border-color: #12365d;
+
+  box-shadow: 0 0 0 3px rgba(18, 54, 93, 0.1);
+}
+
+.recuperar-boton {
+  width: 100%;
+  height: 46px;
+
+  margin-top: 22px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #12365d;
+
+  color: white;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: background 0.2s, transform 0.2s;
+}
+
+.recuperar-boton:hover {
+  background: #0d2b4b;
+}
+
+.recuperar-boton:active {
+  transform: scale(0.99);
+}
+
+/* =====================================================
+   MENSAJES
+   ===================================================== */
+
+.recuperar-error {
+  margin: 12px 0 0;
+
+  color: #c0392b;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+.recuperar-exito {
+  margin: 12px 0 0;
+
+  color: #238636;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+/* =====================================================
+   VOLVER
+   ===================================================== */
+
+.recuperar-volver {
+  display: block;
+
+  margin-top: 24px;
+
+  color: #12365d;
+
+  font-size: 13px;
+
+  text-align: center;
+
+  text-decoration: none;
+
+  transition: color 0.2s;
+}
+
+.recuperar-volver:hover {
+  color: #d99d00;
+  text-decoration: underline;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 750px) {
+  .recuperar-card {
+    width: 100%;
+    max-width: 500px;
+
+    grid-template-columns: 1fr;
+  }
+
+  .recuperar-info {
+    padding: 35px 25px;
+  }
+
+  .recuperar-info h1 {
+    font-size: 28px;
+  }
+
+  .recuperar-negocio {
+    margin-top: 20px !important;
+  }
+
+  .recuperar-formulario {
+    padding: 40px 30px;
+  }
+}

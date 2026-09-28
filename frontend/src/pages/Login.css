@@ -1,0 +1,519 @@
+/* =====================================================
+   LOGIN SIGESPAD
+   ===================================================== */
+
+.login-container {
+    min-height: calc(100vh - 88px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 45px 25px;
+
+    background: #f4f7fb;
+
+    position: relative;
+    z-index: 2;
+}
+
+
+/* =====================================================
+   TARJETA PRINCIPAL
+   ===================================================== */
+
+.login-card {
+    width: 760px;
+    max-width: 100%;
+    min-height: 430px;
+
+    display: grid;
+    grid-template-columns: 45% 55%;
+
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 15px 40px rgba(15, 48, 86, 0.16);
+}
+
+
+/* =====================================================
+   PANEL IZQUIERDO
+   ===================================================== */
+
+.login-brand {
+    background: #15385f;
+
+    color: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 45px 35px;
+}
+
+
+/* ÍCONO */
+
+.login-brand-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1.5px solid #f4bd22;
+    border-radius: 50%;
+
+    color: #f4bd22;
+
+    font-size: 25px;
+
+    margin-bottom: 18px;
+}
+
+
+/* NOMBRE */
+
+.login-brand h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 32px;
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* LÍNEA DORADA */
+
+.login-brand-line {
+    width: 45px;
+    height: 3px;
+
+    background: #f4bd22;
+
+    margin: 10px 0 18px;
+}
+
+
+/* DESCRIPCIÓN */
+
+.login-brand p {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    max-width: 220px;
+}
+
+
+/* PAPELERÍA SAN DIEGO */
+
+.login-brand-small {
+    margin-top: 30px !important;
+
+    color: #f4bd22 !important;
+
+    font-size: 11px !important;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+/* =====================================================
+   PANEL DERECHO
+   ===================================================== */
+
+.login-form-container {
+    background: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    padding: 45px 55px;
+}
+
+
+/* TÍTULO */
+
+.login-form-container h2 {
+    margin: 0 0 8px;
+
+    color: #15385f;
+
+    font-size: 27px;
+
+    font-weight: 700;
+
+    text-align: center;
+}
+
+
+/* SUBTÍTULO */
+
+.login-subtitle {
+    margin: 0 0 30px;
+
+    color: #718096;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   FORMULARIO
+   ===================================================== */
+
+.login-form {
+    width: 100%;
+}
+
+
+/* GRUPO */
+
+.login-form-group {
+    margin-bottom: 18px;
+}
+
+
+/* LABEL */
+
+.login-form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #15385f;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+.login-input-container {
+    position: relative;
+
+    width: 100%;
+}
+
+
+.login-input {
+    width: 100%;
+
+    height: 44px;
+
+    padding: 0 14px;
+
+    border: 1px solid #ccd6e2;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #15385f;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 13px;
+
+    outline: none;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-input:focus {
+    border-color: #15385f;
+
+    box-shadow:
+        0 0 0 3px rgba(21, 56, 95, 0.08);
+}
+
+
+.login-input::placeholder {
+    color: #a0aec0;
+}
+
+
+/* =====================================================
+   CONTRASEÑA
+   ===================================================== */
+
+.login-password-input {
+    padding-right: 48px;
+}
+
+
+/* =====================================================
+   BOTÓN OJO
+   ===================================================== */
+
+.login-password-toggle {
+    position: absolute;
+
+    right: 10px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    margin: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #718096;
+
+    cursor: pointer;
+
+    border-radius: 5px;
+
+    transition:
+        color 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.login-password-toggle:hover {
+    color: #15385f;
+
+    background: #f4f7fb;
+}
+
+
+.login-password-toggle:focus {
+    outline: none;
+
+    color: #15385f;
+}
+
+
+/* =====================================================
+   ERROR
+   ===================================================== */
+
+.login-error {
+    margin: 8px 0 15px;
+
+    padding: 10px 12px;
+
+    background: #fff5f5;
+
+    border: 1px solid #fed7d7;
+
+    border-radius: 6px;
+
+    color: #c53030;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   BOTÓN INICIAR SESIÓN
+   ===================================================== */
+
+.login-submit {
+    width: 100%;
+
+    height: 44px;
+
+    margin-top: 5px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #15385f;
+
+    color: #ffffff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.1s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.login-submit:hover {
+    background: #0f2d4d;
+
+    box-shadow:
+        0 5px 12px rgba(21, 56, 95, 0.18);
+}
+
+
+.login-submit:active {
+    transform: scale(0.99);
+}
+
+
+/* =====================================================
+   RECUPERAR CONTRASEÑA
+   ===================================================== */
+
+.login-forgot {
+    display: block;
+
+    width: 100%;
+
+    margin-top: 17px;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #15385f;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    text-decoration: none;
+}
+
+
+.login-forgot:hover {
+    color: #c18f00;
+
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   PIE
+   ===================================================== */
+
+.login-footer {
+    margin-top: 30px;
+
+    padding-top: 17px;
+
+    border-top: 1px solid #e2e8f0;
+
+    color: #a0aec0;
+
+    font-size: 10px;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    .login-container {
+        min-height: calc(100vh - 75px);
+
+        padding: 30px 15px;
+    }
+
+
+    .login-card {
+        width: 430px;
+
+        grid-template-columns: 1fr;
+    }
+
+
+    .login-brand {
+        min-height: 230px;
+
+        padding: 30px 25px;
+    }
+
+
+    .login-brand-icon {
+        width: 50px;
+        height: 50px;
+
+        font-size: 21px;
+
+        margin-bottom: 12px;
+    }
+
+
+    .login-brand h1 {
+        font-size: 27px;
+    }
+
+
+    .login-brand-small {
+        margin-top: 18px !important;
+    }
+
+
+    .login-form-container {
+        padding: 35px 30px;
+    }
+}

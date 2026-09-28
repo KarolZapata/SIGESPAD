@@ -81,9 +81,10 @@ const opcionesPorRol = {
       ruta: "/carrito",
     },
     {
-      titulo: "Mis compras",
-      descripcion:
-        "Consultar las compras realizadas cuando esté implementado el historial.",
+    titulo: "Mis compras",
+    descripcion:
+        "Consultar las compras realizadas con tu cuenta.",
+    ruta: "/mis-compras",
     },
   ],
 };
