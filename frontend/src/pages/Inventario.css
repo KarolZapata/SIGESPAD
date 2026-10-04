@@ -1,188 +1,794 @@
+/* =========================================================
+   INVENTARIO
+========================================================= */
 
 .inventario {
-  max-width: 1200px;
+  width: min(1200px, 92%);
   margin: 0 auto;
-  padding: 32px 24px;
-  color: #222;
+  padding: 34px 0 70px;
+  color: #102b4e;
 }
 
+
+/* =========================================================
+   ENCABEZADO PRINCIPAL
+========================================================= */
+
 .inventario-encabezado {
-  margin-bottom: 24px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.inventario-etiqueta-seccion {
+  display: inline-block;
+  margin-bottom: 9px;
+  padding: 6px 13px;
+  border: 1px solid #e5b93f;
+  border-radius: 20px;
+  color: #b78300;
+  background: #fffdf5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
 }
 
 .inventario-encabezado h1 {
-  margin-bottom: 8px;
+  margin: 0 0 8px;
+  color: #102b4e;
+  font-size: clamp(30px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.7px;
 }
 
-.inventario-encabezado p,
-.inventario-seccion p {
-  color: #666;
+.inventario-encabezado p {
+  max-width: 700px;
+  margin: 0 auto;
+  color: #63758a;
+  font-size: 14px;
+  line-height: 1.6;
 }
+
+
+/* =========================================================
+   BOTÓN VOLVER AL PANEL
+========================================================= */
+
+.boton-volver-panel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  margin-top: 18px;
+  padding: 9px 14px;
+
+  border: 1px solid #cfd9e4;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #17365d;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.boton-volver-panel span {
+  font-size: 14px;
+}
+
+.boton-volver-panel:hover {
+  background: #f5f8fb;
+  border-color: #9fb2c7;
+  box-shadow: 0 3px 10px rgba(16, 43, 78, 0.07);
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.inventario-mensaje {
+  margin-bottom: 20px;
+  padding: 13px 16px;
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.inventario-mensaje.error {
+  border: 1px solid #f2caca;
+  background: #fff3f3;
+  color: #a12b22;
+}
+
+.inventario-mensaje.exito {
+  border: 1px solid #c9e8d2;
+  background: #effaf2;
+  color: #216e39;
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
 
 .inventario-resumen {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 14px;
+
+  margin-bottom: 38px;
 }
 
 .inventario-tarjeta {
-  padding: 20px;
-  border: 1px solid #e5e5e5;
+  position: relative;
+
+  padding: 20px 20px 18px;
+
+  border: 1px solid #dce3ea;
   border-radius: 10px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+
+  background: #ffffff;
+
+  box-shadow: 0 4px 15px rgba(16, 43, 78, 0.04);
+
+  text-align: center;
+
+  overflow: hidden;
+}
+
+.inventario-tarjeta::before {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width: 3px;
+
+  background: #e2b52d;
 }
 
 .inventario-tarjeta span {
-  color: #666;
-  font-size: 14px;
-}
+  display: block;
 
-.inventario-tarjeta strong {
-  font-size: 28px;
-}
+  margin-bottom: 8px;
 
-.inventario-tarjeta.alerta strong {
-  color: #c0392b;
-}
+  color: #65778c;
 
-.inventario-seccion {
-  margin-bottom: 32px;
-}
-
-.inventario-seccion h2 {
-  margin-bottom: 16px;
-}
-
-.inventario-tabla-contenedor {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
-}
-
-.inventario-tabla {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  font-size: 14px;
-}
-
-.inventario-tabla th,
-.inventario-tabla td {
-  padding: 12px 14px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  white-space: nowrap;
-}
-
-.inventario-tabla th {
-  background: #f7f7f7;
-  font-weight: 600;
-}
-
-.inventario-tabla tbody tr:hover {
-  background: #fafafa;
-}
-
-.inventario-etiqueta {
-  display: inline-block;
-  padding: 5px 9px;
-  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
 }
 
-.inventario-etiqueta.disponible {
-  color: #216e39;
-  background: #e5f5e9;
+.inventario-tarjeta strong {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #102b4e;
+
+  font-size: 27px;
+  font-weight: 700;
 }
 
-.inventario-etiqueta.bajo {
-  color: #a12b22;
+.inventario-tarjeta small {
+  color: #91a0af;
+  font-size: 10px;
+}
+
+.inventario-tarjeta.alerta strong {
+  color: #c7352d;
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.inventario-seccion {
+  width: 100%;
+  margin-bottom: 42px;
+}
+
+
+/* =========================================================
+   ENCABEZADO DE CADA SECCIÓN
+========================================================= */
+
+/*
+   IMPORTANTE:
+
+   El encabezado ocupa todo el ancho.
+
+   El contenido central se centra de verdad.
+
+   El contador se mantiene a la derecha sin empujar
+   el título hacia un lado.
+*/
+
+.inventario-seccion-encabezado {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  min-height: 70px;
+
+  margin-bottom: 15px;
+
+  text-align: center;
+}
+
+
+/* Contenido central */
+
+.inventario-seccion-contenido {
+  width: 100%;
+  text-align: center;
+}
+
+
+/* Etiquetas:
+   CONTROL DE EXISTENCIAS
+   MOVIMIENTOS
+   REGISTRO
+*/
+
+.inventario-seccion-etiqueta {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #bd8b00;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 1.4px;
+}
+
+
+/* Títulos */
+
+.inventario-seccion h2 {
+  margin: 0 0 5px;
+
+  color: #102b4e;
+
+  font-size: 19px;
+  font-weight: 700;
+}
+
+
+/* Descripciones */
+
+.inventario-seccion p {
+  margin: 0;
+
+  color: #718197;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   ENCABEZADOS SIN CONTADOR
+   Registrar movimiento
+========================================================= */
+
+.inventario-seccion-encabezado.centrado {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+
+/* =========================================================
+   CONTADORES
+========================================================= */
+
+.inventario-contador {
+  position: absolute;
+
+  right: 0;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  padding: 9px 13px;
+
+  border: 1px solid #dce3ea;
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  color: #5e7187;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   TABLAS
+========================================================= */
+
+.inventario-tabla-contenedor {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #dce3ea;
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  box-shadow: 0 4px 15px rgba(16, 43, 78, 0.035);
+}
+
+.inventario-tabla {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  background: #ffffff;
+
+  font-size: 12px;
+}
+
+.inventario-tabla th,
+.inventario-tabla td {
+  padding: 13px 10px;
+
+  text-align: left;
+
+  border-bottom: 1px solid #edf0f3;
+
+  vertical-align: middle;
+
+  white-space: nowrap;
+}
+
+.inventario-tabla th {
+  background: #f7f9fb;
+
+  color: #52667d;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.4px;
+
+  text-transform: uppercase;
+}
+
+.inventario-tabla tbody tr {
+  transition: background 0.15s ease;
+}
+
+.inventario-tabla tbody tr:hover {
+  background: #fafcfd;
+}
+
+.inventario-tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+
+/* =========================================================
+   PRODUCTO
+========================================================= */
+
+.inventario-producto {
+  color: #183a61;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   CÓDIGO
+========================================================= */
+
+.inventario-codigo {
+  display: inline-block;
+
+  padding: 5px 7px;
+
+  border-radius: 4px;
+
+  background: #f2f5f8;
+  color: #5d7186;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   STOCK
+========================================================= */
+
+.inventario-stock-actual {
+  color: #173b62;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   ESTADOS
+========================================================= */
+
+.inventario-etiqueta {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 58px;
+
+  padding: 5px 9px;
+
+  border-radius: 20px;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.inventario-etiqueta.disponible,
+.inventario-etiqueta.entrada {
+  background: #e5f5e9;
+  color: #216e39;
+}
+
+.inventario-etiqueta.bajo,
+.inventario-etiqueta.salida {
   background: #fde9e7;
+  color: #a12b22;
 }
 
 .inventario-etiqueta.inactivo {
-  color: #555;
-  background: #eee;
+  background: #eeeeee;
+  color: #555555;
 }
+
+
+/* =========================================================
+   TABLA VACÍA
+========================================================= */
+
+.inventario-vacio {
+  padding: 28px !important;
+
+  text-align: center !important;
+
+  color: #8996a4;
+}
+
+
+/* =========================================================
+   FORMULARIO DE MOVIMIENTOS
+========================================================= */
 
 .inventario-formulario {
   display: grid;
+
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
   gap: 18px;
-  padding: 22px;
-  border: 1px solid #e5e5e5;
+
+  padding: 25px;
+
+  border: 1px solid #dce3ea;
   border-radius: 10px;
-  background: #fff;
+
+  background: #ffffff;
+
+  box-shadow: 0 4px 15px rgba(16, 43, 78, 0.035);
 }
 
-.inventario-formulario label {
+.inventario-formulario-campo {
   display: flex;
+
   flex-direction: column;
-  gap: 8px;
-  font-weight: 600;
+
+  gap: 7px;
+}
+
+.inventario-formulario-campo label {
+  color: #304b68;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.inventario-formulario-campo input,
+.inventario-formulario-campo select {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 11px 12px;
+
+  border: 1px solid #ccd7e2;
+  border-radius: 6px;
+
+  background: #ffffff;
+  color: #253f5c;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.inventario-formulario-campo input::placeholder {
+  color: #a0acb8;
+}
+
+.inventario-formulario-campo input:focus,
+.inventario-formulario-campo select:focus {
+  border-color: #9db3c9;
+
+  box-shadow: 0 0 0 3px rgba(16, 43, 78, 0.06);
+}
+
+
+/* =========================================================
+   BOTÓN REGISTRAR
+========================================================= */
+
+.inventario-formulario-acciones {
+  grid-column: 1 / -1;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  margin-top: 2px;
+}
+
+.inventario-formulario-acciones button {
+  padding: 11px 18px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: #102f55;
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.inventario-formulario-acciones button:hover {
+  background: #0b2442;
+
+  box-shadow: 0 4px 12px rgba(16, 43, 78, 0.16);
+
+  transform: translateY(-1px);
+}
+
+.inventario-formulario-acciones button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   HISTORIAL
+========================================================= */
+
+.inventario-historial {
+  padding-bottom: 8px;
+}
+
+.inventario-tabla-historial {
+  min-width: 900px;
+}
+
+
+/* =========================================================
+   BOTÓN FINAL
+   SOLO INVENTARIO
+========================================================= */
+
+.inventario-acciones-finales {
+  display: flex;
+
+  justify-content: center;
+
+  margin-top: 24px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid #e3e8ee;
+}
+
+.inventario-acciones-finales .boton-volver-panel {
+  margin-top: 0;
+}
+
+
+/* =========================================================
+   CARGANDO
+========================================================= */
+
+.inventario-cargando {
+  padding: 70px 20px;
+
+  text-align: center;
+
+  color: #6f8092;
+
   font-size: 14px;
 }
 
-.inventario-formulario input,
-.inventario-formulario select {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 11px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font: inherit;
-  font-weight: 400;
-  background: #fff;
+.inventario-cargando-punto {
+  display: inline-block;
+
+  width: 8px;
+  height: 8px;
+
+  margin-right: 7px;
+
+  border-radius: 50%;
+
+  background: #e2b52d;
+
+  animation: inventario-pulso 1s infinite ease-in-out;
 }
 
-.inventario-formulario button {
-  grid-column: 1 / -1;
-  padding: 12px 18px;
-  border: none;
-  border-radius: 6px;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
+@keyframes inventario-pulso {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.inventario-formulario button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
-.inventario-mensaje {
-  padding: 12px 16px;
-  margin-bottom: 18px;
-  border-radius: 8px;
-}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
-.inventario-mensaje.error {
-  color: #a12b22;
-  background: #fde9e7;
-}
+@media (max-width: 800px) {
 
-.inventario-mensaje.exito {
-  color: #216e39;
-  background: #e5f5e9;
-}
+  .inventario {
+    width: min(94%, 1200px);
 
-@media (max-width: 700px) {
+    padding: 28px 0 55px;
+  }
+
   .inventario-resumen {
     grid-template-columns: 1fr;
   }
 
-  .inventario-formulario {
-    grid-template-columns: 1fr;
+  /*
+     En pantallas pequeñas el contador vuelve
+     a ocupar su propio espacio para evitar
+     que se cruce con el título.
+  */
+
+  .inventario-seccion-encabezado {
+    flex-direction: column;
+
+    min-height: auto;
+
+    gap: 12px;
+
+    text-align: center;
   }
 
-  .inventario {
-    padding: 24px 14px;
+  .inventario-seccion-contenido {
+    width: 100%;
   }
+
+  .inventario-contador {
+    position: static;
+
+    transform: none;
+  }
+
+  .inventario-formulario {
+    grid-template-columns: 1fr;
+
+    padding: 20px;
+  }
+
+  .inventario-formulario-acciones {
+    grid-column: auto;
+  }
+
+  .inventario-formulario-acciones button {
+    width: 100%;
+  }
+
+  .inventario-encabezado h1 {
+    font-size: 30px;
+  }
+
+  .inventario-tabla {
+    min-width: 720px;
+  }
+}
+
+
+@media (max-width: 500px) {
+
+  .inventario {
+    width: 94%;
+  }
+
+  .inventario-encabezado {
+    margin-bottom: 25px;
+  }
+
+  .inventario-encabezado h1 {
+    font-size: 27px;
+  }
+
+  .inventario-encabezado p {
+    font-size: 12px;
+  }
+
+  .inventario-tarjeta {
+    padding: 17px;
+  }
+
+  .inventario-formulario {
+    padding: 16px;
+  }
+
+  .boton-volver-panel {
+    width: auto;
+  }
+
+  .inventario-acciones-finales {
+    margin-top: 20px;
+  }
+
 }

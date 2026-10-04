@@ -1,9 +1,11 @@
-
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "./Inventario.css";
 
 function Inventario() {
+  const navigate = useNavigate();
+
   const [productos, setProductos] = useState([]);
   const [movimientos, setMovimientos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -56,6 +58,7 @@ function Inventario() {
 
   const registrarMovimiento = async (e) => {
     e.preventDefault();
+
     setError("");
     setMensaje("");
 
@@ -65,20 +68,19 @@ function Inventario() {
       Number(formulario.cantidad) <= 0 ||
       !Number.isInteger(Number(formulario.cantidad))
     ) {
-      setError("Selecciona un producto e ingresa una cantidad entera mayor que cero.");
+      setError(
+        "Selecciona un producto e ingresa una cantidad entera mayor que cero."
+      );
       return;
     }
 
     try {
       setGuardando(true);
 
-      const respuesta = await api.post(
-        "/inventario/movimientos",
-        {
-          ...formulario,
-          cantidad: Number(formulario.cantidad),
-        }
-      );
+      const respuesta = await api.post("/inventario/movimientos", {
+        ...formulario,
+        cantidad: Number(formulario.cantidad),
+      });
 
       setMensaje(
         `${respuesta.data.mensaje}. Stock actualizado: ${respuesta.data.stock_nuevo}.`
@@ -119,20 +121,49 @@ function Inventario() {
   if (cargando) {
     return (
       <main className="inventario">
-        <p>Cargando inventario...</p>
+        <div className="inventario-cargando">
+          <span className="inventario-cargando-punto"></span>
+          <p>Cargando inventario...</p>
+        </div>
       </main>
     );
   }
 
   return (
     <main className="inventario">
+
+      {/* =====================================================
+          ENCABEZADO PRINCIPAL
+      ===================================================== */}
+
       <header className="inventario-encabezado">
+
+        <span className="inventario-etiqueta-seccion">
+          INVENTARIO
+        </span>
+
         <h1>Gestión de inventario</h1>
+
         <p>
-          Consulta existencias, identifica productos con stock
-          bajo y registra entradas o salidas.
+          Consulta existencias, identifica productos con stock bajo
+          y registra entradas o salidas.
         </p>
+
+        <button
+          type="button"
+          className="boton-volver-panel"
+          onClick={() => navigate("/dashboard")}
+        >
+          <span>←</span>
+          Volver al panel
+        </button>
+
       </header>
+
+
+      {/* =====================================================
+          MENSAJES
+      ===================================================== */}
 
       {error && (
         <div className="inventario-mensaje error">
@@ -146,28 +177,87 @@ function Inventario() {
         </div>
       )}
 
+
+      {/* =====================================================
+          RESUMEN
+      ===================================================== */}
+
       <section className="inventario-resumen">
-        <article className="inventario-tarjeta">
-          <span>Productos registrados</span>
-          <strong>{productos.length}</strong>
-        </article>
 
         <article className="inventario-tarjeta">
-          <span>Productos activos</span>
-          <strong>{productosActivos.length}</strong>
+          <div className="inventario-tarjeta-acento"></div>
+
+          <span>Productos registrados</span>
+
+          <strong>{productos.length}</strong>
+
+          <small>
+            Total de productos en el sistema
+          </small>
         </article>
+
+
+        <article className="inventario-tarjeta">
+          <div className="inventario-tarjeta-acento"></div>
+
+          <span>Productos activos</span>
+
+          <strong>{productosActivos.length}</strong>
+
+          <small>
+            Productos disponibles para operar
+          </small>
+        </article>
+
 
         <article className="inventario-tarjeta alerta">
+          <div className="inventario-tarjeta-acento"></div>
+
           <span>Stock bajo</span>
+
           <strong>{productosStockBajo.length}</strong>
+
+          <small>
+            Productos que requieren atención
+          </small>
         </article>
+
       </section>
 
+
+      {/* =====================================================
+          EXISTENCIAS
+      ===================================================== */}
+
       <section className="inventario-seccion">
-        <h2>Existencias</h2>
+
+        <div className="inventario-seccion-encabezado">
+
+          <div className="inventario-seccion-contenido">
+
+            <span className="inventario-seccion-etiqueta">
+              CONTROL DE EXISTENCIAS
+            </span>
+
+            <h2>Existencias</h2>
+
+            <p>
+              Consulta el stock actual de los productos registrados.
+            </p>
+
+          </div>
+
+          <span className="inventario-contador">
+            {productos.length} productos
+          </span>
+
+        </div>
+
 
         <div className="inventario-tabla-contenedor">
+
           <table className="inventario-tabla">
+
             <thead>
               <tr>
                 <th>Código</th>
@@ -180,91 +270,183 @@ function Inventario() {
             </thead>
 
             <tbody>
+
               {productos.map((producto) => (
                 <tr key={producto.id_producto}>
-                  <td>{producto.codigo}</td>
-                  <td>{producto.nombre}</td>
-                  <td>{producto.categoria || "—"}</td>
-                  <td>{producto.stock}</td>
-                  <td>{producto.stock_minimo}</td>
+
                   <td>
+                    <span className="inventario-codigo">
+                      {producto.codigo}
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong className="inventario-producto">
+                      {producto.nombre}
+                    </strong>
+                  </td>
+
+                  <td>
+                    {producto.categoria || "—"}
+                  </td>
+
+                  <td>
+                    <strong className="inventario-stock-actual">
+                      {producto.stock}
+                    </strong>
+                  </td>
+
+                  <td>
+                    {producto.stock_minimo}
+                  </td>
+
+                  <td>
+
                     {Number(producto.estado) !== 1 ? (
+
                       <span className="inventario-etiqueta inactivo">
                         Inactivo
                       </span>
+
                     ) : Number(producto.stock_bajo) === 1 ? (
+
                       <span className="inventario-etiqueta bajo">
                         Stock bajo
                       </span>
+
                     ) : (
+
                       <span className="inventario-etiqueta disponible">
                         Disponible
                       </span>
+
                     )}
+
                   </td>
+
                 </tr>
               ))}
 
+
               {productos.length === 0 && (
                 <tr>
-                  <td colSpan="6">
+                  <td
+                    colSpan="6"
+                    className="inventario-vacio"
+                  >
                     No hay productos registrados.
                   </td>
                 </tr>
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </section>
 
+
+      {/* =====================================================
+          REGISTRAR MOVIMIENTO
+      ===================================================== */}
+
       <section className="inventario-seccion">
-        <h2>Registrar movimiento</h2>
-        <p>
-          Registra entradas por reposición o salidas manuales
-          de productos.
-        </p>
+
+        <div className="inventario-seccion-encabezado centrado">
+
+          <div className="inventario-seccion-contenido">
+
+            <span className="inventario-seccion-etiqueta">
+              MOVIMIENTOS
+            </span>
+
+            <h2>Registrar movimiento</h2>
+
+            <p>
+              Registra entradas por reposición o salidas manuales
+              de productos.
+            </p>
+
+          </div>
+
+        </div>
+
 
         <form
           className="inventario-formulario"
           onSubmit={registrarMovimiento}
         >
-          <label>
-            Producto
+
+          <div className="inventario-formulario-campo">
+
+            <label htmlFor="id_producto">
+              Producto
+            </label>
+
             <select
+              id="id_producto"
               name="id_producto"
               value={formulario.id_producto}
               onChange={actualizarCampo}
               required
             >
-              <option value="">Selecciona un producto</option>
+
+              <option value="">
+                Selecciona un producto
+              </option>
 
               {productosActivos.map((producto) => (
                 <option
                   key={producto.id_producto}
                   value={producto.id_producto}
                 >
-                  {producto.codigo} - {producto.nombre} (Stock: {producto.stock})
+                  {producto.codigo} - {producto.nombre}{" "}
+                  (Stock: {producto.stock})
                 </option>
               ))}
-            </select>
-          </label>
 
-          <label>
-            Tipo de movimiento
+            </select>
+
+          </div>
+
+
+          <div className="inventario-formulario-campo">
+
+            <label htmlFor="tipo">
+              Tipo de movimiento
+            </label>
+
             <select
+              id="tipo"
               name="tipo"
               value={formulario.tipo}
               onChange={actualizarCampo}
               required
             >
-              <option value="ENTRADA">Entrada</option>
-              <option value="SALIDA">Salida</option>
-            </select>
-          </label>
 
-          <label>
-            Cantidad
+              <option value="ENTRADA">
+                Entrada
+              </option>
+
+              <option value="SALIDA">
+                Salida
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div className="inventario-formulario-campo">
+
+            <label htmlFor="cantidad">
+              Cantidad
+            </label>
+
             <input
+              id="cantidad"
               type="number"
               name="cantidad"
               min="1"
@@ -274,11 +456,18 @@ function Inventario() {
               placeholder="Ej. 10"
               required
             />
-          </label>
 
-          <label>
-            Motivo
+          </div>
+
+
+          <div className="inventario-formulario-campo">
+
+            <label htmlFor="motivo">
+              Motivo
+            </label>
+
             <input
+              id="motivo"
               type="text"
               name="motivo"
               value={formulario.motivo}
@@ -286,19 +475,61 @@ function Inventario() {
               placeholder="Ej. Reposición de mercancía"
               maxLength="255"
             />
-          </label>
 
-          <button type="submit" disabled={guardando}>
-            {guardando ? "Guardando..." : "Registrar movimiento"}
-          </button>
+          </div>
+
+
+          <div className="inventario-formulario-acciones">
+
+            <button
+              type="submit"
+              disabled={guardando}
+            >
+              {guardando
+                ? "Guardando..."
+                : "Registrar movimiento"}
+            </button>
+
+          </div>
+
         </form>
+
       </section>
 
+
+      {/* =====================================================
+          HISTORIAL
+      ===================================================== */}
+
       <section className="inventario-seccion">
-        <h2>Historial de movimientos</h2>
+
+        <div className="inventario-seccion-encabezado">
+
+          <div className="inventario-seccion-contenido">
+
+            <span className="inventario-seccion-etiqueta">
+              REGISTRO
+            </span>
+
+            <h2>Historial de movimientos</h2>
+
+            <p>
+              Consulta las entradas y salidas realizadas en el inventario.
+            </p>
+
+          </div>
+
+          <span className="inventario-contador">
+            {movimientos.length} movimientos
+          </span>
+
+        </div>
+
 
         <div className="inventario-tabla-contenedor">
+
           <table className="inventario-tabla">
+
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -313,40 +544,102 @@ function Inventario() {
             </thead>
 
             <tbody>
+
               {movimientos.map((movimiento) => (
                 <tr key={movimiento.id_movimiento}>
-                  <td>{formatoFecha(movimiento.fecha_movimiento)}</td>
-                  <td>{movimiento.codigo}</td>
-                  <td>{movimiento.producto}</td>
+
                   <td>
+                    {formatoFecha(
+                      movimiento.fecha_movimiento
+                    )}
+                  </td>
+
+                  <td>
+                    <span className="inventario-codigo">
+                      {movimiento.codigo}
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong className="inventario-producto">
+                      {movimiento.producto}
+                    </strong>
+                  </td>
+
+                  <td>
+
                     <span
                       className={`inventario-etiqueta ${
                         movimiento.tipo === "ENTRADA"
-                          ? "disponible"
-                          : "bajo"
+                          ? "entrada"
+                          : "salida"
                       }`}
                     >
                       {movimiento.tipo}
                     </span>
+
                   </td>
-                  <td>{movimiento.cantidad}</td>
-                  <td>{movimiento.stock_anterior}</td>
-                  <td>{movimiento.stock_nuevo}</td>
-                  <td>{movimiento.motivo || "—"}</td>
+
+                  <td>
+                    <strong>
+                      {movimiento.cantidad}
+                    </strong>
+                  </td>
+
+                  <td>
+                    {movimiento.stock_anterior}
+                  </td>
+
+                  <td>
+                    {movimiento.stock_nuevo}
+                  </td>
+
+                  <td>
+                    {movimiento.motivo || "—"}
+                  </td>
+
                 </tr>
               ))}
 
+
               {movimientos.length === 0 && (
                 <tr>
-                  <td colSpan="8">
+                  <td
+                    colSpan="8"
+                    className="inventario-vacio"
+                  >
                     Aún no hay movimientos registrados.
                   </td>
                 </tr>
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
+
+        {/* =================================================
+            BOTÓN FINAL
+            SOLO INVENTARIO
+        ================================================= */}
+
+        <div className="inventario-acciones-finales">
+
+          <button
+            type="button"
+            className="boton-volver-panel boton-volver-final"
+            onClick={() => navigate("/dashboard")}
+          >
+            <span>←</span>
+            Volver al panel
+          </button>
+
+        </div>
+
       </section>
+
     </main>
   );
 }

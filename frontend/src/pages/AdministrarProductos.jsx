@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "./AdministrarProductos.css";
 
-// Estado inicial del formulario.
 const formularioInicial = {
   codigo: "",
   nombre: "",
@@ -15,10 +15,11 @@ const formularioInicial = {
 };
 
 function AdministrarProductos() {
+  const navigate = useNavigate();
+
   const [formulario, setFormulario] = useState(formularioInicial);
   const [imagenes, setImagenes] = useState([]);
   const [productos, setProductos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
   const [busqueda, setBusqueda] = useState("");
 
   const [vista, setVista] = useState("listado");
@@ -31,16 +32,25 @@ function AdministrarProductos() {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
-  // Carga los productos desde el backend.
+  // =====================================================
+  // OBTENER PRODUCTOS
+  // =====================================================
+
   const obtenerProductos = async () => {
     try {
       setCargandoProductos(true);
       setError("");
 
       const respuesta = await api.get("/productos");
-      setProductos(Array.isArray(respuesta.data) ? respuesta.data : []);
+
+      setProductos(
+        Array.isArray(respuesta.data)
+          ? respuesta.data
+          : []
+      );
     } catch (err) {
       console.error("Error al cargar productos:", err);
+
       setError(
         err.response?.data?.error ||
           "No fue posible cargar los productos."
@@ -50,43 +60,44 @@ function AdministrarProductos() {
     }
   };
 
-// Carga las categorías desde el backend.
-const obtenerCategorias = async () => {
-  try {
-    const respuesta = await api.get("/categorias");
-    setCategorias(Array.isArray(respuesta.data) ? respuesta.data : []);
-  } catch (err) {
-    console.error("Error al cargar categorías:", err);
-    setError(
-      err.response?.data?.error ||
-        "No fue posible cargar las categorías."
-    );
-  }
-};
+  useEffect(() => {
+    obtenerProductos();
+  }, []);
 
-useEffect(() => {
-  obtenerProductos();
-  obtenerCategorias();
-}, []);
+  // =====================================================
+  // FILTRO
+  // =====================================================
 
-  // Filtra por código o nombre.
   const productosFiltrados = productos.filter((producto) => {
     const texto = busqueda.toLowerCase().trim();
 
     return (
-      producto.codigo?.toLowerCase().includes(texto) ||
-      producto.nombre?.toLowerCase().includes(texto)
+      producto.codigo
+        ?.toLowerCase()
+        .includes(texto) ||
+      producto.nombre
+        ?.toLowerCase()
+        .includes(texto)
     );
   });
 
-  // Estadísticas del inventario.
+  // =====================================================
+  // ESTADÍSTICAS
+  // =====================================================
+
   const totalProductos = productos.length;
+
   const productosActivos = productos.filter(
     (producto) => Number(producto.estado) === 1
   ).length;
-  const productosInactivos = totalProductos - productosActivos;
 
-  // Actualiza el estado de un campo del formulario.
+  const productosInactivos =
+    totalProductos - productosActivos;
+
+  // =====================================================
+  // CAMBIOS DEL FORMULARIO
+  // =====================================================
+
   const manejarCambio = (e) => {
     const { name, value } = e.target;
 
@@ -96,33 +107,52 @@ useEffect(() => {
     }));
   };
 
-  // Agrega imágenes seleccionadas al estado.
+  // =====================================================
+  // IMÁGENES
+  // =====================================================
+
   const manejarImagenes = (e) => {
-    const nuevasImagenes = Array.from(e.target.files || []);
+    const nuevasImagenes = Array.from(
+      e.target.files || []
+    );
 
-    setImagenes((actuales) => [...actuales, ...nuevasImagenes]);
+    setImagenes((actuales) => [
+      ...actuales,
+      ...nuevasImagenes,
+    ]);
 
-    // Permite seleccionar nuevamente el mismo archivo.
     e.target.value = "";
   };
 
-  // Quita una imagen seleccionada.
   const quitarImagen = (indiceQuitar) => {
     setImagenes((actuales) =>
-      actuales.filter((_, indice) => indice !== indiceQuitar)
+      actuales.filter(
+        (_, indice) => indice !== indiceQuitar
+      )
     );
   };
 
-  // Limpia el formulario y el selector de archivos.
+  // =====================================================
+  // LIMPIAR FORMULARIO
+  // =====================================================
+
   const limpiarFormulario = () => {
     setFormulario(formularioInicial);
     setImagenes([]);
 
-    const selector = document.getElementById("imagenes-producto");
-    if (selector) selector.value = "";
+    const selector = document.getElementById(
+      "imagenes-producto"
+    );
+
+    if (selector) {
+      selector.value = "";
+    }
   };
 
-  // Abre el formulario para crear un producto nuevo.
+  // =====================================================
+  // REGISTRAR PRODUCTO
+  // =====================================================
+
   const abrirRegistro = () => {
     limpiarFormulario();
     setProductoEditando(null);
@@ -131,7 +161,10 @@ useEffect(() => {
     setVista("registro");
   };
 
-  // Carga los datos del producto seleccionado en el formulario.
+  // =====================================================
+  // EDITAR PRODUCTO
+  // =====================================================
+
   const editarProducto = (producto) => {
     setFormulario({
       codigo: producto.codigo || "",
@@ -139,9 +172,11 @@ useEffect(() => {
       descripcion: producto.descripcion || "",
       categoria: producto.categoria || "",
       precio: producto.precio ?? "",
-      precio_mayorista: producto.precio_mayorista ?? "",
+      precio_mayorista:
+        producto.precio_mayorista ?? "",
       stock: producto.stock ?? "",
-      stock_minimo: producto.stock_minimo ?? "5",
+      stock_minimo:
+        producto.stock_minimo ?? "5",
     });
 
     setProductoEditando(producto);
@@ -151,7 +186,10 @@ useEffect(() => {
     setVista("registro");
   };
 
-  // Sale del formulario y regresa al listado.
+  // =====================================================
+  // VOLVER AL LISTADO
+  // =====================================================
+
   const volverAlListado = () => {
     limpiarFormulario();
     setProductoEditando(null);
@@ -160,9 +198,15 @@ useEffect(() => {
     setVista("listado");
   };
 
-  // Valida los campos numéricos y obligatorios.
+  // =====================================================
+  // VALIDACIÓN
+  // =====================================================
+
   const validarFormulario = () => {
-    if (!formulario.codigo.trim() || !formulario.nombre.trim()) {
+    if (
+      !formulario.codigo.trim() ||
+      !formulario.nombre.trim()
+    ) {
       return "El código y el nombre son obligatorios.";
     }
 
@@ -176,8 +220,12 @@ useEffect(() => {
 
     if (
       formulario.precio_mayorista !== "" &&
-      (!Number.isFinite(Number(formulario.precio_mayorista)) ||
-        Number(formulario.precio_mayorista) < 0)
+      (
+        !Number.isFinite(
+          Number(formulario.precio_mayorista)
+        ) ||
+        Number(formulario.precio_mayorista) < 0
+      )
     ) {
       return "El precio mayorista no puede ser negativo.";
     }
@@ -192,7 +240,9 @@ useEffect(() => {
 
     if (
       formulario.stock_minimo === "" ||
-      !Number.isInteger(Number(formulario.stock_minimo)) ||
+      !Number.isInteger(
+        Number(formulario.stock_minimo)
+      ) ||
       Number(formulario.stock_minimo) < 0
     ) {
       return "El stock mínimo debe ser un entero igual o mayor que cero.";
@@ -205,13 +255,19 @@ useEffect(() => {
     return "";
   };
 
-  // Registra un producto nuevo o actualiza el seleccionado.
+  // =====================================================
+  // GUARDAR PRODUCTO
+  // =====================================================
+
   const manejarEnvio = async (e) => {
     e.preventDefault();
+
     setMensaje("");
     setError("");
 
-    const errorValidacion = validarFormulario();
+    const errorValidacion =
+      validarFormulario();
+
     if (errorValidacion) {
       setError(errorValidacion);
       return;
@@ -221,19 +277,22 @@ useEffect(() => {
       setCargando(true);
 
       if (productoEditando) {
-        // La edición envía datos JSON al endpoint PUT.
-        // El código no se actualiza desde este formulario.
         const datosActualizados = {
           nombre: formulario.nombre.trim(),
-          descripcion: formulario.descripcion.trim(),
+          descripcion:
+            formulario.descripcion.trim(),
           categoria: formulario.categoria,
           precio: Number(formulario.precio),
           precio_mayorista:
             formulario.precio_mayorista === ""
               ? null
-              : Number(formulario.precio_mayorista),
+              : Number(
+                  formulario.precio_mayorista
+                ),
           stock: Number(formulario.stock),
-          stock_minimo: Number(formulario.stock_minimo),
+          stock_minimo: Number(
+            formulario.stock_minimo
+          ),
         };
 
         await api.put(
@@ -241,29 +300,41 @@ useEffect(() => {
           datosActualizados
         );
 
-        setMensaje("Producto actualizado correctamente.");
+        setMensaje(
+          "Producto actualizado correctamente."
+        );
       } else {
-        // El registro usa FormData porque puede incluir imágenes.
         const datos = new FormData();
 
-        Object.entries(formulario).forEach(([campo, valor]) => {
-          datos.append(campo, valor);
-        });
+        Object.entries(formulario).forEach(
+          ([campo, valor]) => {
+            datos.append(campo, valor);
+          }
+        );
 
         imagenes.forEach((imagen) => {
           datos.append("imagenes", imagen);
         });
 
         await api.post("/productos", datos);
-        setMensaje("Producto creado correctamente.");
+
+        setMensaje(
+          "Producto creado correctamente."
+        );
       }
 
       limpiarFormulario();
       setProductoEditando(null);
+
       await obtenerProductos();
+
       setVista("listado");
     } catch (err) {
-      console.error("Error al guardar producto:", err);
+      console.error(
+        "Error al guardar producto:",
+        err
+      );
+
       setError(
         err.response?.data?.mensaje ||
           err.response?.data?.error ||
@@ -274,10 +345,19 @@ useEffect(() => {
     }
   };
 
-  // Activa o desactiva un producto según su estado actual.
-  const cambiarEstadoProducto = async (producto) => {
-    const estaActivo = Number(producto.estado) === 1;
-    const accion = estaActivo ? "desactivar" : "activar";
+  // =====================================================
+  // ACTIVAR / DESACTIVAR
+  // =====================================================
+
+  const cambiarEstadoProducto = async (
+    producto
+  ) => {
+    const estaActivo =
+      Number(producto.estado) === 1;
+
+    const accion = estaActivo
+      ? "desactivar"
+      : "activar";
 
     const confirmado = window.confirm(
       `¿Seguro que deseas ${accion} el producto "${producto.nombre}"?`
@@ -291,11 +371,13 @@ useEffect(() => {
       setMensaje("");
 
       if (estaActivo) {
-        // El backend desactiva mediante DELETE lógico.
-        await api.delete(`/productos/${producto.id_producto}`);
+        await api.delete(
+          `/productos/${producto.id_producto}`
+        );
       } else {
-        // El backend cuenta con una ruta específica para activar.
-        await api.put(`/productos/${producto.id_producto}/activar`);
+        await api.put(
+          `/productos/${producto.id_producto}/activar`
+        );
       }
 
       setMensaje(
@@ -306,7 +388,11 @@ useEffect(() => {
 
       await obtenerProductos();
     } catch (err) {
-      console.error("Error al cambiar estado:", err);
+      console.error(
+        "Error al cambiar estado:",
+        err
+      );
+
       setError(
         err.response?.data?.mensaje ||
           err.response?.data?.error ||
@@ -317,190 +403,375 @@ useEffect(() => {
     }
   };
 
-  // Formatea valores monetarios en pesos colombianos.
+  // =====================================================
+  // FORMATO DE PRECIO
+  // =====================================================
+
   const formatoPrecio = (valor) =>
     Number(valor || 0).toLocaleString("es-CO");
 
+  // =====================================================
+  // VISTA
+  // =====================================================
+
   return (
     <main className="administrar-productos">
-      <header className="administrar-productos-header">
-        <div className="etiqueta-seccion">INVENTARIO</div>
-        <h1>Administrar productos</h1>
-        <p>
-          Registra y administra los productos del catálogo de Papelería San
-          Diego.
-        </p>
-      </header>
+
+      {/* =================================================
+          VISTA DEL LISTADO
+      ================================================= */}
 
       {vista === "listado" && (
-        <section className="listado-productos">
-          <div className="listado-productos-encabezado">
-            <div>
-              <h2>Productos registrados</h2>
-              <p className="subtitulo-listado">
-                Consulta y administra los productos del catálogo.
-              </p>
-            </div>
+        <>
+          {/* =========================
+              ENCABEZADO
+          ========================= */}
 
+          <section className="administrar-productos-header">
+
+            <span className="etiqueta-seccion">
+              INVENTARIO
+            </span>
+
+            <h1>Administrar productos</h1>
+
+            <p>
+              Registra y administra los productos
+              del catálogo de Papelería San Diego.
+            </p>
+
+          </section>
+
+          {/* =========================
+              VOLVER AL PANEL
+              MISMA UBICACIÓN QUE CATEGORÍAS
+          ========================= */}
+
+          <div className="acciones-productos">
             <button
               type="button"
-              onClick={abrirRegistro}
-              className="boton-nuevo-producto"
+              className="boton-volver-panel"
+              onClick={() =>
+                navigate("/dashboard")
+              }
             >
-              + Registrar producto
+              <span>←</span>
+              Volver al panel
             </button>
           </div>
 
-          {/* Resumen de cantidades del inventario. */}
-          <div className="resumen-productos">
-            <div className="resumen-producto">
-              <span>Total de productos</span>
-              <strong>{totalProductos}</strong>
+          {/* =========================
+              LISTADO
+          ========================= */}
+
+          <section className="listado-productos">
+
+            {/* ENCABEZADO */}
+
+            <div className="listado-productos-encabezado">
+
+              <div>
+                <h2>
+                  Productos registrados
+                </h2>
+
+                <p className="subtitulo-listado">
+                  Consulta y administra los
+                  productos del catálogo.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={abrirRegistro}
+                className="boton-nuevo-producto"
+              >
+                + Registrar producto
+              </button>
+
             </div>
-            <div className="resumen-producto">
-              <span>Activos</span>
-              <strong>{productosActivos}</strong>
+
+            {/* =========================
+                RESUMEN
+            ========================= */}
+
+            <div className="resumen-productos">
+
+              <div className="resumen-producto">
+                <span>
+                  Total de productos
+                </span>
+
+                <strong>
+                  {totalProductos}
+                </strong>
+              </div>
+
+              <div className="resumen-producto">
+                <span>Activos</span>
+
+                <strong>
+                  {productosActivos}
+                </strong>
+              </div>
+
+              <div className="resumen-producto">
+                <span>Inactivos</span>
+
+                <strong>
+                  {productosInactivos}
+                </strong>
+              </div>
+
             </div>
-            <div className="resumen-producto">
-              <span>Inactivos</span>
-              <strong>{productosInactivos}</strong>
+
+            {/* =========================
+                BUSCADOR
+            ========================= */}
+
+            <div className="productos-herramientas">
+
+              <input
+                type="text"
+                value={busqueda}
+                onChange={(e) =>
+                  setBusqueda(e.target.value)
+                }
+                placeholder="Buscar por código o nombre..."
+                aria-label="Buscar productos"
+              />
+
             </div>
-          </div>
 
-          <div className="productos-herramientas">
-            <input
-              type="text"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar por código o nombre..."
-              aria-label="Buscar productos"
-            />
-          </div>
+            {/* =========================
+                MENSAJES
+            ========================= */}
 
-          {mensaje && <p className="mensaje-exito">{mensaje}</p>}
-          {error && <p className="mensaje-error">{error}</p>}
+            {mensaje && (
+              <p className="mensaje-exito">
+                {mensaje}
+              </p>
+            )}
 
-          {cargandoProductos ? (
-            <p className="productos-cargando">Cargando productos...</p>
-          ) : (
-            <div className="tabla-productos-contenedor">
-              <table className="tabla-productos">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Categoría</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
+            {error && (
+              <p className="mensaje-error">
+                {error}
+              </p>
+            )}
 
-                <tbody>
-                  {productosFiltrados.map((producto) => {
-                    const activo = Number(producto.estado) === 1;
-                    const stockBajo =
-                      Number(producto.stock) <=
-                      Number(producto.stock_minimo ?? 5);
+            {/* =========================
+                TABLA
+            ========================= */}
 
-                    return (
-                      <tr key={producto.id_producto}>
-                        <td>
-                          <div className="producto-celda">
-                            <div className="producto-avatar">
-                              {(producto.nombre || "?")
-                                .charAt(0)
-                                .toUpperCase()}
-                            </div>
-                            <div className="producto-identidad">
-                              <strong>{producto.nombre}</strong>
-                              <span>{producto.codigo}</span>
-                            </div>
-                          </div>
-                        </td>
+            {cargandoProductos ? (
+              <p className="productos-cargando">
+                Cargando productos...
+              </p>
+            ) : (
+              <div className="tabla-productos-contenedor">
 
-                        <td>
-                          <span className="producto-categoria">
-                            {producto.categoria || "Sin categoría"}
-                          </span>
-                        </td>
+                <table className="tabla-productos">
 
-                        <td className="producto-precio">
-                          ${formatoPrecio(producto.precio)}
-                        </td>
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Categoría</th>
+                      <th>Precio</th>
+                      <th>Stock</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
 
-                        <td>
-                          <span
-                            className={
-                              stockBajo
-                                ? "producto-stock stock-bajo"
-                                : "producto-stock"
+                  <tbody>
+
+                    {productosFiltrados.map(
+                      (producto) => {
+
+                        const activo =
+                          Number(
+                            producto.estado
+                          ) === 1;
+
+                        const stockBajo =
+                          Number(
+                            producto.stock
+                          ) <=
+                          Number(
+                            producto.stock_minimo ??
+                              5
+                          );
+
+                        return (
+                          <tr
+                            key={
+                              producto.id_producto
                             }
                           >
-                            {producto.stock}
-                          </span>
-                        </td>
 
-                        <td>
-                          <span
-                            className={
-                              activo
-                                ? "estado-producto estado-activo"
-                                : "estado-producto estado-inactivo"
-                            }
-                          >
-                            {activo ? "Activo" : "Inactivo"}
-                          </span>
-                        </td>
+                            {/* PRODUCTO */}
 
-                        <td>
-                          <div className="acciones-producto">
-                            <button
-                              type="button"
-                              className="boton-accion boton-editar"
-                              onClick={() => editarProducto(producto)}
-                              disabled={procesandoId === producto.id_producto}
-                            >
-                              Editar
-                            </button>
+                            <td>
+                              <div className="producto-celda">
 
-                            <button
-                              type="button"
-                              className={
-                                activo
-                                  ? "boton-accion boton-desactivar"
-                                  : "boton-accion boton-activar"
-                              }
-                              onClick={() => cambiarEstadoProducto(producto)}
-                              disabled={procesandoId === producto.id_producto}
-                            >
-                              {procesandoId === producto.id_producto
-                                ? "Procesando..."
-                                : activo
-                                  ? "Desactivar"
-                                  : "Activar"}
-                            </button>
-                          </div>
+                                <div className="producto-avatar">
+                                  {(
+                                    producto.nombre ||
+                                    "?"
+                                  )
+                                    .charAt(0)
+                                    .toUpperCase()}
+                                </div>
+
+                                <div className="producto-identidad">
+
+                                  <strong>
+                                    {
+                                      producto.nombre
+                                    }
+                                  </strong>
+
+                                  <span>
+                                    {
+                                      producto.codigo
+                                    }
+                                  </span>
+
+                                </div>
+
+                              </div>
+                            </td>
+
+                            {/* CATEGORÍA */}
+
+                            <td>
+                              <span className="producto-categoria">
+                                {producto.categoria ||
+                                  "Sin categoría"}
+                              </span>
+                            </td>
+
+                            {/* PRECIO */}
+
+                            <td className="producto-precio">
+                              $
+                              {formatoPrecio(
+                                producto.precio
+                              )}
+                            </td>
+
+                            {/* STOCK */}
+
+                            <td>
+                              <span
+                                className={
+                                  stockBajo
+                                    ? "producto-stock stock-bajo"
+                                    : "producto-stock"
+                                }
+                              >
+                                {producto.stock}
+                              </span>
+                            </td>
+
+                            {/* ESTADO */}
+
+                            <td>
+                              <span
+                                className={
+                                  activo
+                                    ? "estado-producto estado-activo"
+                                    : "estado-producto estado-inactivo"
+                                }
+                              >
+                                {activo
+                                  ? "Activo"
+                                  : "Inactivo"}
+                              </span>
+                            </td>
+
+                            {/* ACCIONES */}
+
+                            <td>
+                              <div className="acciones-producto">
+
+                                <button
+                                  type="button"
+                                  className="boton-accion boton-editar"
+                                  onClick={() =>
+                                    editarProducto(
+                                      producto
+                                    )
+                                  }
+                                  disabled={
+                                    procesandoId ===
+                                    producto.id_producto
+                                  }
+                                >
+                                  Editar
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className={
+                                    activo
+                                      ? "boton-accion boton-desactivar"
+                                      : "boton-accion boton-activar"
+                                  }
+                                  onClick={() =>
+                                    cambiarEstadoProducto(
+                                      producto
+                                    )
+                                  }
+                                  disabled={
+                                    procesandoId ===
+                                    producto.id_producto
+                                  }
+                                >
+                                  {procesandoId ===
+                                  producto.id_producto
+                                    ? "Procesando..."
+                                    : activo
+                                    ? "Desactivar"
+                                    : "Activar"}
+                                </button>
+
+                              </div>
+                            </td>
+
+                          </tr>
+                        );
+                      }
+                    )}
+
+                    {productosFiltrados.length ===
+                      0 && (
+                      <tr>
+                        <td
+                          colSpan="6"
+                          className="productos-vacio"
+                        >
+                          {busqueda
+                            ? "No se encontraron productos con esa búsqueda."
+                            : "Aún no hay productos registrados."}
                         </td>
                       </tr>
-                    );
-                  })}
+                    )}
 
-                  {productosFiltrados.length === 0 && (
-                    <tr>
-                      <td colSpan="6" className="productos-vacio">
-                        {busqueda
-                          ? "No se encontraron productos con esa búsqueda."
-                          : "Aún no hay productos registrados."}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+                  </tbody>
+
+                </table>
+
+              </div>
+            )}
+
+          </section>
+        </>
       )}
+
+      {/* =================================================
+          VISTA DEL FORMULARIO
+      ================================================= */}
 
       {vista === "registro" && (
         <>
@@ -512,22 +783,36 @@ useEffect(() => {
             ← Volver al listado
           </button>
 
-          <form className="formulario-producto" onSubmit={manejarEnvio}>
+          <form
+            className="formulario-producto"
+            onSubmit={manejarEnvio}
+          >
+
+            {/* TÍTULO */}
+
             <div className="formulario-titulo">
+
               <h2>
                 {productoEditando
                   ? "Editar producto"
                   : "Información del producto"}
               </h2>
+
               <p>
-                Completa los datos marcados con asterisco (*).
+                Completa los datos marcados con
+                asterisco (*).
               </p>
+
             </div>
 
+            {/* CÓDIGO */}
+
             <div className="campo-producto">
+
               <label htmlFor="codigo">
                 Código <span>*</span>
               </label>
+
               <input
                 id="codigo"
                 name="codigo"
@@ -537,17 +822,29 @@ useEffect(() => {
                 onChange={manejarCambio}
                 placeholder="Ej. ACC-0001"
                 required
-                readOnly={Boolean(productoEditando)}
+                readOnly={Boolean(
+                  productoEditando
+                )}
               />
+
               {productoEditando && (
-                <small>El código no se puede modificar durante la edición.</small>
+                <small>
+                  El código no se puede modificar
+                  durante la edición.
+                </small>
               )}
+
             </div>
 
+            {/* NOMBRE */}
+
             <div className="campo-producto">
+
               <label htmlFor="nombre">
-                Nombre del producto <span>*</span>
+                Nombre del producto{" "}
+                <span>*</span>
               </label>
+
               <input
                 id="nombre"
                 name="nombre"
@@ -558,38 +855,54 @@ useEffect(() => {
                 placeholder="Escribe el nombre del producto"
                 required
               />
+
             </div>
 
-            <div className="campo-producto">
-            <label htmlFor="categoria">Categoría</label>
+            {/* CATEGORÍA */}
 
-            <select
+            <div className="campo-producto">
+
+              <label htmlFor="categoria">
+                Categoría
+              </label>
+
+              <select
                 id="categoria"
                 name="categoria"
                 value={formulario.categoria}
                 onChange={manejarCambio}
-            >
-                <option value="">Selecciona una categoría</option>
+              >
+                <option value="">
+                  Selecciona una categoría
+                </option>
 
-                {categorias
-                .filter(
-                    (categoria) =>
-                    Number(categoria.estado) === 1 ||
-                    categoria.nombre === formulario.categoria
-                )
-                .map((categoria) => (
-                    <option
-                    key={categoria.id_categoria}
-                    value={categoria.nombre}
-                    >
-                    {categoria.nombre}
-                    </option>
-                ))}
-            </select>
+                <option value="Accesorios">
+                  Accesorios
+                </option>
+
+                <option value="Relojería">
+                  Relojería
+                </option>
+
+                <option value="Cristalería y Hogar">
+                  Cristalería y Hogar
+                </option>
+
+                <option value="Papelería">
+                  Papelería
+                </option>
+              </select>
+
             </div>
-            
+
+            {/* DESCRIPCIÓN */}
+
             <div className="campo-producto">
-              <label htmlFor="descripcion">Descripción</label>
+
+              <label htmlFor="descripcion">
+                Descripción
+              </label>
+
               <textarea
                 id="descripcion"
                 name="descripcion"
@@ -599,19 +912,36 @@ useEffect(() => {
                 placeholder="Describe brevemente el producto"
                 rows="4"
               />
+
             </div>
+
+            {/* PRECIOS E INVENTARIO */}
 
             <div className="separador-formulario">
-              <h2>Precios e inventario</h2>
-              <p>Define los precios y las cantidades disponibles.</p>
+
+              <h2>
+                Precios e inventario
+              </h2>
+
+              <p>
+                Define los precios y las
+                cantidades disponibles.
+              </p>
+
             </div>
 
+            {/* PRECIO DE VENTA */}
+
             <div className="campo-producto">
+
               <label htmlFor="precio">
                 Precio de venta <span>*</span>
               </label>
+
               <div className="entrada-con-prefijo">
+
                 <span>$</span>
+
                 <input
                   id="precio"
                   name="precio"
@@ -623,30 +953,48 @@ useEffect(() => {
                   placeholder="0"
                   required
                 />
+
               </div>
+
             </div>
 
+            {/* PRECIO MAYORISTA */}
+
             <div className="campo-producto">
-              <label htmlFor="precio_mayorista">Precio mayorista</label>
+
+              <label htmlFor="precio_mayorista">
+                Precio mayorista
+              </label>
+
               <div className="entrada-con-prefijo">
+
                 <span>$</span>
+
                 <input
                   id="precio_mayorista"
                   name="precio_mayorista"
                   type="number"
                   min="0"
                   step="0.01"
-                  value={formulario.precio_mayorista}
+                  value={
+                    formulario.precio_mayorista
+                  }
                   onChange={manejarCambio}
                   placeholder="0"
                 />
+
               </div>
+
             </div>
 
+            {/* STOCK */}
+
             <div className="campo-producto">
+
               <label htmlFor="stock">
                 Stock <span>*</span>
               </label>
+
               <input
                 id="stock"
                 name="stock"
@@ -658,29 +1006,42 @@ useEffect(() => {
                 placeholder="Cantidad disponible"
                 required
               />
+
             </div>
 
+            {/* STOCK MÍNIMO */}
+
             <div className="campo-producto">
+
               <label htmlFor="stock_minimo">
                 Stock mínimo <span>*</span>
               </label>
+
               <input
                 id="stock_minimo"
                 name="stock_minimo"
                 type="number"
                 min="0"
                 step="1"
-                value={formulario.stock_minimo}
+                value={
+                  formulario.stock_minimo
+                }
                 onChange={manejarCambio}
                 required
               />
-              <small>Se utiliza como referencia para el inventario.</small>
+
+              <small>
+                Se utiliza como referencia para
+                el inventario.
+              </small>
+
             </div>
 
-            {/* En edición no se habilita la carga porque el PUT actual
-                del backend no administra archivos de imagen. */}
+            {/* IMÁGENES */}
+
             {!productoEditando && (
               <div className="campo-producto campo-imagenes">
+
                 <label htmlFor="imagenes-producto">
                   Imágenes del producto
                 </label>
@@ -689,11 +1050,21 @@ useEffect(() => {
                   className="zona-imagenes"
                   htmlFor="imagenes-producto"
                 >
-                  <span className="icono-subida">↑</span>
-                  <strong>Selecciona las imágenes</strong>
-                  <span>
-                    JPG, JPEG, PNG o WEBP · Máximo 10 imágenes, 5 MB cada una
+
+                  <span className="icono-subida">
+                    ↑
                   </span>
+
+                  <strong>
+                    Selecciona las imágenes
+                  </strong>
+
+                  <span>
+                    JPG, JPEG, PNG o WEBP ·
+                    Máximo 10 imágenes,
+                    5 MB cada una
+                  </span>
+
                   <input
                     id="imagenes-producto"
                     type="file"
@@ -701,35 +1072,68 @@ useEffect(() => {
                     multiple
                     onChange={manejarImagenes}
                   />
+
                 </label>
 
                 {imagenes.length > 0 && (
                   <div className="lista-imagenes">
+
                     <strong>
-                      {imagenes.length} imagen(es) seleccionada(s)
+                      {imagenes.length} imagen(es)
+                      seleccionada(s)
                     </strong>
+
                     <ul>
-                      {imagenes.map((imagen, indice) => (
-                        <li key={`${imagen.name}-${indice}`}>
-                          {imagen.name}
-                          <button
-                            type="button"
-                            onClick={() => quitarImagen(indice)}
+
+                      {imagenes.map(
+                        (imagen, indice) => (
+                          <li
+                            key={`${imagen.name}-${indice}`}
                           >
-                            Quitar
-                          </button>
-                        </li>
-                      ))}
+
+                            {imagen.name}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                quitarImagen(
+                                  indice
+                                )
+                              }
+                            >
+                              Quitar
+                            </button>
+
+                          </li>
+                        )
+                      )}
+
                     </ul>
+
                   </div>
                 )}
+
               </div>
             )}
 
-            {mensaje && <p className="mensaje-exito">{mensaje}</p>}
-            {error && <p className="mensaje-error">{error}</p>}
+            {/* MENSAJES */}
+
+            {mensaje && (
+              <p className="mensaje-exito">
+                {mensaje}
+              </p>
+            )}
+
+            {error && (
+              <p className="mensaje-error">
+                {error}
+              </p>
+            )}
+
+            {/* ACCIONES */}
 
             <div className="acciones-formulario">
+
               <button
                 type="button"
                 className="boton-cancelar-producto"
@@ -747,13 +1151,16 @@ useEffect(() => {
                 {cargando
                   ? "Guardando..."
                   : productoEditando
-                    ? "Guardar cambios"
-                    : "Guardar producto"}
+                  ? "Guardar cambios"
+                  : "Guardar producto"}
               </button>
+
             </div>
+
           </form>
         </>
       )}
+
     </main>
   );
 }

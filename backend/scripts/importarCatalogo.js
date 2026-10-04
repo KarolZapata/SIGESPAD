@@ -3,19 +3,24 @@ const path = require("path");
 const { parse } = require("csv-parse/sync");
 const db = require("../db");
 
-// Ruta del CSV
+// =====================================================
+// RUTAS
+// =====================================================
+
 const rutaCSV = path.join(
   __dirname,
-  "../../Catalogo/Catalogo_SIGESPAD_44.csv"
+  "../../Catalogo/Catalogo_SIGESPAD_productos.csv"
 );
 
-// Carpeta donde están las imágenes
 const carpetaImagenes = path.join(
   __dirname,
   "../../Catalogo/imagenes_productos"
 );
 
-// Convertir db.query de callbacks a Promise
+// =====================================================
+// CONSULTAS MYSQL COMO PROMESAS
+// =====================================================
+
 function ejecutarConsulta(sql, valores = []) {
   return new Promise((resolve, reject) => {
     db.query(sql, valores, (error, resultados) => {
@@ -28,26 +33,53 @@ function ejecutarConsulta(sql, valores = []) {
   });
 }
 
+// =====================================================
+// IMPORTADOR
+// =====================================================
+
 async function importarCatalogo() {
+  let conexion;
+
   try {
+    console.log("");
     console.log("======================================");
     console.log("   IMPORTADOR DE CATÁLOGO SIGESPAD");
     console.log("======================================");
+    console.log("");
 
-    // Verificar CSV
+    // =================================================
+    // 1. VERIFICAR CSV
+    // =================================================
+
     if (!fs.existsSync(rutaCSV)) {
-      throw new Error(`No se encontró el archivo CSV en: ${rutaCSV}`);
-    }
-
-    // Verificar carpeta de imágenes
-    if (!fs.existsSync(carpetaImagenes)) {
       throw new Error(
-        `No se encontró la carpeta de imágenes en: ${carpetaImagenes}`
+        `No se encontró el archivo CSV en:\n${rutaCSV}`
       );
     }
 
-    // Leer CSV
-    const contenidoCSV = fs.readFileSync(rutaCSV, "utf8");
+    console.log("✓ CSV encontrado");
+
+    // =================================================
+    // 2. VERIFICAR CARPETA DE IMÁGENES
+    // =================================================
+
+    if (!fs.existsSync(carpetaImagenes)) {
+      throw new Error(
+        `No se encontró la carpeta de imágenes en:\n${carpetaImagenes}`
+      );
+    }
+
+    console.log("✓ Carpeta de imágenes encontrada");
+    console.log("");
+
+    // =================================================
+    // 3. LEER CSV
+    // =================================================
+
+    const contenidoCSV = fs.readFileSync(
+      rutaCSV,
+      "utf8"
+    );
 
     const productos = parse(contenidoCSV, {
       columns: true,
@@ -57,14 +89,57 @@ async function importarCatalogo() {
       trim: true,
     });
 
-    console.log(`Productos encontrados en el CSV: ${productos.length}`);
+    console.log(
+      `Productos encontrados en el CSV: ${productos.length}`
+    );
+
+    // =================================================
+    // 4. VALIDAR CÓDIGOS DEL CSV
+    // =================================================
+
+    console.log("");
+    console.log("Validando códigos del catálogo...");
+
+    const codigos = new Set();
+    const codigosDuplicados = new Set();
+
+    for (const producto of productos) {
+      const codigo = producto["Código"]?.trim();
+
+      if (!codigo) {
+        continue;
+      }
+
+      if (codigos.has(codigo)) {
+        codigosDuplicados.add(codigo);
+      }
+
+      codigos.add(codigo);
+    }
+
+    if (codigosDuplicados.size > 0) {
+      console.log("");
+      console.log(
+        "❌ Se encontraron códigos duplicados en el CSV:"
+      );
+
+      for (const codigo of codigosDuplicados) {
+        console.log(`   - ${codigo}`);
+      }
+
+      console.log("");
+      throw new Error(
+        "La importación fue cancelada porque existen códigos duplicados en el CSV."
+      );
+    }
+
+    console.log("✓ No existen códigos duplicados");
     console.log("");
 
-    let nuevos = 0;
-    let actualizados = 0;
-    let imagenesRegistradas = 0;
+    // =================================================
+    // 5. OBTENER IMÁGENES
+    // =================================================
 
-    // Obtener archivos de imágenes
     const archivosImagenes = fs
       .readdirSync(carpetaImagenes)
       .filter((archivo) =>
@@ -72,53 +147,149 @@ async function importarCatalogo() {
       );
 
     console.log(
-      `Imágenes encontradas en la carpeta: ${archivosImagenes.length}`
+      `Imágenes encontradas: ${archivosImagenes.length}`
     );
+
     console.log("");
 
-    // ==========================================
-    // IMPORTAR PRODUCTOS
-    // ==========================================
+    // =================================================
+    // 6. VALIDAR DATOS NUMÉRICOS ANTES DE IMPORTAR
+    // =================================================
+
+    console.log("Validando datos de productos...");
+
+    const productosInvalidos = [];
 
     for (const producto of productos) {
       const codigo = producto["Código"]?.trim();
       const nombre = producto["Nombre"]?.trim();
-      const descripcion = producto["Descripción"]?.trim() || null;
-      const categoria = producto["Categoría"]?.trim() || null;
 
       const precio = parseFloat(
         String(producto["Precio normal"]).replace(",", ".")
       );
 
-      const precioMayorista = producto["Precio mayorista"]
-        ? parseFloat(
-            String(producto["Precio mayorista"]).replace(",", ".")
-          )
-        : null;
-
-      const stock = parseInt(producto["Stock"], 10);
-      const stockMinimo = parseInt(producto["Stock minimo"], 10);
-
-      if (!codigo || !nombre) {
-        console.log("⚠️ Producto omitido: falta código o nombre.");
-        continue;
-      }
-
-      if (isNaN(precio) || isNaN(stock) || isNaN(stockMinimo)) {
-        console.log(`⚠️ ${codigo} omitido: datos numéricos inválidos.`);
-        continue;
-      }
-
-      // Buscar producto existente
-      const existentes = await ejecutarConsulta(
-        "SELECT id_producto FROM productos WHERE codigo = ?",
-        [codigo]
+      const stock = parseInt(
+        producto["Stock"],
+        10
       );
+
+      const stockMinimo = parseInt(
+        producto["Stock minimo"],
+        10
+      );
+
+      if (
+        !codigo ||
+        !nombre ||
+        Number.isNaN(precio) ||
+        Number.isNaN(stock) ||
+        Number.isNaN(stockMinimo)
+      ) {
+        productosInvalidos.push(
+          codigo || "(sin código)"
+        );
+      }
+    }
+
+    if (productosInvalidos.length > 0) {
+      console.log("");
+      console.log(
+        "❌ Se encontraron productos con datos inválidos:"
+      );
+
+      for (const codigo of productosInvalidos) {
+        console.log(`   - ${codigo}`);
+      }
+
+      console.log("");
+
+      throw new Error(
+        "La importación fue cancelada porque existen datos inválidos en el CSV."
+      );
+    }
+
+    console.log("✓ Datos numéricos válidos");
+    console.log("");
+
+    // =================================================
+    // 7. COMENZAR IMPORTACIÓN
+    // =================================================
+
+    console.log("======================================");
+    console.log("      INICIANDO IMPORTACIÓN");
+    console.log("======================================");
+    console.log("");
+
+    let nuevos = 0;
+    let actualizados = 0;
+    let imagenesRegistradas = 0;
+    let productosSinImagen = 0;
+
+    // =================================================
+    // 8. PROCESAR PRODUCTOS
+    // =================================================
+
+    for (const producto of productos) {
+      const codigo =
+        producto["Código"]?.trim();
+
+      const nombre =
+        producto["Nombre"]?.trim();
+
+      const descripcion =
+        producto["Descripción"]?.trim() || null;
+
+      const categoria =
+        producto["Categoría"]?.trim() || null;
+
+      const precio =
+        parseFloat(
+          String(producto["Precio normal"])
+            .replace(",", ".")
+        );
+
+      const precioMayorista =
+        producto["Precio mayorista"]
+          ? parseFloat(
+              String(
+                producto["Precio mayorista"]
+              ).replace(",", ".")
+            )
+          : null;
+
+      const stock =
+        parseInt(
+          producto["Stock"],
+          10
+        );
+
+      const stockMinimo =
+        parseInt(
+          producto["Stock minimo"],
+          10
+        );
+
+      // =================================================
+      // BUSCAR PRODUCTO EXISTENTE
+      // =================================================
+
+      const existentes =
+        await ejecutarConsulta(
+          `SELECT id_producto
+           FROM productos
+           WHERE codigo = ?`,
+          [codigo]
+        );
 
       let idProducto;
 
+      // =================================================
+      // PRODUCTO EXISTENTE
+      // =================================================
+
       if (existentes.length > 0) {
-        idProducto = existentes[0].id_producto;
+        idProducto =
+          existentes[0].id_producto;
 
         await ejecutarConsulta(
           `UPDATE productos
@@ -144,94 +315,175 @@ async function importarCatalogo() {
 
         actualizados++;
 
-        console.log(`🔄 Actualizado: ${codigo} - ${nombre}`);
-      } else {
-        const resultado = await ejecutarConsulta(
-          `INSERT INTO productos
-           (codigo, nombre, descripcion, categoria, precio,
-            precio_mayorista, stock, stock_minimo, estado)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-          [
-            codigo,
-            nombre,
-            descripcion,
-            categoria,
-            precio,
-            precioMayorista,
-            stock,
-            stockMinimo,
-          ]
+        console.log(
+          `🔄 Actualizado: ${codigo} - ${nombre}`
         );
+      }
 
-        idProducto = resultado.insertId;
+      // =================================================
+      // PRODUCTO NUEVO
+      // =================================================
+
+      else {
+        const resultado =
+          await ejecutarConsulta(
+            `INSERT INTO productos
+             (
+               codigo,
+               nombre,
+               descripcion,
+               categoria,
+               precio,
+               precio_mayorista,
+               stock,
+               stock_minimo,
+               estado
+             )
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+            [
+              codigo,
+              nombre,
+              descripcion,
+              categoria,
+              precio,
+              precioMayorista,
+              stock,
+              stockMinimo,
+            ]
+          );
+
+        idProducto =
+          resultado.insertId;
 
         nuevos++;
 
-        console.log(`✅ Creado: ${codigo} - ${nombre}`);
+        console.log(
+          `✅ Creado: ${codigo} - ${nombre}`
+        );
       }
 
-      // ==========================================
-      // REGISTRAR IMÁGENES DEL PRODUCTO
-      // ==========================================
+      // =================================================
+      // ELIMINAR RELACIONES DE IMÁGENES ANTERIORES
+      // =================================================
 
-      // Eliminar relaciones anteriores de este producto
       await ejecutarConsulta(
-        "DELETE FROM producto_imagenes WHERE id_producto = ?",
+        `DELETE FROM producto_imagenes
+         WHERE id_producto = ?`,
         [idProducto]
       );
 
-      // Buscar imágenes cuyo nombre corresponda al código
-      const imagenesProducto = archivosImagenes
-        .filter((archivo) => {
-          const nombreArchivo = path.parse(archivo).name;
+      // =================================================
+      // BUSCAR IMÁGENES DEL PRODUCTO
+      // =================================================
 
-          return (
-            nombreArchivo === codigo ||
-            nombreArchivo.startsWith(`${codigo}-`)
+      const imagenesProducto =
+        archivosImagenes
+          .filter((archivo) => {
+            const nombreArchivo =
+              path.parse(archivo).name;
+
+            return (
+              nombreArchivo === codigo ||
+              nombreArchivo.startsWith(
+                `${codigo}-`
+              )
+            );
+          })
+          .sort((a, b) =>
+            a.localeCompare(
+              b,
+              undefined,
+              {
+                numeric: true,
+                sensitivity: "base",
+              }
+            )
           );
-        })
-        .sort((a, b) => a.localeCompare(b, undefined, {
-          numeric: true,
-          sensitivity: "base",
-        }));
 
-      // Registrar imágenes encontradas
+      // =================================================
+      // REGISTRAR IMÁGENES
+      // =================================================
+
       let orden = 1;
 
       for (const imagen of imagenesProducto) {
         await ejecutarConsulta(
           `INSERT INTO producto_imagenes
-           (id_producto, nombre_imagen, orden)
+           (
+             id_producto,
+             nombre_imagen,
+             orden
+           )
            VALUES (?, ?, ?)`,
-          [idProducto, imagen, orden]
+          [
+            idProducto,
+            imagen,
+            orden,
+          ]
         );
 
-        console.log(`   🖼️ ${imagen}`);
+        console.log(
+          `   🖼️ ${imagen}`
+        );
 
         orden++;
         imagenesRegistradas++;
       }
 
-      if (imagenesProducto.length === 0) {
-        console.log(`   ⚠️ Sin imagen encontrada para ${codigo}`);
+      // =================================================
+      // PRODUCTO SIN IMAGEN
+      // =================================================
+
+      if (
+        imagenesProducto.length === 0
+      ) {
+        productosSinImagen++;
+
+        console.log(
+          `   ⚠️ Sin imagen encontrada para ${codigo}`
+        );
       }
     }
+
+    // =================================================
+    // 9. RESUMEN FINAL
+    // =================================================
 
     console.log("");
     console.log("======================================");
     console.log("       IMPORTACIÓN FINALIZADA");
     console.log("======================================");
-    console.log(`Productos nuevos: ${nuevos}`);
-    console.log(`Productos actualizados: ${actualizados}`);
-    console.log(`Imágenes registradas: ${imagenesRegistradas}`);
-    console.log(`Total productos procesados: ${productos.length}`);
+    console.log(
+      `Productos nuevos: ${nuevos}`
+    );
+    console.log(
+      `Productos actualizados: ${actualizados}`
+    );
+    console.log(
+      `Imágenes registradas: ${imagenesRegistradas}`
+    );
+    console.log(
+      `Productos sin imagen: ${productosSinImagen}`
+    );
+    console.log(
+      `Total productos procesados: ${productos.length}`
+    );
     console.log("======================================");
+    console.log("");
 
     process.exit(0);
+
   } catch (error) {
+
     console.error("");
-    console.error("❌ ERROR DURANTE LA IMPORTACIÓN");
-    console.error(error.message);
+    console.error(
+      "❌ ERROR DURANTE LA IMPORTACIÓN"
+    );
+    console.error(
+      error.message
+    );
+    console.error("");
+
     process.exit(1);
   }
 }

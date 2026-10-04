@@ -1,84 +1,442 @@
 .pagos-page {
-  padding: 28px;
+  padding: 30px;
   color: #263238;
 }
+
+/* =====================================================
+   ENCABEZADO
+===================================================== */
 
 .pagos-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
-  margin-bottom: 28px;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+/* CENTRAR TÍTULO Y DESCRIPCIÓN DEL ENCABEZADO */
+.pagos-header > div:first-child {
+  flex: 1;
+  text-align: center;
 }
 
 .pagos-etiqueta {
   display: inline-block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: #b58900;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
 }
 
 .pagos-header h1 {
   margin: 0 0 8px;
-  font-size: 28px;
+  color: #102f55;
+  font-size: 30px;
 }
 
 .pagos-header p {
   margin: 0;
   color: #6b7280;
+  font-size: 15px;
 }
 
 .pagos-btn-volver {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  background: #e5e7eb;
+  padding: 11px 18px;
+  border: 1px solid #dbe1e8;
+  border-radius: 9px;
+  background: #ffffff;
   color: #263238;
   cursor: pointer;
   font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+  transition: 0.2s ease;
 }
 
 .pagos-btn-volver:hover {
-  background: #d1d5db;
+  background: #f3f4f6;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
 }
 
+/* =====================================================
+   SECCIONES
+===================================================== */
+
 .pagos-seccion {
-  margin-top: 24px;
-  padding: 22px;
+  margin-top: 26px;
+  padding: 25px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.05);
+}
+
+.pagos-seccion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+/* CENTRAR TÍTULO Y DESCRIPCIÓN DE CADA SECCIÓN
+   SIN MOVER EL CONTADOR */
+.pagos-seccion-header > div:first-child {
+  flex: 1;
+  text-align: center;
+}
+
+.pagos-seccion-etiqueta {
+  display: inline-block;
+  margin-bottom: 6px;
+  color: #b58900;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
 }
 
 .pagos-seccion h2 {
-  margin: 0 0 18px;
-  font-size: 20px;
+  margin: 0 0 6px;
+  color: #102f55;
+  font-size: 21px;
 }
 
-.pagos-buscador {
-  display: flex;
-  align-items: end;
-  flex-wrap: wrap;
-  gap: 14px;
-}
-
-.pagos-buscador div,
-.pagos-formulario div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pagos-buscador label,
-.pagos-formulario label {
+.pagos-seccion-header p {
+  margin: 0;
+  color: #6b7280;
   font-size: 14px;
+}
+
+/* =====================================================
+   CONTADOR DE VENTAS
+===================================================== */
+
+.pagos-contador-ventas {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: 1px solid #dbe4ed;
+  border-radius: 20px;
+  background: #f8fafc;
+  color: #5f7488;
+  font-size: 13px;
   font-weight: 600;
 }
 
-.pagos-buscador input,
+/* =====================================================
+   LISTA DE VENTAS
+===================================================== */
+
+.pagos-lista-ventas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-height: 390px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.pago-venta-item {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) auto 25px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 76px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #263238;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pago-venta-item:hover {
+  border-color: #b9c9da;
+  background: #f8fafc;
+  box-shadow: 0 3px 8px rgba(16, 47, 85, 0.08);
+  transform: translateY(-1px);
+}
+
+.pago-venta-item.seleccionada {
+  border-color: #102f55;
+  background: #f1f6fb;
+  box-shadow: 0 0 0 1px #102f55;
+}
+
+.pago-venta-item:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.pago-venta-numero {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pago-venta-numero span {
+  color: #7a8a99;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.pago-venta-numero strong {
+  color: #102f55;
+  font-size: 18px;
+}
+
+.pago-venta-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pago-venta-datos span {
+  overflow: hidden;
+  color: #718096;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pago-venta-datos strong {
+  color: #263238;
+  font-size: 14px;
+}
+
+.pago-venta-estado {
+  display: flex;
+  justify-content: center;
+}
+
+.pago-venta-flecha {
+  color: #78909c;
+  font-size: 19px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pago-venta-item.seleccionada .pago-venta-flecha {
+  color: #102f55;
+}
+
+/* =====================================================
+   ESTADO DE LA LISTA
+===================================================== */
+
+.pagos-lista-estado {
+  padding: 35px 20px;
+  border: 1px dashed #d5dce4;
+  border-radius: 10px;
+  background: #f8fafc;
+  text-align: center;
+  color: #6b7280;
+}
+
+.pagos-lista-estado strong {
+  display: block;
+  margin: 8px 0 5px;
+  color: #374151;
+  font-size: 15px;
+}
+
+.pagos-lista-estado p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.pagos-cargando-icono,
+.pagos-vacio-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e9eef4;
+  color: #102f55;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.pagos-cargando-icono {
+  animation: pagos-girar 1s linear infinite;
+}
+
+@keyframes pagos-girar {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =====================================================
+   CONSULTA MANUAL
+===================================================== */
+
+.pagos-consulta-manual {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagos-consulta-manual label {
+  display: block;
+  margin-bottom: 8px;
+  color: #5f6f7d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pagos-consulta-manual-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagos-consulta-manual-fila input {
+  width: 220px;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.pagos-consulta-manual-fila input:focus {
+  outline: none;
+  border-color: #102f55;
+  box-shadow: 0 0 0 3px rgba(16, 47, 85, 0.08);
+}
+
+/* =====================================================
+   BOTÓN PRINCIPAL
+===================================================== */
+
+.pagos-btn-principal {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #102f55;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.pagos-btn-principal:hover {
+  background: #0d2948;
+  transform: translateY(-1px);
+}
+
+.pagos-btn-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =====================================================
+   MENSAJES
+===================================================== */
+
+.pagos-mensaje {
+  margin: 18px 0;
+  padding: 14px 18px;
+  border-radius: 9px;
+  font-weight: 600;
+}
+
+.pagos-mensaje.exitoso {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.pagos-mensaje.error {
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.pagos-mensaje.informacion {
+  color: #1e40af;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+
+/* =====================================================
+   RESUMEN DE VENTA
+===================================================== */
+
+.pagos-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.pago-resumen-card {
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.pago-resumen-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #718096;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pago-resumen-card strong {
+  color: #1f2937;
+  font-size: 17px;
+}
+
+.pago-resumen-card.pendiente {
+  border-color: #f2c36b;
+  background: #fffbeb;
+}
+
+.pago-resumen-card.pendiente strong {
+  color: #92400e;
+}
+
+/* =====================================================
+   FORMULARIO DE PAGO
+===================================================== */
+
+.pagos-formulario {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagos-formulario div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pagos-formulario label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .pagos-formulario input,
 .pagos-formulario select {
   min-width: 220px;
@@ -87,100 +445,34 @@
   border-radius: 8px;
   font: inherit;
   box-sizing: border-box;
-}
-
-.pagos-btn-principal {
-  padding: 11px 18px;
-  border: none;
-  border-radius: 8px;
-  background: #12345b;
-  color: #ffffff;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.pagos-btn-principal:hover {
-  background: #0d2948;
-}
-
-.pagos-btn-principal:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.pagos-mensaje {
-  margin: 18px 0;
-  padding: 14px 18px;
-  border-radius: 8px;
-  font-weight: 600;
-}
-
-.pagos-mensaje.exitoso {
-  color: #166534;
-  background: #dcfce7;
-}
-
-.pagos-mensaje.error {
-  color: #b91c1c;
-  background: #fee2e2;
-}
-
-.pagos-mensaje.informacion {
-  color: #1e40af;
-  background: #dbeafe;
-}
-
-.pagos-resumen {
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(180px, 1fr)
-  );
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.pago-resumen-card {
-  padding: 18px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
 }
 
-.pago-resumen-card span {
-  display: block;
-  margin-bottom: 8px;
-  color: #6b7280;
-  font-size: 13px;
+.pagos-formulario input:focus,
+.pagos-formulario select:focus {
+  outline: none;
+  border-color: #102f55;
+  box-shadow: 0 0 0 3px rgba(16, 47, 85, 0.08);
 }
 
-.pago-resumen-card strong {
-  color: #1f2937;
-  font-size: 18px;
-}
-
-.pago-resumen-card.pendiente {
-  border-color: #f59e0b;
-}
-
-.pagos-formulario {
-  display: flex;
-  align-items: end;
-  flex-wrap: wrap;
-  gap: 16px;
-}
+/* =====================================================
+   TABLA DE PAGOS
+===================================================== */
 
 .pagos-vacio {
   margin: 0;
-  padding: 14px;
+  padding: 18px;
   background: #f3f4f6;
-  border-radius: 8px;
+  border-radius: 9px;
   color: #6b7280;
+  text-align: center;
 }
 
 .pagos-tabla-contenedor {
   width: 100%;
   overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
 }
 
 .pagos-tabla {
@@ -191,30 +483,48 @@
 
 .pagos-tabla th,
 .pagos-tabla td {
-  padding: 12px 14px;
+  padding: 13px 15px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
   white-space: nowrap;
 }
 
 .pagos-tabla th {
-  background: #f3f4f6;
-  font-weight: 600;
+  background: #f3f6f8;
+  color: #526675;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pagos-tabla td {
+  color: #374151;
+  font-size: 14px;
+}
+
+.pagos-tabla tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .pagos-tabla tbody tr:hover {
   background: #f9fafb;
 }
 
+/* =====================================================
+   ESTADOS DE PAGO
+===================================================== */
+
 .pago-estado {
   display: inline-block;
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
-.pago-estado.confirmado {
+.pago-estado.confirmado,
+.pago-estado.completada {
   color: #166534;
   background: #dcfce7;
 }
@@ -224,34 +534,87 @@
   background: #fef3c7;
 }
 
-.pago-estado.anulado {
+.pago-estado.anulado,
+.pago-estado.cancelada {
   color: #991b1b;
   background: #fee2e2;
 }
 
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 950px) {
+  .pagos-lista-ventas {
+    grid-template-columns: 1fr;
+  }
+
+  .pagos-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 700px) {
   .pagos-page {
-    padding: 16px;
+    padding: 18px;
   }
 
   .pagos-header {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .pagos-btn-volver {
     width: 100%;
   }
 
-  .pagos-buscador,
+  .pagos-seccion {
+    padding: 18px;
+  }
+
+  .pagos-seccion-header {
+    flex-direction: column;
+  }
+
+  .pagos-contador-ventas {
+    align-self: flex-start;
+  }
+
+  .pago-venta-item {
+    grid-template-columns: 75px minmax(0, 1fr) auto;
+  }
+
+  .pago-venta-flecha {
+    display: none;
+  }
+
+  .pago-venta-estado {
+    display: none;
+  }
+
+  .pagos-consulta-manual-fila {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagos-consulta-manual-fila input,
+  .pagos-consulta-manual-fila .pagos-btn-principal {
+    width: 100%;
+  }
+
+  .pagos-resumen {
+    grid-template-columns: 1fr;
+  }
+
   .pagos-formulario {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .pagos-buscador input,
+  .pagos-formulario div,
   .pagos-formulario input,
   .pagos-formulario select,
-  .pagos-btn-principal {
+  .pagos-formulario .pagos-btn-principal {
     width: 100%;
   }
 }

@@ -1,5 +1,5 @@
-
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import "./Usuarios.css";
 
@@ -11,6 +11,8 @@ const formularioInicial = {
 };
 
 function Usuarios() {
+  const navigate = useNavigate();
+
   const [usuarios, setUsuarios] = useState([]);
   const [formulario, setFormulario] = useState(formularioInicial);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
@@ -57,6 +59,7 @@ function Usuarios() {
 
   const guardarUsuario = async (e) => {
     e.preventDefault();
+
     setError("");
     setMensaje("");
 
@@ -84,7 +87,6 @@ function Usuarios() {
       rol: formulario.rol,
     };
 
-    // Al editar, solo enviamos la contraseña si se escribió una nueva.
     if (formulario.contrasena) {
       datosUsuario.contrasena = formulario.contrasena;
     }
@@ -99,13 +101,18 @@ function Usuarios() {
         );
 
         setMensaje(
-          respuesta.data.mensaje || "Usuario actualizado correctamente."
+          respuesta.data.mensaje ||
+            "Usuario actualizado correctamente."
         );
       } else {
-        const respuesta = await api.post("/usuarios", datosUsuario);
+        const respuesta = await api.post(
+          "/usuarios",
+          datosUsuario
+        );
 
         setMensaje(
-          respuesta.data.mensaje || "Usuario creado correctamente."
+          respuesta.data.mensaje ||
+            "Usuario creado correctamente."
         );
       }
 
@@ -133,6 +140,11 @@ function Usuarios() {
 
     setError("");
     setMensaje("");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const cambiarEstado = async (usuario) => {
@@ -169,21 +181,41 @@ function Usuarios() {
   if (cargando) {
     return (
       <main className="usuarios">
-        <p>Cargando usuarios...</p>
+        <div className="usuarios-cargando">
+          <p>Cargando usuarios...</p>
+        </div>
       </main>
     );
   }
 
   return (
     <main className="usuarios">
+
+      {/* ENCABEZADO */}
       <header className="usuarios-encabezado">
+
+        <span className="usuarios-etiqueta-superior">
+          USUARIOS
+        </span>
+
         <h1>Gestión de usuarios</h1>
+
         <p>
           Administra las cuentas, los roles y el estado de los
           usuarios del sistema.
         </p>
+
+        <button
+          type="button"
+          className="usuarios-boton-volver"
+          onClick={() => navigate("/dashboard")}
+        >
+          ←&nbsp; Volver al panel
+        </button>
+
       </header>
 
+      {/* MENSAJES */}
       {error && (
         <div className="usuarios-mensaje error">
           {error}
@@ -196,41 +228,65 @@ function Usuarios() {
         </div>
       )}
 
+      {/* FORMULARIO */}
       <section className="usuarios-seccion">
-        <h2>
-          {usuarioEditando ? "Editar usuario" : "Registrar usuario"}
-        </h2>
+
+        <div className="usuarios-seccion-encabezado">
+
+          <span className="usuarios-seccion-etiqueta">
+            {usuarioEditando ? "EDICIÓN" : "REGISTRO"}
+          </span>
+
+          <h2>
+            {usuarioEditando
+              ? "Editar usuario"
+              : "Registrar usuario"}
+          </h2>
+
+          <p>
+            {usuarioEditando
+              ? "Actualiza la información de la cuenta seleccionada."
+              : "Registra una nueva cuenta para acceder al sistema."}
+          </p>
+
+        </div>
 
         <form
           className="usuarios-formulario"
           onSubmit={guardarUsuario}
         >
+
           <label>
-            Nombre
+            <span>Nombre</span>
+
             <input
               type="text"
               name="nombre"
               value={formulario.nombre}
               onChange={actualizarCampo}
               maxLength="100"
+              placeholder="Ej. Juan Pérez"
               required
             />
           </label>
 
           <label>
-            Correo electrónico
+            <span>Correo electrónico</span>
+
             <input
               type="email"
               name="correo"
               value={formulario.correo}
               onChange={actualizarCampo}
               maxLength="100"
+              placeholder="Ej. usuario@correo.com"
               required
             />
           </label>
 
           <label>
-            Contraseña
+            <span>Contraseña</span>
+
             <input
               type="password"
               name="contrasena"
@@ -247,20 +303,31 @@ function Usuarios() {
           </label>
 
           <label>
-            Rol
+            <span>Rol</span>
+
             <select
               name="rol"
               value={formulario.rol}
               onChange={actualizarCampo}
               required
             >
-              <option value="ADMINISTRADOR">Administrador</option>
-              <option value="VENDEDOR">Vendedor</option>
+              <option value="ADMINISTRADOR">
+                Administrador
+              </option>
+
+              <option value="VENDEDOR">
+                Vendedor
+              </option>
             </select>
           </label>
 
           <div className="usuarios-formulario-acciones">
-            <button type="submit" disabled={guardando}>
+
+            <button
+              type="submit"
+              className="usuarios-boton-principal"
+              disabled={guardando}
+            >
               {guardando
                 ? "Guardando..."
                 : usuarioEditando
@@ -278,15 +345,44 @@ function Usuarios() {
                 Cancelar edición
               </button>
             )}
+
           </div>
+
         </form>
+
       </section>
 
+      {/* TABLA */}
       <section className="usuarios-seccion">
-        <h2>Usuarios registrados</h2>
+
+        <div className="usuarios-seccion-encabezado">
+
+          <span className="usuarios-seccion-etiqueta">
+            REGISTRO
+          </span>
+
+          <h2>Usuarios registrados</h2>
+
+          <p>
+            Consulta y administra las cuentas registradas
+            en el sistema.
+          </p>
+
+        </div>
+
+        <div className="usuarios-resumen-tabla">
+          <span>
+            {usuarios.length}{" "}
+            {usuarios.length === 1
+              ? "usuario registrado"
+              : "usuarios registrados"}
+          </span>
+        </div>
 
         <div className="usuarios-tabla-contenedor">
+
           <table className="usuarios-tabla">
+
             <thead>
               <tr>
                 <th>ID</th>
@@ -300,12 +396,30 @@ function Usuarios() {
             </thead>
 
             <tbody>
+
               {usuarios.map((usuario) => (
                 <tr key={usuario.id_usuario}>
-                  <td>{usuario.id_usuario}</td>
-                  <td>{usuario.nombre}</td>
-                  <td>{usuario.correo}</td>
-                  <td>{usuario.rol}</td>
+
+                  <td>
+                    <span className="usuarios-id">
+                      {usuario.id_usuario}
+                    </span>
+                  </td>
+
+                  <td className="usuarios-nombre">
+                    {usuario.nombre}
+                  </td>
+
+                  <td>
+                    {usuario.correo}
+                  </td>
+
+                  <td>
+                    <span className="usuarios-rol">
+                      {usuario.rol}
+                    </span>
+                  </td>
+
                   <td>
                     <span
                       className={`usuarios-etiqueta ${
@@ -319,6 +433,7 @@ function Usuarios() {
                         : "Inactivo"}
                     </span>
                   </td>
+
                   <td>
                     {usuario.fecha_creacion
                       ? new Date(
@@ -326,26 +441,41 @@ function Usuarios() {
                         ).toLocaleDateString("es-CO")
                       : "—"}
                   </td>
+
                   <td>
+
                     <div className="usuarios-acciones">
+
                       <button
                         type="button"
-                        onClick={() => editarUsuario(usuario)}
+                        className="usuarios-boton-editar"
+                        onClick={() =>
+                          editarUsuario(usuario)
+                        }
                       >
                         Editar
                       </button>
 
                       <button
                         type="button"
-                        className="usuarios-boton-secundario"
-                        onClick={() => cambiarEstado(usuario)}
+                        className={
+                          Number(usuario.estado) === 1
+                            ? "usuarios-boton-desactivar"
+                            : "usuarios-boton-activar"
+                        }
+                        onClick={() =>
+                          cambiarEstado(usuario)
+                        }
                       >
                         {Number(usuario.estado) === 1
                           ? "Desactivar"
                           : "Activar"}
                       </button>
+
                     </div>
+
                   </td>
+
                 </tr>
               ))}
 
@@ -356,10 +486,15 @@ function Usuarios() {
                   </td>
                 </tr>
               )}
+
             </tbody>
+
           </table>
+
         </div>
+
       </section>
+
     </main>
   );
 }

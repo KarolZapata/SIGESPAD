@@ -53,9 +53,31 @@ function VentasVendedor() {
 
   return (
     <main className="ventas-vendedor">
+
+      {/* ================================
+          NAVEGACIÓN
+      ================================= */}
+
+      <div className="ventas-navegacion">
+        <button
+          type="button"
+          className="ventas-volver-panel"
+          onClick={() => navigate("/dashboard")}
+        >
+          <span>←</span>
+          Volver al panel
+        </button>
+      </div>
+
+      {/* ================================
+          ENCABEZADO
+      ================================= */}
+
       <header className="ventas-vendedor-header">
-        <div>
-          <span className="ventas-etiqueta">VENTAS</span>
+        <div className="ventas-vendedor-titulo">
+          <span className="ventas-etiqueta">
+            GESTIÓN DE VENTAS
+          </span>
 
           <h1>Ventas registradas</h1>
 
@@ -69,82 +91,152 @@ function VentasVendedor() {
           type="button"
           className="ventas-btn-actualizar"
           onClick={obtenerVentas}
+          disabled={cargando}
         >
-          Actualizar
+          <span className="ventas-icono-actualizar">↻</span>
+          {cargando ? "Actualizando..." : "Actualizar"}
         </button>
       </header>
 
+      {/* ================================
+          MENSAJE DE ERROR
+      ================================= */}
+
       {error && (
         <div className="ventas-mensaje ventas-error">
-          {error}
+          <strong>Ocurrió un problema</strong>
+          <span>{error}</span>
         </div>
       )}
 
-      {cargando ? (
-        <div className="ventas-mensaje">
-          Cargando ventas...
+      {/* ================================
+          CONTENIDO
+      ================================= */}
+
+      <section className="ventas-contenido">
+
+        <div className="ventas-contenido-header">
+          <div>
+            <span className="ventas-seccion-etiqueta">
+              REGISTRO
+            </span>
+
+            <h2>Historial de ventas</h2>
+
+            <p>
+              Consulta las transacciones registradas en el sistema.
+            </p>
+          </div>
+
+          {!cargando && ventas.length > 0 && (
+            <div className="ventas-contador">
+              <span>{ventas.length}</span>
+              <small>
+                {ventas.length === 1
+                  ? "venta registrada"
+                  : "ventas registradas"}
+              </small>
+            </div>
+          )}
         </div>
-      ) : ventas.length === 0 ? (
-        <div className="ventas-mensaje">
-          No hay ventas registradas.
-        </div>
-      ) : (
-        <section className="ventas-tabla-contenedor">
-          <table className="ventas-tabla">
-            <thead>
-              <tr>
-                <th>Venta</th>
-                <th>Vendedor</th>
-                <th>Fecha</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {ventas.map((venta) => (
-                <tr key={venta.id_venta}>
-                  <td>#{venta.id_venta}</td>
+        {cargando ? (
+          <div className="ventas-estado-vacio">
+            <div className="ventas-cargando-icono">↻</div>
 
-                  <td>{venta.usuario}</td>
+            <h3>Cargando ventas...</h3>
 
-                  <td>
-                    {formatoFecha(venta.fecha_venta)}
-                  </td>
+            <p>
+              Estamos consultando las ventas registradas.
+            </p>
+          </div>
+        ) : ventas.length === 0 ? (
+          <div className="ventas-estado-vacio">
+            <div className="ventas-vacio-icono">▱</div>
 
-                  <td>
-                    $
-                    {formatoPrecio(venta.total)}
-                  </td>
+            <h3>No hay ventas registradas</h3>
 
-                  <td>
-                    <span
-                      className={`venta-estado venta-estado-${String(
-                        venta.estado
-                      ).toLowerCase()}`}
-                    >
-                      {venta.estado}
-                    </span>
-                  </td>
+            <p>
+              Cuando se registre una venta, aparecerá
+              automáticamente en este listado.
+            </p>
+          </div>
+        ) : (
+          <div className="ventas-tabla-contenedor">
+            <table className="ventas-tabla">
 
-                  <td>
-                    <button
-                      type="button"
-                      className="ventas-btn-detalle"
-                      onClick={() =>
-                        verDetalle(venta.id_venta)
-                      }
-                    >
-                      Ver detalle
-                    </button>
-                  </td>
+              <thead>
+                <tr>
+                  <th>Venta</th>
+                  <th>Vendedor</th>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
+              </thead>
+
+              <tbody>
+                {ventas.map((venta) => (
+                  <tr key={venta.id_venta}>
+
+                    <td>
+                      <span className="venta-numero">
+                        #{venta.id_venta}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="venta-vendedor">
+                        {venta.usuario}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="venta-fecha">
+                        {formatoFecha(venta.fecha_venta)}
+                      </span>
+                    </td>
+
+                    <td>
+                      <strong className="venta-total">
+                        ${formatoPrecio(venta.total)}
+                      </strong>
+                    </td>
+
+                    <td>
+                      <span
+                        className={`venta-estado venta-estado-${String(
+                          venta.estado
+                        ).toLowerCase()}`}
+                      >
+                        {venta.estado}
+                      </span>
+                    </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className="ventas-btn-detalle"
+                        onClick={() =>
+                          verDetalle(venta.id_venta)
+                        }
+                      >
+                        Ver detalle
+                        <span>→</span>
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+        )}
+
+      </section>
+
     </main>
   );
 }

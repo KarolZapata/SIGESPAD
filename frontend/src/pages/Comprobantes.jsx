@@ -72,10 +72,7 @@ function Comprobantes() {
       setDetalles(respuestaVenta.data.detalles || []);
       setPagos(respuestaPagos.data || []);
     } catch (err) {
-      console.error(
-        "Error al cargar comprobante:",
-        err
-      );
+      console.error("Error al cargar comprobante:", err);
 
       setVenta(null);
       setDetalles([]);
@@ -136,48 +133,76 @@ function Comprobantes() {
 
   return (
     <main className="comprobantes-page">
+
+      {/* =====================================================
+          ENCABEZADO DE LA PÁGINA
+      ===================================================== */}
+
       <header className="comprobantes-header">
-        <div>
-          <span className="comprobantes-etiqueta">
-            VENTAS
-          </span>
+        <span className="comprobantes-etiqueta">
+          VENTAS
+        </span>
 
-          <h1>Comprobantes</h1>
+        <h1>Comprobantes</h1>
 
-          <p>
-            Consulta y genera el comprobante de una venta
-            registrada.
-          </p>
-        </div>
+        <p>
+          Consulta y genera el comprobante de una venta
+          registrada.
+        </p>
       </header>
 
+      {/* =====================================================
+          SELECTOR DE VENTA
+      ===================================================== */}
+
       <section className="comprobantes-selector">
-        <label htmlFor="venta">
-          Seleccionar venta
-        </label>
 
-        <select
-          id="venta"
-          value={idVenta}
-          onChange={seleccionarVenta}
-          disabled={cargandoVentas}
-        >
-          <option value="">
-            Selecciona una venta
-          </option>
+        <div className="selector-icono">
+          ✓
+        </div>
 
-          {ventas.map((item) => (
-            <option
-              key={item.id_venta}
-              value={item.id_venta}
-            >
-              Venta #{item.id_venta} - $
-              {formatoPrecio(item.total)} -{" "}
-              {item.estado}
+        <div className="selector-contenido">
+          <span className="selector-etiqueta">
+            CONSULTA
+          </span>
+
+          <label htmlFor="venta">
+            Seleccionar venta
+          </label>
+
+          <p>
+            Selecciona una venta para consultar su
+            comprobante.
+          </p>
+
+          <select
+            id="venta"
+            value={idVenta}
+            onChange={seleccionarVenta}
+            disabled={cargandoVentas}
+          >
+            <option value="">
+              Selecciona una venta
             </option>
-          ))}
-        </select>
+
+            {ventas.map((item) => (
+              <option
+                key={item.id_venta}
+                value={item.id_venta}
+              >
+                Venta #{item.id_venta} - $
+                {formatoPrecio(item.total)} -{" "}
+                {item.estado}
+              </option>
+            ))}
+          </select>
+        </div>
+
       </section>
+
+      {/* =====================================================
+          MENSAJES
+      ===================================================== */}
 
       {error && (
         <div className="comprobantes-mensaje error">
@@ -191,173 +216,361 @@ function Comprobantes() {
         </div>
       )}
 
+      {/* =====================================================
+          COMPROBANTE
+      ===================================================== */}
+
       {venta && !cargandoComprobante && (
         <>
           <section className="comprobante">
+
+            {/* DECORACIÓN SUPERIOR */}
+            <div className="comprobante-franja"></div>
+
+            {/* ENCABEZADO */}
             <div className="comprobante-encabezado">
-              <div>
-                <h2>PAPELERÍA SAN DIEGO</h2>
-                <p>Comprobante de venta</p>
+
+              <div className="comprobante-marca">
+                <div className="marca-icono">
+                  SD
+                </div>
+
+                <div>
+                  <h2>PAPELERÍA SAN DIEGO</h2>
+
+                  <p>
+                    Calidad · Servicio · Confianza
+                  </p>
+                </div>
               </div>
 
               <div className="comprobante-numero">
+                <span>COMPROBANTE DE VENTA</span>
+
                 <strong>
-                  Venta #{venta.id_venta}
+                  #{venta.id_venta}
                 </strong>
 
-                <span>
+                <small>
                   {formatoFecha(venta.fecha_venta)}
+                </small>
+              </div>
+
+            </div>
+
+            {/* SEPARADOR */}
+            <div className="comprobante-linea"></div>
+
+            {/* INFORMACIÓN GENERAL */}
+            <div className="comprobante-meta">
+
+              <div className="meta-item">
+                <span className="meta-icono">
+                  👤
                 </span>
+
+                <div>
+                  <small>VENDEDOR</small>
+                  <strong>
+                    {venta.usuario}
+                  </strong>
+                </div>
               </div>
+
+              <div className="meta-item">
+                <span className="meta-icono">
+                  📅
+                </span>
+
+                <div>
+                  <small>FECHA DE VENTA</small>
+                  <strong>
+                    {formatoFecha(
+                      venta.fecha_venta
+                    )}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="meta-item">
+                <span className="meta-icono">
+                  ●
+                </span>
+
+                <div>
+                  <small>ESTADO</small>
+
+                  <strong>
+                    <span
+                      className={`estado-comprobante ${venta.estado?.toLowerCase()}`}
+                    >
+                      {venta.estado}
+                    </span>
+                  </strong>
+                </div>
+              </div>
+
             </div>
 
-            <div className="comprobante-info">
-              <div>
-                <span>Vendedor</span>
-                <strong>{venta.usuario}</strong>
+            {/* =================================================
+                PRODUCTOS
+            ================================================= */}
+
+            <div className="comprobante-seccion">
+
+              <div className="seccion-titulo">
+                <div>
+                  <span>DETALLE DE LA VENTA</span>
+                  <h3>Productos</h3>
+                </div>
+
+                <div className="cantidad-productos">
+                  {detalles.length}{" "}
+                  {detalles.length === 1
+                    ? "producto"
+                    : "productos"}
+                </div>
               </div>
 
-              <div>
-                <span>Estado</span>
-                <strong>{venta.estado}</strong>
-              </div>
-            </div>
+              <div className="comprobante-tabla">
 
-            <div className="comprobante-detalles">
-              <h3>Productos</h3>
-
-              <table>
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio unitario</th>
-                    <th>Subtotal</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {detalles.map((detalle) => (
-                    <tr key={detalle.id_detalle}>
-                      <td>{detalle.producto}</td>
-
-                      <td>{detalle.cantidad}</td>
-
-                      <td>
-                        $
-                        {formatoPrecio(
-                          detalle.precio_unitario
-                        )}
-                      </td>
-
-                      <td>
-                        $
-                        {formatoPrecio(
-                          detalle.subtotal
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="comprobante-pago">
-              <h3>Información de pago</h3>
-
-              {pagos.length === 0 ? (
-                <p>
-                  No hay pagos registrados para esta
-                  venta.
-                </p>
-              ) : (
                 <table>
                   <thead>
                     <tr>
-                      <th>Tipo</th>
-                      <th>Monto</th>
-                      <th>Estado</th>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Precio unitario</th>
+                      <th>Subtotal</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    {pagos.map((pago) => (
-                      <tr key={pago.id_pago}>
-                        <td>{pago.tipo_pago}</td>
+                    {detalles.map((detalle) => (
+                      <tr key={detalle.id_detalle}>
+
+                        <td>
+                          <div className="producto-tabla">
+                            <span className="producto-indicador"></span>
+
+                            <strong>
+                              {detalle.producto}
+                            </strong>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span className="cantidad-badge">
+                            {detalle.cantidad}
+                          </span>
+                        </td>
 
                         <td>
                           $
                           {formatoPrecio(
-                            pago.monto
+                            detalle.precio_unitario
                           )}
                         </td>
 
-                        <td>
-                          {pago.estado}
+                        <td className="valor-subtotal">
+                          $
+                          {formatoPrecio(
+                            detalle.subtotal
+                          )}
                         </td>
+
                       </tr>
                     ))}
                   </tbody>
                 </table>
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                PAGOS
+            ================================================= */}
+
+            <div className="comprobante-seccion">
+
+              <div className="seccion-titulo">
+                <div>
+                  <span>TRANSACCIONES</span>
+                  <h3>Información de pago</h3>
+                </div>
+
+                <div className="cantidad-productos">
+                  {pagos.length}{" "}
+                  {pagos.length === 1
+                    ? "pago"
+                    : "pagos"}
+                </div>
+              </div>
+
+              {pagos.length === 0 ? (
+
+                <div className="sin-pagos">
+                  <div className="sin-pagos-icono">
+                    $
+                  </div>
+
+                  <div>
+                    <strong>
+                      Sin pagos registrados
+                    </strong>
+
+                    <p>
+                      Esta venta todavía no tiene
+                      pagos registrados.
+                    </p>
+                  </div>
+                </div>
+
+              ) : (
+
+                <div className="comprobante-tabla">
+
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Tipo de pago</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {pagos.map((pago) => (
+                        <tr key={pago.id_pago}>
+
+                          <td>
+                            <strong>
+                              {pago.tipo_pago}
+                            </strong>
+                          </td>
+
+                          <td className="valor-subtotal">
+                            $
+                            {formatoPrecio(
+                              pago.monto
+                            )}
+                          </td>
+
+                          <td>
+                            <span
+                              className={`estado-pago ${pago.estado?.toLowerCase()}`}
+                            >
+                              {pago.estado}
+                            </span>
+                          </td>
+
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                </div>
+
               )}
+
             </div>
 
-            <div className="comprobante-totales">
-              <div>
-                <span>Total venta</span>
-                <strong>
-                  $
-                  {formatoPrecio(
-                    venta.total
-                  )}
-                </strong>
+            {/* =================================================
+                RESUMEN DE TOTALES
+            ================================================= */}
+
+            <div className="resumen-final">
+
+              <div className="resumen-datos">
+
+                <div>
+                  <span>Total venta</span>
+
+                  <strong>
+                    $
+                    {formatoPrecio(
+                      venta.total
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Total pagado</span>
+
+                  <strong>
+                    $
+                    {formatoPrecio(
+                      totalPagado
+                    )}
+                  </strong>
+                </div>
+
+                <div className="resumen-saldo">
+                  <span>Saldo pendiente</span>
+
+                  <strong>
+                    $
+                    {formatoPrecio(
+                      Math.max(
+                        0,
+                        saldoPendiente
+                      )
+                    )}
+                  </strong>
+                </div>
+
               </div>
 
-              <div>
-                <span>Total pagado</span>
-                <strong>
-                  $
-                  {formatoPrecio(totalPagado)}
-                </strong>
-              </div>
-
-              <div>
-                <span>Saldo pendiente</span>
-                <strong>
-                  $
-                  {formatoPrecio(
-                    Math.max(0, saldoPendiente)
-                  )}
-                </strong>
-              </div>
             </div>
+
+            {/* =================================================
+                PIE
+            ================================================= */}
 
             <footer className="comprobante-footer">
+
+              <div className="footer-linea"></div>
+
               <p>
-                Gracias por su compra.
+                Gracias por su compra
               </p>
 
+              <span>
+                PAPELERÍA SAN DIEGO
+              </span>
+
               <small>
-                Comprobante interno generado por
-                SIGESPAD.
+                Comprobante interno generado por SIGESPAD
               </small>
+
             </footer>
+
           </section>
 
+          {/* =================================================
+              ACCIONES
+          ================================================= */}
+
           <div className="comprobante-acciones no-imprimir">
+
             <button
               type="button"
-              onClick={() => navigate("/ventas-vendedor")}
+              className="btn-volver"
+              onClick={() =>
+                navigate("/ventas-vendedor")
+              }
             >
-              Volver a ventas
+              ← Volver a ventas
             </button>
 
             <button
               type="button"
+              className="btn-imprimir"
               onClick={imprimirComprobante}
             >
-              Imprimir comprobante
+              🖨 Imprimir comprobante
             </button>
+
           </div>
         </>
       )}

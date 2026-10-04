@@ -41,31 +41,31 @@ const opcionesPorRol = {
     },
   ],
 
-    VENDEDOR: [
+  VENDEDOR: [
     {
-        titulo: "Registrar venta",
-        descripcion: "Registrar las ventas presenciales.",
-        ruta: "/registrar-venta",
+      titulo: "Registrar venta",
+      descripcion: "Registrar las ventas presenciales.",
+      ruta: "/registrar-venta",
     },
     {
-        titulo: "Ventas",
-        descripcion:
+      titulo: "Ventas",
+      descripcion:
         "Consultar la información de las ventas registradas.",
-        ruta: "/ventas-vendedor",
+      ruta: "/ventas-vendedor",
     },
     {
-        titulo: "Pagos",
-        descripcion:
+      titulo: "Pagos",
+      descripcion:
         "Registrar pagos y gestionar su confirmación.",
-        ruta: "/pagos",
+      ruta: "/pagos",
     },
     {
-        titulo: "Comprobantes",
-        descripcion:
+      titulo: "Comprobantes",
+      descripcion:
         "Consultar e imprimir comprobantes de las ventas.",
-        ruta: "/comprobantes",
+      ruta: "/comprobantes",
     },
-    ],
+  ],
 
   CLIENTE: [
     {
@@ -81,10 +81,10 @@ const opcionesPorRol = {
       ruta: "/carrito",
     },
     {
-    titulo: "Mis compras",
-    descripcion:
+      titulo: "Mis compras",
+      descripcion:
         "Consultar las compras realizadas con tu cuenta.",
-    ruta: "/mis-compras",
+      ruta: "/mis-compras",
     },
   ],
 };
@@ -106,26 +106,71 @@ function Dashboard() {
     }
   };
 
+  const tituloPanel =
+    usuario?.rol === "ADMINISTRADOR"
+      ? "Panel de administración"
+      : usuario?.rol === "VENDEDOR"
+      ? "Panel de ventas"
+      : "Mi cuenta";
+
+  const descripcionPanel =
+    usuario?.rol === "ADMINISTRADOR"
+      ? "Gestiona los productos, inventario, usuarios, ventas y reportes del negocio."
+      : usuario?.rol === "VENDEDOR"
+      ? "Gestiona las ventas y operaciones comerciales del negocio."
+      : "Consulta y administra la información de tu cuenta.";
+
   return (
     <main className="dashboard">
-      <section className="dashboard-encabezado">
-        <h1>
-          {usuario?.rol === "ADMINISTRADOR"
-            ? "Panel de administración"
-            : usuario?.rol === "VENDEDOR"
-            ? "Panel de ventas"
-            : "Mi cuenta"}
-        </h1>
 
-        <p>Bienvenido, {usuario?.nombre}</p>
-        <p>Rol: {usuario?.rol}</p>
+      {/* =========================
+          ENCABEZADO PRINCIPAL
+      ========================= */}
+
+      <section className="dashboard-hero">
+
+        <div className="dashboard-hero-etiqueta">
+          {usuario?.rol}
+        </div>
+
+        <h1>{tituloPanel}</h1>
+
+        <p className="dashboard-bienvenida">
+          Bienvenido, <strong>{usuario?.nombre}</strong>
+        </p>
+
+        <p className="dashboard-descripcion">
+          {descripcionPanel}
+        </p>
+
       </section>
 
+      {/* =========================
+          MÓDULOS
+      ========================= */}
+
       <section className="dashboard-contenido">
-        <h2>Opciones disponibles</h2>
+
+        <div className="dashboard-seccion-encabezado">
+
+          <div>
+            <span className="dashboard-seccion-etiqueta">
+              GESTIÓN DEL SISTEMA
+            </span>
+
+            <h2>Opciones disponibles</h2>
+          </div>
+
+          <span className="dashboard-total">
+            {opciones.length} módulos
+          </span>
+
+        </div>
 
         <div className="dashboard-opciones">
-          {opciones.map((opcion) => (
+
+          {opciones.map((opcion, index) => (
+
             <button
               type="button"
               className="dashboard-opcion"
@@ -133,20 +178,62 @@ function Dashboard() {
               onClick={() => irASeccion(opcion.ruta)}
               disabled={!opcion.ruta}
             >
-              <h3>{opcion.titulo}</h3>
-              <p>{opcion.descripcion}</p>
+
+              <div className="dashboard-opcion-superior">
+
+                <span className="dashboard-numero">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <span className="dashboard-opcion-linea"></span>
+
+              </div>
+
+              <div className="dashboard-opcion-contenido">
+
+                <h3>{opcion.titulo}</h3>
+
+                <p>{opcion.descripcion}</p>
+
+              </div>
+
+              <span className="dashboard-opcion-enlace">
+                Administrar <span>→</span>
+              </span>
+
             </button>
+
           ))}
+
         </div>
+
       </section>
 
-      <button
-        type="button"
-        onClick={cerrarSesion}
-        className="dashboard-cerrar-sesion"
-      >
-        Cerrar sesión
-      </button>
+      {/* =========================
+          ACCIONES
+      ========================= */}
+
+      <section className="dashboard-acciones">
+
+        <button
+          type="button"
+          onClick={() => navigate("/productos")}
+          className="dashboard-volver"
+        >
+          <span>←</span>
+          Volver al catálogo
+        </button>
+
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          className="dashboard-cerrar-sesion"
+        >
+          Cerrar sesión
+        </button>
+
+      </section>
+
     </main>
   );
 }

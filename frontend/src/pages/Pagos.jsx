@@ -14,6 +14,9 @@ function Pagos() {
   const [venta, setVenta] = useState(null);
   const [pagos, setPagos] = useState([]);
 
+  const [ventasDisponibles, setVentasDisponibles] = useState([]);
+  const [cargandoVentas, setCargandoVentas] = useState(true);
+
   const [tipoPago, setTipoPago] = useState("EFECTIVO");
   const [monto, setMonto] = useState("");
 
@@ -24,33 +27,66 @@ function Pagos() {
   const [error, setError] = useState("");
 
   // =====================================================
+  // CARGAR LISTA DE VENTAS
+  // =====================================================
+
+  const obtenerVentas = async () => {
+    try {
+      setCargandoVentas(true);
+
+      const respuesta = await api.get("/ventas");
+
+      const ventasOrdenadas = (respuesta.data || []).sort(
+        (a, b) => Number(b.id_venta) - Number(a.id_venta)
+      );
+
+      setVentasDisponibles(ventasOrdenadas);
+    } catch (err) {
+      console.error("Error al consultar ventas:", err);
+
+      setError(
+        err.response?.data?.error ||
+          "No fue posible cargar la lista de ventas."
+      );
+    } finally {
+      setCargandoVentas(false);
+    }
+  };
+
+  // =====================================================
   // BUSCAR VENTA
   // =====================================================
 
-  const buscarVenta = async () => {
+  const buscarVenta = async (idForzado = null) => {
     setMensaje("");
     setError("");
     setVenta(null);
     setPagos([]);
 
-    if (!idVenta || Number(idVenta) <= 0) {
-      setError("Ingrese un número de venta válido.");
+    const idConsulta =
+      idForzado !== null ? String(idForzado) : idVenta;
+
+    if (!idConsulta || Number(idConsulta) <= 0) {
+      setError("Seleccione un número de venta válido.");
       return;
     }
 
     try {
       setCargandoVenta(true);
 
-      const respuesta = await api.get(`/ventas/${idVenta}`);
+      setIdVenta(idConsulta);
+
+      const respuesta = await api.get(
+        `/ventas/${idConsulta}`
+      );
 
       setVenta(respuesta.data.venta);
 
       const respuestaPagos = await api.get(
-        `/pagos/venta/${idVenta}`
+        `/pagos/venta/${idConsulta}`
       );
 
       setPagos(respuestaPagos.data || []);
-
     } catch (err) {
       console.error("Error al consultar venta:", err);
 
@@ -64,14 +100,24 @@ function Pagos() {
   };
 
   // =====================================================
-  // CARGAR VENTA DESDE ?venta=
+  // CARGAR DATOS INICIALES
   // =====================================================
 
   useEffect(() => {
+    obtenerVentas();
+
     if (ventaInicial) {
-      buscarVenta();
+      buscarVenta(ventaInicial);
     }
   }, []);
+
+  // =====================================================
+  // SELECCIONAR VENTA DESDE LA LISTA
+  // =====================================================
+
+  const seleccionarVenta = (idVentaSeleccionada) => {
+    buscarVenta(idVentaSeleccionada);
+  };
 
   // =====================================================
   // REGISTRAR PAGO
@@ -112,8 +158,10 @@ function Pagos() {
       setMonto("");
 
       // Actualizar venta y pagos
-      await buscarVenta();
+      await buscarVenta(venta.id_venta);
 
+      // Actualizar también el listado de ventas
+      await obtenerVentas();
     } catch (err) {
       console.error("Error al registrar pago:", err);
 
@@ -132,6 +180,19 @@ function Pagos() {
 
   const formatoPrecio = (valor) =>
     Number(valor || 0).toLocaleString("es-CO");
+
+  // =====================================================
+  // FORMATO DE FECHA
+  // =====================================================
+
+  const formatoFecha = (fecha) => {
+    if (!fecha) return "-";
+
+    return new Date(fecha).toLocaleString("es-CO", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  };
 
   // =====================================================
   // CALCULAR PAGADO Y PENDIENTE
@@ -153,6 +214,11 @@ function Pagos() {
 
   return (
     <main className="pagos-page">
+
+      {/* =================================================
+          ENCABEZADO
+      ================================================= */}
+
       <header className="pagos-header">
         <div>
           <span className="pagos-etiqueta">
@@ -172,11 +238,13 @@ function Pagos() {
           className="pagos-btn-volver"
           onClick={() => navigate("/dashboard")}
         >
-          Volver al panel
+          ← Volver al panel
         </button>
       </header>
 
-      {/* MENSAJES */}
+      {/* =================================================
+          MENSAJES
+      ================================================= */}
 
       {mensaje && (
         <div className="pagos-mensaje exitoso">
@@ -190,48 +258,172 @@ function Pagos() {
         </div>
       )}
 
-      {/* BUSCAR VENTA */}
+      {/* =================================================
+          CONSULTAR VENTA
+      ================================================= */}
 
-      <section className="pagos-seccion">
-        <h2>Consultar venta</h2>
+      <section className="pagos-seccion pagos-consulta">
 
-        <div className="pagos-buscador">
+        <div className="pagos-seccion-header">
           <div>
-            <label htmlFor="idVenta">
-              Número de venta
-            </label>
+            <span className="pagos-seccion-etiqueta">
+              CONSULTA
+            </span>
 
+            <h2>Seleccionar venta</h2>
+
+            <p>
+              Selecciona una venta de la lista para consultar
+              su información y gestionar el pago.
+            </p>
+          </div>
+
+          {!cargandoVentas && ventasDisponibles.length > 0 && (
+            <span className="pagos-contador-ventas">
+              {ventasDisponibles.length}{" "}
+              {ventasDisponibles.length === 1
+                ? "venta"
+                : "ventas"}
+            </span>
+          )}
+        </div>
+
+        {cargandoVentas ? (
+          <div className="pagos-lista-estado">
+            <span className="pagos-cargando-icono">
+              ↻
+            </span>
+
+            <strong>Cargando ventas...</strong>
+
+            <p>
+              Estamos consultando las ventas registradas.
+            </p>
+          </div>
+        ) : ventasDisponibles.length === 0 ? (
+          <div className="pagos-lista-estado">
+            <span className="pagos-vacio-icono">
+              ▱
+            </span>
+
+            <strong>No hay ventas registradas</strong>
+
+            <p>
+              Las ventas aparecerán aquí cuando sean
+              registradas en el sistema.
+            </p>
+          </div>
+        ) : (
+          <div className="pagos-lista-ventas">
+
+            {ventasDisponibles.map((ventaDisponible) => (
+              <button
+                key={ventaDisponible.id_venta}
+                type="button"
+                className={`pago-venta-item ${
+                  Number(idVenta) ===
+                  Number(ventaDisponible.id_venta)
+                    ? "seleccionada"
+                    : ""
+                }`}
+                onClick={() =>
+                  seleccionarVenta(
+                    ventaDisponible.id_venta
+                  )
+                }
+                disabled={cargandoVenta}
+              >
+                <div className="pago-venta-numero">
+                  <span>VENTA</span>
+
+                  <strong>
+                    #{ventaDisponible.id_venta}
+                  </strong>
+                </div>
+
+                <div className="pago-venta-datos">
+                  <span>
+                    {formatoFecha(
+                      ventaDisponible.fecha_venta
+                    )}
+                  </span>
+
+                  <strong>
+                    $
+                    {formatoPrecio(
+                      ventaDisponible.total
+                    )}
+                  </strong>
+                </div>
+
+                <div className="pago-venta-estado">
+                  <span
+                    className={`pago-estado ${String(
+                      ventaDisponible.estado
+                    ).toLowerCase()}`}
+                  >
+                    {ventaDisponible.estado}
+                  </span>
+                </div>
+
+                <span className="pago-venta-flecha">
+                  →
+                </span>
+              </button>
+            ))}
+
+          </div>
+        )}
+
+        {/* =================================================
+            CONSULTA MANUAL
+        ================================================= */}
+
+        <div className="pagos-consulta-manual">
+          <label htmlFor="idVenta">
+            O ingresa directamente el número de venta
+          </label>
+
+          <div className="pagos-consulta-manual-fila">
             <input
               id="idVenta"
               type="number"
               min="1"
               value={idVenta}
-              onChange={(e) => setIdVenta(e.target.value)}
+              onChange={(e) =>
+                setIdVenta(e.target.value)
+              }
               placeholder="Ej. 15"
             />
-          </div>
 
-          <button
-            type="button"
-            onClick={buscarVenta}
-            disabled={cargandoVenta}
-            className="pagos-btn-principal"
-          >
-            {cargandoVenta
-              ? "Consultando..."
-              : "Consultar venta"}
-          </button>
+            <button
+              type="button"
+              onClick={() => buscarVenta()}
+              disabled={cargandoVenta}
+              className="pagos-btn-principal"
+            >
+              {cargandoVenta
+                ? "Consultando..."
+                : "Consultar venta"}
+            </button>
+          </div>
         </div>
+
       </section>
 
-      {/* INFORMACIÓN DE LA VENTA */}
+      {/* =================================================
+          INFORMACIÓN DE LA VENTA
+      ================================================= */}
 
       {venta && (
         <>
           <section className="pagos-resumen">
+
             <div className="pago-resumen-card">
               <span>Venta</span>
-              <strong>#{venta.id_venta}</strong>
+              <strong>
+                #{venta.id_venta}
+              </strong>
             </div>
 
             <div className="pago-resumen-card">
@@ -266,14 +458,33 @@ function Pagos() {
 
             <div className="pago-resumen-card">
               <span>Estado</span>
-              <strong>{venta.estado}</strong>
+              <strong>
+                {venta.estado}
+              </strong>
             </div>
+
           </section>
 
-          {/* REGISTRAR PAGO */}
+          {/* =================================================
+              REGISTRAR PAGO
+          ================================================= */}
 
           <section className="pagos-seccion">
-            <h2>Registrar pago</h2>
+
+            <div className="pagos-seccion-header">
+              <div>
+                <span className="pagos-seccion-etiqueta">
+                  TRANSACCIÓN
+                </span>
+
+                <h2>Registrar pago</h2>
+
+                <p>
+                  Registra el valor recibido para la venta
+                  seleccionada.
+                </p>
+              </div>
+            </div>
 
             {saldoPendiente <= 0 ||
             venta.estado === "CANCELADA" ? (
@@ -301,15 +512,19 @@ function Pagos() {
                     <option value="EFECTIVO">
                       Efectivo
                     </option>
+
                     <option value="TARJETA">
                       Tarjeta
                     </option>
+
                     <option value="TRANSFERENCIA">
                       Transferencia
                     </option>
+
                     <option value="NEQUI">
                       Nequi
                     </option>
+
                     <option value="DAVIPLATA">
                       Daviplata
                     </option>
@@ -346,20 +561,40 @@ function Pagos() {
                 </button>
               </form>
             )}
+
           </section>
 
-          {/* HISTORIAL */}
+          {/* =================================================
+              HISTORIAL
+          ================================================= */}
 
           <section className="pagos-seccion">
-            <h2>Pagos registrados</h2>
+
+            <div className="pagos-seccion-header">
+              <div>
+                <span className="pagos-seccion-etiqueta">
+                  HISTORIAL
+                </span>
+
+                <h2>Pagos registrados</h2>
+
+                <p>
+                  Consulta los pagos asociados a la venta
+                  seleccionada.
+                </p>
+              </div>
+            </div>
 
             {pagos.length === 0 ? (
               <p className="pagos-vacio">
-                Esta venta todavía no tiene pagos registrados.
+                Esta venta todavía no tiene pagos
+                registrados.
               </p>
             ) : (
               <div className="pagos-tabla-contenedor">
+
                 <table className="pagos-tabla">
+
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -373,9 +608,14 @@ function Pagos() {
                   <tbody>
                     {pagos.map((pago) => (
                       <tr key={pago.id_pago}>
-                        <td>{pago.id_pago}</td>
 
-                        <td>{pago.tipo_pago}</td>
+                        <td>
+                          #{pago.id_pago}
+                        </td>
+
+                        <td>
+                          {pago.tipo_pago}
+                        </td>
 
                         <td>
                           $
@@ -399,15 +639,20 @@ function Pagos() {
                             pago.fecha_pago
                           ).toLocaleString("es-CO")}
                         </td>
+
                       </tr>
                     ))}
                   </tbody>
+
                 </table>
+
               </div>
             )}
+
           </section>
         </>
       )}
+
     </main>
   );
 }
