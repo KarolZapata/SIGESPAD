@@ -1,541 +1,278 @@
-/* =====================================================
-   RECUPERAR CONTRASEÑA SIGESPAD
-   ===================================================== */
 
-.recuperacion-container {
-    min-height: calc(100vh - 88px);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 45px 25px;
-
-    background: #f4f7fb;
-
-    position: relative;
-    z-index: 2;
+.recuperar-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 18px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse at top left, #e4edf9 0%, transparent 48%),
+    linear-gradient(135deg, #f3f6fb, #ffffff 55%, #eaf0f8);
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #26364c;
 }
 
+.recuperar-card {
+  width: 100%;
+  max-width: 490px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5eaf1;
+  border-radius: 20px;
+  box-shadow: 0 18px 55px rgba(25, 48, 80, 0.13);
+}
 
-/* =====================================================
-   TARJETA PRINCIPAL
-   ===================================================== */
+.recuperar-logo {
+  padding: 32px 25px 23px;
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff, #f8faff);
+}
 
-.recuperacion-card {
-    width: 760px;
-    max-width: 100%;
-    min-height: 430px;
+.recuperar-logo-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  background: #17365f;
+  color: #ffffff;
+  font-size: 27px;
+  font-weight: 800;
+  box-shadow: 0 6px 15px rgba(23, 54, 95, 0.2);
+}
 
-    display: grid;
-    grid-template-columns: 45% 55%;
+.recuperar-logo h1 {
+  margin: 0;
+  color: #122b4c;
+  font-size: 35px;
+  line-height: 1.2;
+  letter-spacing: -1.3px;
+  font-weight: 800;
+}
 
-    background: #ffffff;
+.recuperar-subtitulo {
+  margin: 10px 0 5px;
+  color: #596c84;
+  font-size: 14px;
+  line-height: 1.6;
+}
 
+.recuperar-negocio {
+  color: #244a78;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 1.3px;
+}
+
+.recuperar-separador {
+  height: 1px;
+  background: #e9edf3;
+}
+
+.recuperar-contenido {
+  padding: 30px 38px 32px;
+}
+
+.recuperar-icono {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  background: #edf4fc;
+  color: #245a91;
+}
+
+.recuperar-contenido h2 {
+  margin: 0 0 12px;
+  color: #172f50;
+  text-align: center;
+  font-size: 23px;
+  font-weight: 750;
+}
+
+.recuperar-info {
+  margin: 0 auto 25px;
+  max-width: 350px;
+  color: #69788c;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.recuperar-contenido form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recuperar-contenido label {
+  color: #30445e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.recuperar-contenido input {
+  display: block;
+  width: 100%;
+  min-height: 47px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border: 1px solid #d4dce7;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #26364c;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.recuperar-contenido input::placeholder {
+  color: #9aa6b5;
+}
+
+.recuperar-contenido input:focus {
+  border-color: #3478b9;
+  box-shadow: 0 0 0 3px rgba(52, 120, 185, 0.12);
+}
+
+.recuperar-contenido button {
+  width: 100%;
+  min-height: 47px;
+  margin-top: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #17365f, #285b91);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(23, 54, 95, 0.16);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recuperar-contenido button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(23, 54, 95, 0.22);
+}
+
+.recuperar-contenido button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.recuperar-volver {
+  display: block;
+  margin-top: 23px;
+  color: #285b91;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+  text-decoration: none;
+}
+
+.recuperar-volver:hover {
+  color: #15365f;
+  text-decoration: underline;
+}
+
+.recuperar-alerta {
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.recuperar-error {
+  border: 1px solid #f3c7c4;
+  background: #fff3f2;
+  color: #a12c27;
+}
+
+.recuperar-exito {
+  border: 1px solid #bce4ce;
+  background: #effaf3;
+  color: #17683b;
+}
+
+.recuperar-footer {
+  padding: 17px 20px 13px;
+  border-top: 1px solid #edf0f5;
+  background: #fafbfd;
+  color: #78869a;
+  font-size: 11px;
+  text-align: center;
+}
+
+.recuperar-footer > span:first-child {
+  color: #344e70;
+  font-weight: 750;
+  letter-spacing: 0.5px;
+}
+
+.recuperar-punto {
+  padding: 0 7px;
+  color: #9ba8b8;
+}
+
+.recuperar-footer p {
+  margin: 8px 0 0;
+  color: #a0aabb;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 520px) {
+  .recuperar-container {
+    padding: 18px 12px;
+  }
+
+  .recuperar-card {
     border-radius: 16px;
+  }
 
-    overflow: hidden;
+  .recuperar-logo {
+    padding: 26px 18px 20px;
+  }
 
-    box-shadow:
-        0 15px 40px rgba(15, 48, 86, 0.16);
+  .recuperar-logo h1 {
+    font-size: 31px;
+  }
+
+  .recuperar-contenido {
+    padding: 25px 22px 27px;
+  }
+
+  .recuperar-contenido h2 {
+    font-size: 21px;
+  }
 }
 
-
-/* =====================================================
-   PANEL IZQUIERDO
-   ===================================================== */
-
-.recuperacion-brand {
-    background: #15385f;
-
-    color: #ffffff;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding: 45px 35px;
+.recuperar-continuar {
+  display: block;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 9px;
+  background: #17365f;
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
 }
 
-
-/* =====================================================
-   ÍCONO
-   ===================================================== */
-
-.recuperacion-brand-icon {
-    width: 58px;
-    height: 58px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1.5px solid #f4bd22;
-    border-radius: 50%;
-
-    color: #f4bd22;
-
-    font-size: 25px;
-
-    margin-bottom: 18px;
-}
-
-
-/* =====================================================
-   NOMBRE
-   ===================================================== */
-
-.recuperacion-brand h1 {
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size: 32px;
-    font-weight: 700;
-
-    letter-spacing: 0.5px;
-}
-
-
-/* =====================================================
-   LÍNEA DORADA
-   ===================================================== */
-
-.recuperacion-brand-line {
-    width: 45px;
-    height: 3px;
-
-    background: #f4bd22;
-
-    margin: 10px 0 18px;
-}
-
-
-/* =====================================================
-   DESCRIPCIÓN
-   ===================================================== */
-
-.recuperacion-brand p {
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size: 14px;
-
-    line-height: 1.6;
-
-    max-width: 220px;
-}
-
-
-/* =====================================================
-   PAPELERÍA SAN DIEGO
-   ===================================================== */
-
-.recuperacion-brand-small {
-    margin-top: 30px !important;
-
-    color: #f4bd22 !important;
-
-    font-size: 11px !important;
-
-    font-weight: 700;
-
-    letter-spacing: 1.5px;
-}
-
-
-/* =====================================================
-   PANEL DERECHO
-   ===================================================== */
-
-.recuperacion-form-container {
-    background: #ffffff;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: center;
-
-    padding: 45px 55px;
-}
-
-
-/* =====================================================
-   TÍTULO
-   ===================================================== */
-
-.recuperacion-form-container h2 {
-    margin: 0 0 8px;
-
-    color: #15385f;
-
-    font-size: 27px;
-
-    font-weight: 700;
-
-    text-align: center;
-}
-
-
-/* =====================================================
-   SUBTÍTULO
-   ===================================================== */
-
-.recuperacion-subtitle {
-    margin: 0 0 30px;
-
-    color: #718096;
-
-    font-size: 13px;
-
-    line-height: 1.5;
-
-    text-align: center;
-}
-
-
-/* =====================================================
-   FORMULARIO
-   ===================================================== */
-
-.recuperacion-form {
-    width: 100%;
-}
-
-
-/* =====================================================
-   GRUPO
-   ===================================================== */
-
-.recuperacion-form-group {
-    margin-bottom: 18px;
-}
-
-
-/* =====================================================
-   LABEL
-   ===================================================== */
-
-.recuperacion-form-group label {
-    display: block;
-
-    margin-bottom: 7px;
-
-    color: #15385f;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-
-/* =====================================================
-   INPUT
-   ===================================================== */
-
-.recuperacion-input {
-    width: 100%;
-
-    height: 44px;
-
-    padding: 0 14px;
-
-    border: 1px solid #ccd6e2;
-
-    border-radius: 7px;
-
-    background: #ffffff;
-
-    color: #15385f;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 13px;
-
-    outline: none;
-
-    box-sizing: border-box;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-
-.recuperacion-input:focus {
-    border-color: #15385f;
-
-    box-shadow:
-        0 0 0 3px rgba(21, 56, 95, 0.08);
-}
-
-
-.recuperacion-input::placeholder {
-    color: #a0aec0;
-}
-
-
-/* =====================================================
-   MENSAJE DE ÉXITO
-   ===================================================== */
-
-.recuperacion-mensaje-exito {
-    margin: 0 0 15px;
-
-    padding: 10px 12px;
-
-    background: #f0fff4;
-
-    border: 1px solid #c6f6d5;
-
-    border-radius: 6px;
-
-    color: #276749;
-
-    font-size: 12px;
-
-    text-align: center;
-
-    line-height: 1.5;
-}
-
-
-/* =====================================================
-   MENSAJE DE ERROR
-   ===================================================== */
-
-.recuperacion-mensaje-error {
-    margin: 0 0 15px;
-
-    padding: 10px 12px;
-
-    background: #fff5f5;
-
-    border: 1px solid #fed7d7;
-
-    border-radius: 6px;
-
-    color: #c53030;
-
-    font-size: 12px;
-
-    text-align: center;
-
-    line-height: 1.5;
-}
-
-
-/* =====================================================
-   BOTÓN ENVIAR
-   ===================================================== */
-
-.recuperacion-submit {
-    width: 100%;
-
-    height: 44px;
-
-    margin-top: 5px;
-
-    border: none;
-
-    border-radius: 7px;
-
-    background: #15385f;
-
-    color: #ffffff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.1s ease,
-        box-shadow 0.2s ease;
-}
-
-
-.recuperacion-submit:hover {
-    background: #0f2d4d;
-
-    box-shadow:
-        0 5px 12px rgba(21, 56, 95, 0.18);
-}
-
-
-.recuperacion-submit:active {
-    transform: scale(0.99);
-}
-
-
-/* =====================================================
-   BOTÓN CONTINUAR
-   ===================================================== */
-
-.recuperacion-continuar {
-    width: 100%;
-
-    height: 42px;
-
-    margin-top: 12px;
-
-    border: 1px solid #15385f;
-
-    border-radius: 7px;
-
-    background: #ffffff;
-
-    color: #15385f;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
-}
-
-
-.recuperacion-continuar:hover {
-    background: #15385f;
-
-    color: #ffffff;
-}
-
-
-/* =====================================================
-   VOLVER AL LOGIN
-   ===================================================== */
-
-.recuperacion-volver {
-    display: block;
-
-    width: 100%;
-
-    margin-top: 17px;
-
-    padding: 0;
-
-    border: none;
-
-    background: transparent;
-
-    color: #15385f;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 12px;
-
-    font-weight: 600;
-
-    text-align: center;
-
-    cursor: pointer;
-
-    transition: color 0.2s ease;
-}
-
-
-.recuperacion-volver:hover {
-    color: #c18f00;
-
-    text-decoration: underline;
-}
-
-
-/* =====================================================
-   PIE
-   ===================================================== */
-
-.recuperacion-footer {
-    margin-top: 30px;
-
-    padding-top: 17px;
-
-    border-top: 1px solid #e2e8f0;
-
-    color: #a0aec0;
-
-    font-size: 10px;
-
-    text-align: center;
-}
-
-
-/* =====================================================
-   RESPONSIVE
-   ===================================================== */
-
-@media (max-width: 700px) {
-
-    .recuperacion-container {
-        min-height: calc(100vh - 75px);
-
-        padding: 30px 15px;
-    }
-
-
-    .recuperacion-card {
-        width: 430px;
-
-        grid-template-columns: 1fr;
-    }
-
-
-    .recuperacion-brand {
-        min-height: 230px;
-
-        padding: 30px 25px;
-    }
-
-
-    .recuperacion-brand-icon {
-        width: 50px;
-        height: 50px;
-
-        font-size: 21px;
-
-        margin-bottom: 12px;
-    }
-
-
-    .recuperacion-brand h1 {
-        font-size: 27px;
-    }
-
-
-    .recuperacion-brand-small {
-        margin-top: 18px !important;
-    }
-
-
-    .recuperacion-form-container {
-        padding: 35px 30px;
-    }
+.recuperar-continuar:hover {
+  background: #285b91;
 }

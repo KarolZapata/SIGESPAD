@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
+import { Link } from "react-router-dom";
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -244,6 +245,15 @@ function Login() {
           >
             ¿Olvidaste tu contraseña?
           </button>
+
+
+            {/* REGISTRO DE CLIENTES */}
+
+            <p style={{ textAlign: "center", marginTop: "16px" }}>
+            ¿No tienes una cuenta?{" "}
+            <Link to="/registro">Regístrate aquí</Link>
+            </p>
+
 
           {/* PIE */}
 

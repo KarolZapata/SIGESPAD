@@ -1,288 +1,439 @@
-/* =====================================================
-   RESTABLECER CONTRASEÑA
-   ===================================================== */
 
-.recuperar-container {
-  min-height: calc(100vh - 70px);
+.restablecer-container {
+  min-height: 100vh;
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 50px 20px;
-  background: #f4f7fb;
+  justify-content: center;
+  padding: 30px 18px;
   box-sizing: border-box;
+  background:
+    radial-gradient(ellipse at top left, #e4edf9 0%, transparent 48%),
+    linear-gradient(135deg, #f3f6fb, #ffffff 55%, #eaf0f8);
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #26364c;
 }
 
-.recuperar-card {
-  width: 900px;
-  min-height: 500px;
-  display: grid;
-  grid-template-columns: 45% 55%;
-  background: white;
-  border-radius: 18px;
+.restablecer-card {
+  width: 100%;
+  max-width: 490px;
   overflow: hidden;
-  box-shadow: 0 15px 40px rgba(15, 52, 91, 0.15);
+  background: #ffffff;
+  border: 1px solid #e5eaf1;
+  border-radius: 20px;
+  box-shadow: 0 18px 55px rgba(25, 48, 80, 0.13);
 }
 
-/* =====================================================
-   PANEL IZQUIERDO
-   ===================================================== */
+.restablecer-logo {
+  padding: 27px 25px 22px;
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff, #f8faff);
+}
 
-.recuperar-info {
-  background: #12365d;
-  color: white;
+.restablecer-logo-icon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  border-radius: 14px;
+  background: #17365f;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 800;
+  box-shadow: 0 6px 15px rgba(23, 54, 95, 0.2);
+}
 
+.restablecer-logo h1 {
+  margin: 0;
+  color: #122b4c;
+  font-size: 33px;
+  line-height: 1.2;
+  letter-spacing: -1.2px;
+  font-weight: 800;
+}
+
+.restablecer-logo p {
+  margin: 8px 0 5px;
+  color: #596c84;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.restablecer-negocio {
+  color: #244a78;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1.3px;
+}
+
+.restablecer-separador {
+  height: 1px;
+  background: #e9edf3;
+}
+
+.restablecer-contenido {
+  padding: 25px 38px 29px;
+}
+
+.restablecer-icono {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 13px;
+  border-radius: 17px;
+  background: #edf4fc;
+  color: #245a91;
+}
+
+.restablecer-contenido h2 {
+  margin: 0 0 10px;
+  color: #172f50;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 750;
+}
+
+.restablecer-info {
+  margin: 0 auto 22px;
+  max-width: 350px;
+  color: #69788c;
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.restablecer-contenido form {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  text-align: center;
-  padding: 50px 35px;
-  box-sizing: border-box;
+  gap: 8px;
 }
 
-.recuperar-icono {
-  width: 58px;
-  height: 58px;
-
-  border: 1px solid #f5bd24;
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #f5bd24;
-  font-size: 28px;
-
-  margin-bottom: 20px;
-}
-
-.recuperar-info h1 {
-  margin: 0;
-
-  font-size: 32px;
+.restablecer-contenido label {
+  margin-top: 5px;
+  color: #30445e;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1px;
-  color: white;
 }
 
-.recuperar-linea {
-  width: 45px;
-  height: 3px;
-  background: #f5bd24;
-  margin: 12px 0 18px;
-}
-
-.recuperar-info p {
-  margin: 0;
-
-  max-width: 230px;
-
-  font-size: 14px;
-  line-height: 1.6;
-  color: #ffffff;
-}
-
-.recuperar-negocio {
-  margin-top: 35px !important;
-
-  font-size: 11px !important;
-  font-weight: 700;
-
-  letter-spacing: 1.5px;
-
-  color: #f5bd24 !important;
-}
-
-/* =====================================================
-   PANEL DERECHO
-   ===================================================== */
-
-.recuperar-formulario {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 50px 65px;
-  box-sizing: border-box;
-}
-
-.recuperar-contenido {
-  width: 100%;
-  max-width: 360px;
-}
-
-.recuperar-contenido h2 {
-  margin: 0 0 8px;
-
-  color: #12365d;
-
-  font-size: 28px;
-  font-weight: 700;
-
-  text-align: center;
-}
-
-.recuperar-descripcion {
-  margin: 0 0 30px;
-
-  color: #6b7280;
-
-  font-size: 14px;
-  line-height: 1.5;
-
-  text-align: center;
-}
-
-/* =====================================================
-   FORMULARIO
-   ===================================================== */
-
-.recuperar-form {
-  width: 100%;
-}
-
-.recuperar-label {
+.restablecer-contenido input {
   display: block;
-
-  margin-bottom: 8px;
-
-  color: #12365d;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.recuperar-input {
   width: 100%;
-  height: 46px;
-
-  padding: 0 14px;
-
-  border: 1px solid #cbd5e1;
-  border-radius: 7px;
-
-  background: white;
-
-  font-size: 14px;
-
+  min-height: 44px;
+  padding: 11px 13px;
   box-sizing: border-box;
-
+  border: 1px solid #d4dce7;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #26364c;
+  font-family: inherit;
+  font-size: 13px;
   outline: none;
-
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.recuperar-input:focus {
-  border-color: #12365d;
-
-  box-shadow: 0 0 0 3px rgba(18, 54, 93, 0.1);
+.restablecer-contenido input::placeholder {
+  color: #9aa6b5;
 }
 
-.recuperar-boton {
+.restablecer-contenido input:focus {
+  border-color: #3478b9;
+  box-shadow: 0 0 0 3px rgba(52, 120, 185, 0.12);
+}
+
+.restablecer-contenido button {
   width: 100%;
-  height: 46px;
-
-  margin-top: 22px;
-
+  min-height: 46px;
+  margin-top: 12px;
+  padding: 12px;
   border: none;
-  border-radius: 7px;
-
-  background: #12365d;
-
-  color: white;
-
-  font-size: 14px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #17365f, #285b91);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
   font-weight: 700;
-
   cursor: pointer;
-
-  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 5px 12px rgba(23, 54, 95, 0.16);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.recuperar-boton:hover {
-  background: #0d2b4b;
+.restablecer-contenido button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(23, 54, 95, 0.22);
 }
 
-.recuperar-boton:active {
-  transform: scale(0.99);
+.restablecer-contenido button:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
-/* =====================================================
-   MENSAJES
-   ===================================================== */
-
-.recuperar-error {
-  margin: 12px 0 0;
-
-  color: #c0392b;
-
-  font-size: 13px;
-
-  text-align: center;
-}
-
-.recuperar-exito {
-  margin: 12px 0 0;
-
-  color: #238636;
-
-  font-size: 13px;
-
-  text-align: center;
-}
-
-/* =====================================================
-   VOLVER
-   ===================================================== */
-
-.recuperar-volver {
+.restablecer-volver {
   display: block;
-
-  margin-top: 24px;
-
-  color: #12365d;
-
-  font-size: 13px;
-
+  margin-top: 20px;
+  color: #285b91;
+  font-size: 12px;
+  font-weight: 650;
   text-align: center;
-
   text-decoration: none;
-
-  transition: color 0.2s;
 }
 
-.recuperar-volver:hover {
-  color: #d99d00;
+.restablecer-volver:hover {
+  color: #15365f;
   text-decoration: underline;
 }
 
-/* =====================================================
-   RESPONSIVE
-   ===================================================== */
+.restablecer-alerta {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
 
-@media (max-width: 750px) {
-  .recuperar-card {
-    width: 100%;
-    max-width: 500px;
+.restablecer-error {
+  border: 1px solid #f3c7c4;
+  background: #fff3f2;
+  color: #a12c27;
+}
 
-    grid-template-columns: 1fr;
+.restablecer-exito {
+  border: 1px solid #bce4ce;
+  background: #effaf3;
+  color: #17683b;
+}
+
+.restablecer-footer {
+  padding: 15px 18px 12px;
+  border-top: 1px solid #edf0f5;
+  background: #fafbfd;
+  color: #78869a;
+  font-size: 10px;
+  text-align: center;
+}
+
+.restablecer-footer span {
+  padding: 0 5px;
+  color: #9ba8b8;
+}
+
+.restablecer-footer p {
+  margin: 7px 0 0;
+  color: #a0aabb;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 520px) {
+  .restablecer-container {
+    padding: 16px 12px;
   }
 
-  .recuperar-info {
-    padding: 35px 25px;
+  .restablecer-card {
+    border-radius: 16px;
   }
 
-  .recuperar-info h1 {
-    font-size: 28px;
+  .restablecer-contenido {
+    padding: 23px 22px 26px;
   }
 
-  .recuperar-negocio {
-    margin-top: 20px !important;
+  .restablecer-contenido h2 {
+    font-size: 20px;
   }
+}
 
-  .recuperar-formulario {
-    padding: 40px 30px;
-  }
+.restablecer-confirmacion {
+  padding: 12px 0 8px;
+  text-align: center;
+}
+
+.restablecer-confirmacion-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #e8f7ee;
+  color: #18834c;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.restablecer-confirmacion h2 {
+  margin-bottom: 12px;
+  color: #17365f;
+}
+
+.restablecer-confirmacion p {
+  margin: 0 0 24px;
+  color: #69788c;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+
+.restablecer-confirmacion {
+  padding: 18px 0 10px;
+  text-align: center;
+}
+
+.restablecer-confirmacion-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #e8f7ee;
+  color: #18834c;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.restablecer-confirmacion h2 {
+  margin: 0 0 12px;
+  color: #17365f;
+  font-size: 23px;
+}
+
+.restablecer-confirmacion p {
+  margin: 0 0 24px;
+  color: #69788c;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.restablecer-boton-login {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #17365f, #285b91);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.restablecer-boton-login:hover {
+  background: #285b91;
+}
+
+
+.restablecer-requisitos {
+  margin: 8px 0 16px;
+  padding: 12px;
+  border: 1px solid #dce5f0;
+  border-radius: 8px;
+  background: #f4f7fb;
+  color: #526780;
+  font-size: 12px;
+}
+
+.restablecer-requisitos strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #30445e;
+  font-size: 12px;
+}
+
+.restablecer-requisitos ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.restablecer-requisitos li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.restablecer-requisitos .requisito-pendiente {
+  color: #7b8798;
+}
+
+.restablecer-requisitos .requisito-cumplido {
+  color: #18834c;
+  font-weight: 600;
+}
+
+.restablecer-coinciden {
+  margin: -8px 0 12px;
+  color: #18834c;
+  font-size: 12px;
+}
+
+.restablecer-no-coinciden {
+  margin: -8px 0 12px;
+  color: #c0392b;
+  font-size: 12px;
+}
+
+.restablecer-contenido button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.restablecer-confirmacion {
+  padding: 18px 0 10px;
+  text-align: center;
+}
+
+.restablecer-confirmacion-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #e8f7ee;
+  color: #18834c;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.restablecer-confirmacion h2 {
+  margin: 0 0 12px;
+  color: #17365f;
+  font-size: 23px;
+}
+
+.restablecer-confirmacion p {
+  margin: 0 0 24px;
+  color: #69788c;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.restablecer-boton-login {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #17365f, #285b91);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.restablecer-boton-login:hover {
+  background: #285b91;
 }

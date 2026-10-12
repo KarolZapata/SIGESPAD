@@ -517,3 +517,213 @@
         padding: 35px 30px;
     }
 }
+
+/* =====================================================
+   REGISTRO DE CLIENTES - REQUISITOS DE CONTRASEÑA
+   ===================================================== */
+
+.registro-requisitos {
+    margin-top: 10px;
+    padding: 12px 14px;
+
+    background: #f4f7fb;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    color: #718096;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.registro-requisitos-titulo {
+    margin: 0 0 7px;
+
+    color: #15385f;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.registro-requisito {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+
+    margin: 4px 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+
+    transition: color 0.2s ease;
+}
+
+.registro-requisito-icono {
+    flex-shrink: 0;
+    width: 14px;
+
+    font-weight: 700;
+    text-align: center;
+}
+
+.registro-requisito.cumplido {
+    color: #198754;
+}
+
+.registro-requisito.pendiente {
+    color: #718096;
+}
+
+/* Confirmación de contraseñas */
+
+.registro-coincidencia {
+    margin: 6px 0 0;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.registro-coincidencia.cumplido {
+    color: #198754;
+}
+
+.registro-coincidencia.pendiente {
+    color: #c53030;
+}
+
+/* Botón deshabilitado */
+
+.login-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.login-submit:disabled:hover {
+    background: #15385f;
+    box-shadow: none;
+}
+
+/* Ajustes para el formulario de registro */
+
+.login-container:has(.registro-requisitos) {
+    align-items: flex-start;
+    padding-top: 35px;
+    padding-bottom: 35px;
+}
+
+.registro-requisitos {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f4f7fb;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.registro-requisitos-titulo {
+    margin: 0 0 6px;
+    color: #15385f;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.registro-requisito {
+    display: flex;
+    gap: 7px;
+    margin: 3px 0;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.registro-requisito.cumplido {
+    color: #198754;
+}
+
+.registro-requisito.pendiente {
+    color: #718096;
+}
+
+.registro-coincidencia {
+    margin: 6px 0 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+.registro-coincidencia.cumplido {
+    color: #198754;
+}
+
+.registro-coincidencia.pendiente {
+    color: #c53030;
+}
+
+@media (max-width: 700px) {
+    .login-container:has(.registro-requisitos) {
+        padding: 25px 15px;
+    }
+
+    .login-form-container {
+        padding: 30px 24px;
+    }
+}
+
+/* =====================================================
+   AJUSTES EXCLUSIVOS DEL REGISTRO
+   ===================================================== */
+
+.registro-container {
+    align-items: flex-start;
+    padding-top: 35px;
+    padding-bottom: 35px;
+}
+
+.registro-card {
+    min-height: 0;
+    align-items: stretch;
+}
+
+.registro-form-container {
+    justify-content: flex-start;
+    padding-top: 35px;
+    padding-bottom: 30px;
+}
+
+.registro-mensaje {
+    color: #198754;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    text-align: center;
+}
+
+.registro-enlace-login {
+    margin-top: 18px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+.login-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.login-submit:disabled:hover {
+    background: #15385f;
+    box-shadow: none;
+}
+
+@media (max-width: 700px) {
+    .registro-container {
+        padding: 25px 15px;
+    }
+
+    .registro-form-container {
+        padding: 30px 24px;
+    }
+}

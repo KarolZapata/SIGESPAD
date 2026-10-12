@@ -24,6 +24,8 @@ import Comprobantes from "./pages/Comprobantes";
 import MisCompras from "./pages/MisCompras";
 import RecuperarContrasena from "./pages/RecuperarContrasena";
 import RestablecerContrasena from "./pages/RestablecerContrasena";
+import Registro from "./pages/Registro";
+import VerificarCorreo from "./pages/VerificarCorreo";
 
 import Navegacion from "./components/Navegacion";
 
@@ -86,6 +88,16 @@ function App() {
             <Route
               path="/login"
               element={<Login />}
+            />
+
+            <Route
+              path="/registro"
+              element={<Registro />}
+            />
+
+            <Route
+                path="/verificar-correo"
+                element={<VerificarCorreo />}
             />
 
             <Route

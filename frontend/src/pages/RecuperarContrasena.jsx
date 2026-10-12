@@ -1,20 +1,20 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 import "./RecuperarContrasena.css";
 
-function RecuperarContrasena() {
+export default function RecuperarContrasena() {
   const [correo, setCorreo] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
-
-  const navigate = useNavigate();
+  const [cargando, setCargando] = useState(false);
 
   const solicitarCodigo = async (e) => {
     e.preventDefault();
-
     setMensaje("");
     setError("");
+    setCargando(true);
 
     try {
       const respuesta = await api.post(
@@ -22,155 +22,115 @@ function RecuperarContrasena() {
         { correo }
       );
 
-      setMensaje(respuesta.data.mensaje);
-
-      localStorage.setItem(
-        "correoRecuperacion",
-        correo
+      setMensaje(
+        respuesta.data?.mensaje ||
+          "Si el correo está registrado, recibirás las instrucciones para recuperar tu contraseña."
       );
-    } catch (error) {
+    } catch (err) {
       setError(
-        error.response?.data?.error ||
-          "No fue posible procesar la solicitud"
+        err.response?.data?.mensaje ||
+          "No fue posible procesar la solicitud. Intenta nuevamente."
       );
+    } finally {
+      setCargando(false);
     }
   };
 
   return (
-    <div className="recuperacion-container">
-
-      <div className="recuperacion-card">
-
-        {/* =====================================================
-            PANEL IZQUIERDO
-            ===================================================== */}
-
-        <div className="recuperacion-brand">
-
-          <div className="recuperacion-brand-icon">
-            ✦
-          </div>
-
+    <main className="recuperar-container">
+      <section className="recuperar-card">
+        <div className="recuperar-logo">
+          <span className="recuperar-logo-icon">S</span>
           <h1>SIGESPAD</h1>
-
-          <div className="recuperacion-brand-line"></div>
-
-          <p>
+          <p className="recuperar-subtitulo">
             Sistema de Gestión para
             <br />
             Papelería y Miscelánea
           </p>
-
-          <p className="recuperacion-brand-small">
+          <span className="recuperar-negocio">
             PAPELERÍA SAN DIEGO
-          </p>
-
+          </span>
         </div>
 
-        {/* =====================================================
-            PANEL DERECHO
-            ===================================================== */}
+        <div className="recuperar-separador" />
 
-        <div className="recuperacion-form-container">
-
-          <h2>Recuperar contraseña</h2>
-
-          <p className="recuperacion-subtitle">
-            Ingresa tu correo electrónico y te enviaremos
-            <br />
-            un código de recuperación.
-          </p>
-
-          <form
-            className="recuperacion-form"
-            onSubmit={solicitarCodigo}
-          >
-
-            <div className="recuperacion-form-group">
-
-              <label htmlFor="correo">
-                Correo electrónico
-              </label>
-
-              <input
-                id="correo"
-                type="email"
-                className="recuperacion-input"
-                placeholder="Ingrese su correo"
-                value={correo}
-                onChange={(e) =>
-                  setCorreo(e.target.value)
-                }
-                required
-              />
-
-            </div>
-
-            {/* MENSAJE DE ÉXITO */}
-
-            {mensaje && (
-              <p className="recuperacion-mensaje-exito">
-                {mensaje}
-              </p>
-            )}
-
-            {/* MENSAJE DE ERROR */}
-
-            {error && (
-              <p className="recuperacion-mensaje-error">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="recuperacion-submit"
+        <div className="recuperar-contenido">
+          <div className="recuperar-icono">
+            <svg
+              viewBox="0 0 24 24"
+              width="30"
+              height="30"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              Enviar código
-            </button>
-
-          </form>
-
-          {/* CONTINUAR */}
-
-          {mensaje && (
-            <button
-              type="button"
-              className="recuperacion-continuar"
-              onClick={() =>
-                navigate(
-                  "/restablecer-contrasena"
-                )
-              }
-            >
-              Continuar
-            </button>
-          )}
-
-          {/* VOLVER */}
-
-          <button
-            type="button"
-            className="recuperacion-volver"
-            onClick={() =>
-              navigate("/login")
-            }
-          >
-            ← Volver al inicio de sesión
-          </button>
-
-          {/* PIE */}
-
-          <div className="recuperacion-footer">
-            SIGESPAD · Gestión para Papelería San Diego
+              <rect x="4" y="10" width="16" height="11" rx="2" />
+              <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              <path d="M12 14v3" />
+            </svg>
           </div>
 
+          <h2>Recuperar contraseña</h2>
+          <p className="recuperar-info">
+            ¿Olvidaste tu contraseña? No te preocupes.
+            Ingresa tu correo electrónico y te enviaremos
+            las instrucciones para recuperarla.
+          </p>
+
+          <form onSubmit={solicitarCodigo}>
+            <label htmlFor="correo-recuperacion">
+              Correo electrónico
+            </label>
+
+            <input
+              id="correo-recuperacion"
+              type="email"
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
+              placeholder="Ingresa tu correo electrónico"
+              autoComplete="email"
+              required
+            />
+
+            {error && (
+              <div className="recuperar-alerta recuperar-error" role="alert">
+                {error}
+              </div>
+            )}
+
+            {mensaje && (
+              <div className="recuperar-alerta recuperar-exito" role="status">
+                {mensaje}
+
+              <Link
+                className="recuperar-continuar"
+                to={`/restablecer-contrasena?correo=${encodeURIComponent(correo.trim())}`}
+              >
+                Continuar
+              </Link>
+              </div>
+            )}
+
+            <button type="submit" disabled={cargando}>
+              {cargando ? "Enviando..." : "Enviar código"}
+            </button>
+          </form>
+
+          <Link className="recuperar-volver" to="/">
+            <span aria-hidden="true">←</span> Volver al inicio de sesión
+          </Link>
         </div>
 
-      </div>
-
-    </div>
+        <footer className="recuperar-footer">
+          <span>SIGESPAD</span>
+          <span className="recuperar-punto">•</span>
+          Gestión para Papelería San Diego
+          <p>Calidad · Servicio · Confianza</p>
+        </footer>
+      </section>
+    </main>
   );
 }
-
-export default RecuperarContrasena;
