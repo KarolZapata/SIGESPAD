@@ -30,6 +30,7 @@ function Reportes() {
 
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
+  const [canal, setCanal] = useState("TODOS");
 
   const [cargandoResumen, setCargandoResumen] = useState(true);
   const [cargandoVentas, setCargandoVentas] = useState(true);
@@ -43,14 +44,17 @@ function Reportes() {
   useEffect(() => {
     obtenerResumen();
     obtenerProductosMasVendidos();
-    obtenerStockBajo();
     obtenerPagos();
     obtenerVendedores();
-  }, []);
+  }, [canal]);
 
   useEffect(() => {
     obtenerVentas();
-  }, [fechaInicio, fechaFin]);
+  }, [fechaInicio, fechaFin, canal]);
+
+  useEffect(() => {
+    obtenerStockBajo();
+  }, []);
 
   const registrarError = (seccion, mensaje) => {
     setErrores((erroresActuales) => ({
@@ -72,7 +76,9 @@ function Reportes() {
       setCargandoResumen(true);
       limpiarError("resumen");
 
-      const respuesta = await api.get("/reportes/resumen");
+      const respuesta = await api.get("/reportes/resumen", {
+        params: { canal },
+      });
       setResumen(respuesta.data);
     } catch (error) {
       console.error(error);
@@ -91,6 +97,7 @@ function Reportes() {
       limpiarError("ventas");
 
       const parametros = {};
+      parametros.canal = canal;
 
       if (fechaInicio) {
         parametros.fecha_inicio = fechaInicio;
@@ -131,7 +138,10 @@ function Reportes() {
       limpiarError("productos");
 
       const respuesta = await api.get(
-        "/reportes/productos-mas-vendidos"
+        "/reportes/productos-mas-vendidos",
+        {
+          params: { canal },
+        }
       );
 
       const datos = respuesta.data.map((producto) => ({
@@ -175,7 +185,9 @@ function Reportes() {
       setCargandoPagos(true);
       limpiarError("pagos");
 
-      const respuesta = await api.get("/reportes/pagos");
+      const respuesta = await api.get("/reportes/pagos", {
+        params: { canal },
+      });
 
       const datos = respuesta.data.map((pago) => ({
         ...pago,
@@ -200,7 +212,9 @@ function Reportes() {
       setCargandoVendedores(true);
       limpiarError("vendedores");
 
-      const respuesta = await api.get("/reportes/vendedores");
+      const respuesta = await api.get("/reportes/vendedores", {
+        params: { canal },
+      });
 
       const datos = respuesta.data.map((vendedor) => ({
         ...vendedor,
@@ -260,6 +274,22 @@ function Reportes() {
         <p>
           Consulta indicadores de ventas e inventario de SIGESPAD.
         </p>
+
+        <div className="reportes-filtro-canal">
+          <label htmlFor="filtro-canal">
+            Canal de venta
+          </label>
+
+          <select
+            id="filtro-canal"
+            value={canal}
+            onChange={(e) => setCanal(e.target.value)}
+          >
+            <option value="TODOS">Todos los canales</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="WEB">Web</option>
+          </select>
+        </div>
       </header>
 
       {/* =========================

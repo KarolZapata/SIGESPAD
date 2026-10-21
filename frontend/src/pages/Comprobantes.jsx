@@ -12,6 +12,11 @@ function Comprobantes() {
   const [ventas, setVentas] = useState([]);
   const [idVenta, setIdVenta] = useState(ventaInicial || "");
 
+  const [filtroEstado, setFiltroEstado] = useState("TODOS");
+  const [filtroCanal, setFiltroCanal] = useState("TODOS");
+  const [fechaInicial, setFechaInicial] = useState("");
+  const [fechaFinal, setFechaFinal] = useState("");
+
   const [venta, setVenta] = useState(null);
   const [detalles, setDetalles] = useState([]);
   const [pagos, setPagos] = useState([]);
@@ -102,6 +107,54 @@ function Comprobantes() {
     }
   };
 
+  const limpiarFiltros = () => {
+    setFiltroEstado("TODOS");
+    setFiltroCanal("TODOS");
+    setFechaInicial("");
+    setFechaFinal("");
+  };
+
+  const ventasFiltradas = ventas.filter((item) => {
+    const coincideEstado =
+      filtroEstado === "TODOS" ||
+      item.estado === filtroEstado;
+
+    const coincideCanal =
+      filtroCanal === "TODOS" ||
+      item.canal === filtroCanal;
+
+    let coincideFechaInicial = true;
+    let coincideFechaFinal = true;
+
+    if (item.fecha_venta) {
+      const fecha = new Date(item.fecha_venta);
+
+      const anio = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+      const dia = String(fecha.getDate()).padStart(2, "0");
+
+      const fechaVenta = `${anio}-${mes}-${dia}`;
+
+      if (fechaInicial) {
+        coincideFechaInicial = fechaVenta >= fechaInicial;
+      }
+
+      if (fechaFinal) {
+        coincideFechaFinal = fechaVenta <= fechaFinal;
+      }
+    } else {
+      coincideFechaInicial = !fechaInicial;
+      coincideFechaFinal = !fechaFinal;
+    }
+
+    return (
+      coincideEstado &&
+      coincideCanal &&
+      coincideFechaInicial &&
+      coincideFechaFinal
+    );
+  });
+
   const formatoPrecio = (valor) => {
     return Number(valor || 0).toLocaleString("es-CO");
   };
@@ -175,6 +228,79 @@ function Comprobantes() {
             comprobante.
           </p>
 
+        <div className="comprobantes-filtros">
+
+          <div>
+            <label htmlFor="comprobante-estado">
+              Estado
+            </label>
+
+            <select
+              id="comprobante-estado"
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+            >
+              <option value="TODOS">Todos los estados</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="COMPLETADA">Completada</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="comprobante-canal">
+              Canal
+            </label>
+
+            <select
+              id="comprobante-canal"
+              value={filtroCanal}
+              onChange={(e) => setFiltroCanal(e.target.value)}
+            >
+              <option value="TODOS">Todos los canales</option>
+              <option value="PRESENCIAL">Presencial</option>
+              <option value="WEB">Web</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="comprobante-fecha-inicial">
+              Fecha inicial
+            </label>
+
+            <input
+              id="comprobante-fecha-inicial"
+              type="date"
+              value={fechaInicial}
+              max={fechaFinal || undefined}
+              onChange={(e) => setFechaInicial(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="comprobante-fecha-final">
+              Fecha final
+            </label>
+
+            <input
+              id="comprobante-fecha-final"
+              type="date"
+              value={fechaFinal}
+              min={fechaInicial || undefined}
+              onChange={(e) => setFechaFinal(e.target.value)}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="btn-limpiar-filtros"
+            onClick={limpiarFiltros}
+          >
+            Limpiar filtros
+          </button>
+
+        </div>
+
           <select
             id="venta"
             value={idVenta}
@@ -185,7 +311,7 @@ function Comprobantes() {
               Selecciona una venta
             </option>
 
-            {ventas.map((item) => (
+            {ventasFiltradas.map((item) => (
               <option
                 key={item.id_venta}
                 value={item.id_venta}
@@ -309,7 +435,18 @@ function Comprobantes() {
                   </strong>
                 </div>
               </div>
+              <div className="meta-item">
+                <span className="meta-icono">
+                  🛒
+                </span>
 
+                <div>
+                  <small>CANAL DE VENTA</small>
+                  <strong>
+                    {venta.canal || "NO ESPECIFICADO"}
+                  </strong>
+                </div>
+              </div>
             </div>
 
             {/* =================================================

@@ -9,6 +9,10 @@ function VentasVendedor() {
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("TODOS");
+  const [filtroCanal, setFiltroCanal] = useState("TODOS");
+  const [fechaInicial, setFechaInicial] = useState("");
+  const [fechaFinal, setFechaFinal] = useState("");
 
   const obtenerVentas = async () => {
     try {
@@ -46,6 +50,54 @@ function VentasVendedor() {
       timeStyle: "short",
     });
   };
+
+  const limpiarFiltros = () => {
+    setFiltroEstado("TODOS");
+    setFiltroCanal("TODOS");
+    setFechaInicial("");
+    setFechaFinal("");
+  };
+
+  const ventasFiltradas = ventas.filter((venta) => {
+    const coincideEstado =
+      filtroEstado === "TODOS" ||
+      venta.estado === filtroEstado;
+
+    const coincideCanal =
+      filtroCanal === "TODOS" ||
+      venta.canal === filtroCanal;
+
+    let coincideFechaInicial = true;
+    let coincideFechaFinal = true;
+
+    if (venta.fecha_venta) {
+      const fecha = new Date(venta.fecha_venta);
+
+      const anio = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+      const dia = String(fecha.getDate()).padStart(2, "0");
+
+      const fechaVenta = `${anio}-${mes}-${dia}`;
+
+      if (fechaInicial) {
+        coincideFechaInicial = fechaVenta >= fechaInicial;
+      }
+
+      if (fechaFinal) {
+        coincideFechaFinal = fechaVenta <= fechaFinal;
+      }
+    } else {
+      coincideFechaInicial = !fechaInicial;
+      coincideFechaFinal = !fechaFinal;
+    }
+
+    return (
+      coincideEstado &&
+      coincideCanal &&
+      coincideFechaInicial &&
+      coincideFechaFinal
+    );
+  });
 
   const verDetalle = (idVenta) => {
     navigate(`/comprobantes?venta=${idVenta}`);
@@ -115,6 +167,81 @@ function VentasVendedor() {
 
       <section className="ventas-contenido">
 
+      <div className="ventas-filtros">
+
+        <div className="ventas-campo">
+          <label htmlFor="vendedor-filtro-estado">
+            Estado
+          </label>
+
+          <select
+            id="vendedor-filtro-estado"
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value)}
+          >
+            <option value="TODOS">Todos los estados</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="COMPLETADA">Completada</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+
+        <div className="ventas-campo">
+          <label htmlFor="vendedor-filtro-canal">
+            Canal de venta
+          </label>
+
+          <select
+            id="vendedor-filtro-canal"
+            value={filtroCanal}
+            onChange={(e) => setFiltroCanal(e.target.value)}
+          >
+            <option value="TODOS">Todos los canales</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="WEB">Web</option>
+          </select>
+        </div>
+
+        <div className="ventas-campo">
+          <label htmlFor="vendedor-fecha-inicial">
+            Fecha inicial
+          </label>
+
+          <input
+            id="vendedor-fecha-inicial"
+            type="date"
+            value={fechaInicial}
+            max={fechaFinal || undefined}
+            onChange={(e) => setFechaInicial(e.target.value)}
+          />
+        </div>
+
+        <div className="ventas-campo">
+          <label htmlFor="vendedor-fecha-final">
+            Fecha final
+          </label>
+
+          <input
+            id="vendedor-fecha-final"
+            type="date"
+            value={fechaFinal}
+            min={fechaInicial || undefined}
+            onChange={(e) => setFechaFinal(e.target.value)}
+          />
+        </div>
+
+        <div className="ventas-filtro-accion">
+          <button
+            type="button"
+            className="btn-limpiar-filtros"
+            onClick={limpiarFiltros}
+          >
+            Limpiar filtros
+          </button>
+        </div>
+
+      </div>
+
         <div className="ventas-contenido-header">
           <div>
             <span className="ventas-seccion-etiqueta">
@@ -128,13 +255,13 @@ function VentasVendedor() {
             </p>
           </div>
 
-          {!cargando && ventas.length > 0 && (
+          {!cargando && ventasFiltradas.length > 0 && (
             <div className="ventas-contador">
-              <span>{ventas.length}</span>
+              <span>{ventasFiltradas.length}</span>
               <small>
-                {ventas.length === 1
-                  ? "venta registrada"
-                  : "ventas registradas"}
+                {ventasFiltradas.length === 1
+                  ? "venta encontrada"
+                  : "ventas encontradas"}
               </small>
             </div>
           )}
@@ -161,6 +288,16 @@ function VentasVendedor() {
               automáticamente en este listado.
             </p>
           </div>
+        ) : ventasFiltradas.length === 0 ? (
+          <div className="ventas-estado-vacio">
+            <div className="ventas-vacio-icono">▱</div>
+
+            <h3>No se encontraron ventas</h3>
+
+            <p>
+              Intenta cambiar los filtros de estado, canal o fechas.
+            </p>
+          </div>
         ) : (
           <div className="ventas-tabla-contenedor">
             <table className="ventas-tabla">
@@ -170,6 +307,7 @@ function VentasVendedor() {
                   <th>Venta</th>
                   <th>Vendedor</th>
                   <th>Fecha</th>
+                  <th>Canal</th>
                   <th>Total</th>
                   <th>Estado</th>
                   <th>Acción</th>
@@ -177,8 +315,7 @@ function VentasVendedor() {
               </thead>
 
               <tbody>
-                {ventas.map((venta) => (
-                  <tr key={venta.id_venta}>
+                {ventasFiltradas.map((venta) => (                  <tr key={venta.id_venta}>
 
                     <td>
                       <span className="venta-numero">
@@ -196,6 +333,10 @@ function VentasVendedor() {
                       <span className="venta-fecha">
                         {formatoFecha(venta.fecha_venta)}
                       </span>
+                    </td>
+
+                    <td>
+                      {venta.canal || "—"}
                     </td>
 
                     <td>

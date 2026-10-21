@@ -19,6 +19,13 @@ router.get(
     verificarRol("ADMINISTRADOR"),
     (req, res) => {
 
+        const canalSolicitado = req.query.canal;
+
+        const canal =
+            ["PRESENCIAL", "WEB"].includes(canalSolicitado)
+                ? canalSolicitado
+                : null;
+
         const sql = `
             SELECT
                 (SELECT COUNT(*)
@@ -34,19 +41,27 @@ router.get(
                  WHERE estado = 1) AS categorias_activas,
 
                 (SELECT COUNT(*)
-                 FROM ventas) AS total_ventas,
+                 FROM ventas v
+                 WHERE (? IS NULL OR v.canal = ?)
+                ) AS total_ventas,
 
-                (SELECT COALESCE(SUM(total), 0)
-                 FROM ventas
-                 WHERE estado = 'COMPLETADA') AS ingresos_totales,
+                (SELECT COALESCE(SUM(v.total), 0)
+                 FROM ventas v
+                 WHERE v.estado = 'COMPLETADA'
+                 AND (? IS NULL OR v.canal = ?)
+                ) AS ingresos_totales,
 
                 (SELECT COUNT(*)
                  FROM productos
                  WHERE estado = 1
-                 AND stock <= stock_minimo) AS productos_stock_bajo
+                 AND stock <= stock_minimo
+                ) AS productos_stock_bajo
         `;
 
-        conexion.query(sql, (error, resultados) => {
+        conexion.query(
+            sql,
+            [canal, canal, canal, canal],
+            (error, resultados) => {
 
             if (error) {
                 console.error(
@@ -80,6 +95,13 @@ router.get(
             fecha_fin
         } = req.query;
 
+        const canalSolicitado = req.query.canal;
+
+        const canal =
+            ["PRESENCIAL", "WEB"].includes(canalSolicitado)
+                ? canalSolicitado
+                : null;
+
         let sql = `
             SELECT
                 DATE(v.fecha_venta) AS fecha,
@@ -87,9 +109,10 @@ router.get(
                 COALESCE(SUM(v.total), 0) AS total_ventas
             FROM ventas v
             WHERE v.estado = 'COMPLETADA'
+            AND (? IS NULL OR v.canal = ?)
         `;
 
-        const parametros = [];
+        const parametros = [canal, canal];
 
         if (fecha_inicio) {
             sql += ` AND DATE(v.fecha_venta) >= ?`;
@@ -185,6 +208,13 @@ router.get(
     verificarRol("ADMINISTRADOR"),
     (req, res) => {
 
+        const canalSolicitado = req.query.canal;
+
+        const canal =
+            ["PRESENCIAL", "WEB"].includes(canalSolicitado)
+                ? canalSolicitado
+                : null;
+
         const sql = `
             SELECT
                 p.id_producto,
@@ -201,6 +231,7 @@ router.get(
                 ON d.id_venta = v.id_venta
 
             WHERE v.estado = 'COMPLETADA'
+            AND (? IS NULL OR v.canal = ?)
 
             GROUP BY
                 p.id_producto,
@@ -212,7 +243,10 @@ router.get(
             LIMIT 10
         `;
 
-        conexion.query(sql, (error, resultados) => {
+        conexion.query(
+            sql,
+            [canal, canal],
+            (error, resultados) => {
 
             if (error) {
                 console.error(
@@ -242,6 +276,13 @@ router.get(
     verificarRol("ADMINISTRADOR"),
     (req, res) => {
 
+        const canalSolicitado = req.query.canal;
+
+        const canal =
+            ["PRESENCIAL", "WEB"].includes(canalSolicitado)
+                ? canalSolicitado
+                : null;
+
         const sql = `
             SELECT
                 p.tipo_pago,
@@ -254,13 +295,17 @@ router.get(
 
             WHERE p.estado = 'CONFIRMADO'
             AND v.estado = 'COMPLETADA'
+            AND (? IS NULL OR v.canal = ?)
 
             GROUP BY p.tipo_pago
 
             ORDER BY total_recaudado DESC
         `;
 
-        conexion.query(sql, (error, resultados) => {
+        conexion.query(
+            sql,
+            [canal, canal],
+            (error, resultados) => {
 
             if (error) {
                 console.error(
@@ -290,6 +335,13 @@ router.get(
     verificarRol("ADMINISTRADOR"),
     (req, res) => {
 
+        const canalSolicitado = req.query.canal;
+
+        const canal =
+            ["PRESENCIAL", "WEB"].includes(canalSolicitado)
+                ? canalSolicitado
+                : null;
+
         const sql = `
             SELECT
                 u.id_usuario,
@@ -300,9 +352,9 @@ router.get(
 
             INNER JOIN ventas v
                 ON u.id_usuario = v.id_usuario
-
             WHERE u.rol = 'VENDEDOR'
             AND v.estado = 'COMPLETADA'
+            AND (? IS NULL OR v.canal = ?)
 
             GROUP BY
                 u.id_usuario,
@@ -311,7 +363,10 @@ router.get(
             ORDER BY total_vendido DESC
         `;
 
-        conexion.query(sql, (error, resultados) => {
+        conexion.query(
+            sql,
+            [canal, canal],
+            (error, resultados) => {
 
             if (error) {
                 console.error(

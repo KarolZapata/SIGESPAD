@@ -609,3 +609,33 @@
     height: 290px;
   }
 }
+
+.reportes-filtro-canal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 320px;
+  margin-top: 24px;
+}
+
+.reportes-filtro-canal label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.reportes-filtro-canal select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.reportes-filtro-canal select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}

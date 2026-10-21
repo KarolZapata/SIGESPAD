@@ -90,62 +90,82 @@ export function CartProvider({ children }) {
     }
   }, [carrito, claveCarrito]);
 
-  // Agregar un producto o aumentar su cantidad
-  const agregarAlCarrito = (
-    producto,
-    cantidadAgregar = 1
-  ) => {
-    const cantidad = Number(cantidadAgregar);
 
-    if (
-      !Number.isInteger(cantidad) ||
-      cantidad < 1
-    ) {
+  // Agregar un producto o aumentar su cantidad,
+  // respetando el stock disponible
+  const agregarAlCarrito = (producto, cantidadAgregar = 1) => {
+    const cantidad = Number(cantidadAgregar);
+    const stockDisponible = Number(producto.stock);
+
+    if (!Number.isInteger(cantidad) || cantidad < 1) {
       return;
     }
 
-    setCarrito((carritoActual) => {
-      const idProducto =
-        String(producto.id_producto);
+    if (!Number.isFinite(stockDisponible) || stockDisponible < 0) {
+      alert("No se pudo verificar el stock de este producto.");
+      return;
+    }
 
-      const existente = carritoActual.find(
-        (item) =>
-          String(item.id_producto) === idProducto
+    const idProducto = String(producto.id_producto);
+
+    const existente = carrito.find(
+      (item) => String(item.id_producto) === idProducto
+    );
+
+    const cantidadActual = existente
+      ? Number(existente.cantidad)
+      : 0;
+
+    if (cantidadActual + cantidad > stockDisponible) {
+      alert(
+        `Stock insuficiente. Solo hay ${stockDisponible} unidades disponibles.`
       );
+      return;
+    }
 
-      if (existente) {
-        return carritoActual.map((item) =>
+    if (existente) {
+      setCarrito(
+        carrito.map((item) =>
           String(item.id_producto) === idProducto
-            ? {
-                ...item,
-                cantidad:
-                  Number(item.cantidad) + cantidad,
-              }
+            ? { ...item, cantidad: cantidadActual + cantidad }
             : item
-        );
-      }
-
-      return [
-        ...carritoActual,
-        {
-          ...producto,
-          cantidad,
-        },
-      ];
-    });
+        )
+      );
+    } else {
+      setCarrito([...carrito, { ...producto, cantidad }]);
+    }
   };
 
-  // Aumentar cantidad
+
+  // Aumentar cantidad sin superar el stock
   const aumentarCantidad = (id_producto) => {
-    setCarrito((carritoActual) =>
-      carritoActual.map((item) =>
-        String(item.id_producto) ===
-        String(id_producto)
-          ? {
-              ...item,
-              cantidad:
-                Number(item.cantidad) + 1,
-            }
+    const producto = carrito.find(
+      (item) => String(item.id_producto) === String(id_producto)
+    );
+
+    if (!producto) {
+      return;
+    }
+
+    const stockDisponible = Number(producto.stock);
+    const cantidadActual = Number(producto.cantidad);
+
+    if (!Number.isFinite(stockDisponible) || stockDisponible < 0) {
+      alert("No se pudo verificar el stock de este producto.");
+      return;
+    }
+
+    if (cantidadActual + 1 > stockDisponible) {
+      alert(
+        `No puedes agregar más unidades. Stock disponible: ${stockDisponible}.`
+      );
+      return;
+    }
+
+    setCarrito(
+      carrito.map((item) =>
+        String(item.id_producto) === String(id_producto)
+          ? { ...item, cantidad: cantidadActual + 1 }
           : item
       )
     );

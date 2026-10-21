@@ -26,7 +26,8 @@ router.get(
                 u.nombre AS usuario,
                 v.fecha_venta,
                 v.total,
-                v.estado
+                v.estado,
+                v.canal
             FROM ventas v
             INNER JOIN usuarios u
                 ON v.id_usuario = u.id_usuario
@@ -69,7 +70,8 @@ router.get(
                 v.id_venta,
                 v.fecha_venta,
                 v.total,
-                v.estado
+                v.estado,
+                v.canal
             FROM ventas v
             WHERE v.id_usuario = ?
             ORDER BY v.fecha_venta DESC
@@ -112,7 +114,8 @@ router.get(
                 u.nombre AS usuario,
                 v.fecha_venta,
                 v.total,
-                v.estado
+                v.estado,
+                v.canal
             FROM ventas v
             INNER JOIN usuarios u
                 ON v.id_usuario = u.id_usuario

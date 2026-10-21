@@ -75,17 +75,32 @@ body::before {
 }
 
 .navbar-contenido {
-  max-width: 1280px;
+  width: 100%;
+  max-width: 1440px;
   min-height: 92px;
 
   margin: 0 auto;
-  padding: 8px 34px;
+  padding: 8px 24px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  gap: 35px;
+  gap: 12px;
+}
+
+.navbar-logo {
+  flex-shrink: 0;
+}
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
 }
 
 /* =====================================================
@@ -1129,4 +1144,39 @@ body::before {
     .dashboard-opcion-enlace {
         font-size: 10px;
     }
+}
+
+
+/* CORRECCIÓN DEL MENÚ DE NAVEGACIÓN */
+
+@media (max-width: 1100px) {
+  .navbar-contenido {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .navbar-logo {
+    width: 100%;
+  }
+
+  .navbar-menu {
+    width: 100%;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 500px) {
+  .navbar-menu > button.navbar-link {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .navbar-menu {
+    row-gap: 6px;
+  }
 }

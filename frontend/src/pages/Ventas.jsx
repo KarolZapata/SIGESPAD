@@ -9,8 +9,10 @@ function Ventas() {
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
-  const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("TODOS");
+  const [filtroCanal, setFiltroCanal] = useState("TODOS");
+  const [fechaInicial, setFechaInicial] = useState("");
+  const [fechaFinal, setFechaFinal] = useState("");
   const [ventaSeleccionada, setVentaSeleccionada] = useState(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -76,24 +78,54 @@ function Ventas() {
     }
   };
 
-  const limpiarFiltros = () => {
-    setBusqueda("");
-    setFiltroEstado("TODOS");
-    setMensaje("");
-  };
+const limpiarFiltros = () => {
+  setFiltroEstado("TODOS");
+  setFiltroCanal("TODOS");
+  setFechaInicial("");
+  setFechaFinal("");
+  setMensaje("");
+};
 
-  const ventasFiltradas = ventas.filter((venta) => {
-    const texto = busqueda.trim().toLowerCase();
+const ventasFiltradas = ventas.filter((venta) => {
+  const coincideEstado =
+    filtroEstado === "TODOS" ||
+    venta.estado === filtroEstado;
 
-    const coincideBusqueda =
-      String(venta.id_venta).includes(texto) ||
-      venta.usuario?.toLowerCase().includes(texto);
+  const coincideCanal =
+    filtroCanal === "TODOS" ||
+    venta.canal === filtroCanal;
 
-    const coincideEstado =
-      filtroEstado === "TODOS" || venta.estado === filtroEstado;
+  let coincideFechaInicial = true;
+  let coincideFechaFinal = true;
 
-    return coincideBusqueda && coincideEstado;
-  });
+  if (venta.fecha_venta) {
+    const fecha = new Date(venta.fecha_venta);
+
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const dia = String(fecha.getDate()).padStart(2, "0");
+
+    const fechaVenta = `${anio}-${mes}-${dia}`;
+
+    if (fechaInicial) {
+      coincideFechaInicial = fechaVenta >= fechaInicial;
+    }
+
+    if (fechaFinal) {
+      coincideFechaFinal = fechaVenta <= fechaFinal;
+    }
+  } else {
+    coincideFechaInicial = !fechaInicial;
+    coincideFechaFinal = !fechaFinal;
+  }
+
+  return (
+    coincideEstado &&
+    coincideCanal &&
+    coincideFechaInicial &&
+    coincideFechaFinal
+  );
+});
 
   const formatoPrecio = (valor) =>
     Number(valor || 0).toLocaleString("es-CO");
@@ -185,21 +217,6 @@ function Ventas() {
         <div className="ventas-filtros">
 
           <div className="ventas-campo">
-            <label htmlFor="busqueda-venta">
-              Número de venta o usuario
-            </label>
-
-            <input
-              id="busqueda-venta"
-              type="text"
-              placeholder="Buscar venta o usuario..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              aria-label="Buscar ventas"
-            />
-          </div>
-
-          <div className="ventas-campo">
             <label htmlFor="filtro-estado">
               Estado
             </label>
@@ -208,13 +225,56 @@ function Ventas() {
               id="filtro-estado"
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              aria-label="Filtrar por estado"
             >
               <option value="TODOS">Todos los estados</option>
               <option value="PENDIENTE">Pendiente</option>
               <option value="COMPLETADA">Completada</option>
               <option value="CANCELADA">Cancelada</option>
             </select>
+          </div>
+
+          <div className="ventas-campo">
+            <label htmlFor="filtro-canal">
+              Canal de venta
+            </label>
+
+            <select
+              id="filtro-canal"
+              value={filtroCanal}
+              onChange={(e) => setFiltroCanal(e.target.value)}
+            >
+              <option value="TODOS">Todos los canales</option>
+              <option value="PRESENCIAL">Presencial</option>
+              <option value="WEB">Web</option>
+            </select>
+          </div>
+
+          <div className="ventas-campo">
+            <label htmlFor="fecha-inicial">
+              Fecha inicial
+            </label>
+
+            <input
+              id="fecha-inicial"
+              type="date"
+              value={fechaInicial}
+              max={fechaFinal || undefined}
+              onChange={(e) => setFechaInicial(e.target.value)}
+            />
+          </div>
+
+          <div className="ventas-campo">
+            <label htmlFor="fecha-final">
+              Fecha final
+            </label>
+
+            <input
+              id="fecha-final"
+              type="date"
+              value={fechaFinal}
+              min={fechaInicial || undefined}
+              onChange={(e) => setFechaFinal(e.target.value)}
+            />
           </div>
 
           <div className="ventas-filtro-accion">
@@ -276,6 +336,7 @@ function Ventas() {
                   <th>N.º venta</th>
                   <th>Usuario</th>
                   <th>Fecha</th>
+                  <th>Canal</th>
                   <th>Total</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -302,6 +363,10 @@ function Ventas() {
                             venta.fecha_venta
                           ).toLocaleString("es-CO")
                         : "—"}
+                    </td>
+
+                    <td>
+                      {venta.canal || "—"}
                     </td>
 
                     <td className="venta-precio">
@@ -417,6 +482,12 @@ function Ventas() {
                   {ventaSeleccionada.venta.estado}
                 </strong>
               </div>
+              <div className="venta-dato">
+              <span>Canal</span>
+              <strong>
+                {ventaSeleccionada.venta.canal || "—"}
+              </strong>
+            </div>
 
             </div>
 
