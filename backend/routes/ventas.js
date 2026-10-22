@@ -187,10 +187,10 @@ router.get(
 );
 
 
-// =====================================================
-// POST - CREAR UNA VENTA
-// ADMINISTRADOR Y VENDEDOR
-// =====================================================
+ // =====================================================
+ // POST - CREAR UNA VENTA
+ // ADMINISTRADOR Y VENDEDOR
+ // =====================================================
 
 router.post(
     "/",
@@ -201,17 +201,12 @@ router.post(
         const { detalles } = req.body;
         const id_usuario = req.usuario.id_usuario;
 
-        if (
-            !Array.isArray(detalles) ||
-            detalles.length === 0
-        ) {
+        if (!Array.isArray(detalles) || detalles.length === 0) {
             return res.status(400).json({
                 error: "Debe indicar al menos un producto"
             });
         }
 
-        // Evitar cantidades inválidas antes de iniciar
-        // la transacción.
         for (const detalle of detalles) {
             if (
                 !detalle.id_producto ||
@@ -235,7 +230,7 @@ router.post(
             await connection.beginTransaction();
             transaccionIniciada = true;
 
-            // Verificar usuario activo.
+            // Verificar que el usuario esté activo.
             const [usuarios] = await connection.query(
                 `SELECT id_usuario
                  FROM usuarios
@@ -255,13 +250,9 @@ router.post(
             let total = 0;
             const detallesProcesados = [];
 
-            // Consultar y bloquear los productos.
+            // Consultar productos y bloquear sus filas.
             for (const detalle of detalles) {
-
-                const id_producto = Number(
-                    detalle.id_producto
-                );
-
+                const id_producto = Number(detalle.id_producto);
                 const cantidad = Number(detalle.cantidad);
 
                 const [productos] = await connection.query(
@@ -304,6 +295,7 @@ router.post(
                     throw error;
                 }
 
+                // Precio normal de 1 a 5 unidades.
                 // Precio mayorista desde 6 unidades.
                 const precioUnitario =
                     cantidad >= 6 &&
@@ -312,7 +304,6 @@ router.post(
                         : Number(producto.precio);
 
                 const subtotal = precioUnitario * cantidad;
-
                 total += subtotal;
 
                 detallesProcesados.push({
@@ -324,7 +315,7 @@ router.post(
                 });
             }
 
-            // Crear la venta.
+            // Crear el registro principal de la venta.
             const [resultadoVenta] = await connection.query(
                 `INSERT INTO ventas
                     (id_usuario, total, estado)
@@ -334,8 +325,7 @@ router.post(
 
             const idVenta = resultadoVenta.insertId;
 
-            // Registrar detalle, actualizar stock
-            // y registrar cada movimiento.
+            // Guardar detalle, descontar stock y registrar movimientos.
             for (const item of detallesProcesados) {
 
                 await connection.query(
@@ -377,7 +367,7 @@ router.post(
                     throw error;
                 }
 
-                // Registrar salida en el historial.
+                // Registrar la salida en el historial de inventario.
                 await connection.query(
                     `INSERT INTO movimientos_inventario
                         (
@@ -409,7 +399,7 @@ router.post(
                 );
             }
 
-            // Confirmar todos los cambios juntos.
+            // Confirmar la venta y todos sus cambios.
             await connection.commit();
             transaccionIniciada = false;
 
@@ -446,7 +436,7 @@ router.post(
 
         } finally {
 
-            // Devolver la conexión al pool.
+            // Liberar la conexión para devolverla al pool.
             if (connection) {
                 connection.release();
             }
@@ -454,240 +444,6 @@ router.post(
     }
 );
 
-
-// =====================================================
-// PRECIO SEGÚN CANTIDAD
-// 1 a 5 unidades  → precio normal
-// 6 o más         → precio mayorista
-// =====================================================
-
-let precioUnitario;
-
-if (
-    cantidadNumerica >= 6 &&
-    producto.precio_mayorista !== null
-) {
-    precioUnitario =
-        Number(producto.precio_mayorista);
-} else {
-    precioUnitario =
-        Number(producto.precio);
-}
-
-const subtotal =
-    precioUnitario *
-    cantidadNumerica;
-
-total += subtotal;
-
-detallesProcesados.push({
-    id_producto:
-        producto.id_producto,
-
-    cantidad:
-        cantidadNumerica,
-
-    precio_unitario:
-        precioUnitario,
-
-    subtotal:
-        subtotal
-});
-
-procesados++;
-
-if (
-    procesados ===
-    detalles.length
-) {
-
-    const sqlVenta = `
-        INSERT INTO ventas
-        (
-            id_usuario,
-            total,
-            estado
-        )
-        VALUES
-        (?, ?, 'COMPLETADA')
-    `;
-
-    conexion.query(
-        sqlVenta,
-        [
-            id_usuario,
-            total
-        ],
-        (
-            error,
-            resultadoVenta
-        ) => {
-
-            if (error) {
-                return rollback(
-                    "Error al crear la venta",
-                    500
-                );
-            }
-
-            const idVenta =
-                resultadoVenta.insertId;
-
-            let insertados = 0;
-
-            detallesProcesados.forEach(
-                (item) => {
-
-                    const sqlDetalle = `
-                        INSERT INTO detalle_venta
-                        (
-                            id_venta,
-                            id_producto,
-                            cantidad,
-                            precio_unitario,
-                            subtotal
-                        )
-                        VALUES
-                        (?, ?, ?, ?, ?)
-                    `;
-
-                    conexion.query(
-                        sqlDetalle,
-                        [
-                            idVenta,
-                            item.id_producto,
-                            item.cantidad,
-                            item.precio_unitario,
-                            item.subtotal
-                        ],
-                        (error) => {
-
-                            if (error) {
-                                return rollback(
-                                    "Error al crear el detalle de la venta",
-                                    500
-                                );
-                            }
-
-                            const sqlStock = `
-                                UPDATE productos
-                                SET stock = stock - ?
-                                WHERE id_producto = ?
-                            `;
-
-                            conexion.query(
-                                sqlStock,
-                                [
-                                    item.cantidad,
-                                    item.id_producto
-                                ],
-                                (error) => {
-
-                                    if (error) {
-                                        return rollback(
-                                            "Error al actualizar el stock",
-                                            500
-                                        );
-                                    }
-
-                                    // Registrar salida en el historial
-                                    const sqlMovimiento = `
-                                        INSERT INTO movimientos_inventario
-                                        (
-                                            id_producto,
-                                            tipo,
-                                            cantidad,
-                                            stock_anterior,
-                                            stock_nuevo,
-                                            motivo,
-                                            id_venta
-                                        )
-                                        SELECT
-                                            ?,
-                                            'SALIDA',
-                                            ?,
-                                            stock + ?,
-                                            stock,
-                                            'Venta',
-                                            ?
-                                        FROM productos
-                                        WHERE id_producto = ?
-                                    `;
-
-                                    conexion.query(
-                                        sqlMovimiento,
-                                        [
-                                            item.id_producto,
-                                            item.cantidad,
-                                            item.cantidad,
-                                            idVenta,
-                                            item.id_producto
-                                        ],
-                                        (error) => {
-
-                                            if (error) {
-                                                return rollback(
-                                                    "Error al registrar el movimiento de inventario",
-                                                    500
-                                                );
-                                            }
-
-                                            insertados++;
-
-                                            if (
-                                                insertados ===
-                                                detallesProcesados.length
-                                            ) {
-
-                                                conexion.commit(
-                                                    (error) => {
-
-                                                        if (error) {
-                                                            return rollback(
-                                                                "Error al confirmar la venta",
-                                                                500
-                                                            );
-                                                        }
-
-                                                        res.status(201).json({
-                                                            mensaje:
-                                                                "Venta creada correctamente",
-
-                                                            id_venta:
-                                                                idVenta,
-
-                                                            id_usuario:
-                                                                id_usuario,
-
-                                                            total:
-                                                                total
-                                                                                        });
-                                                                                    }
-                                                                                );
-                                                                            }
-                                                                        }
-                                                                    );
-                                                                }
-                                                            );
-                                                        }
-                                                    );
-                                                }
-                                            );
-                                        }
-                                    );
-                                }
-                            }   // cierra callback (error, productos)
-                        );      // cierra conexion.query(sqlProducto...
-
-                    });         // cierra detalles.forEach
-
-                });             // cierra conexion.beginTransaction
-
-            }                   // cierra callback (error, usuarios)
-        );                      // cierra conexion.query(sqlUsuario...
-
-    }                           // cierra handler (req, res)
-);                              // cierra router.post
 
 // =====================================================
 // PUT - ACTUALIZAR ESTADO DE UNA VENTA
