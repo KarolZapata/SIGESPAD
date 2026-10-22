@@ -82,8 +82,39 @@ app.get(
 // =====================================================
 // INICIAR SERVIDOR
 // =====================================================
-app.listen(PORT, () => {
-    console.log(
-        `Servidor SIGESPAD ejecutándose en http://localhost:${PORT}`
-    );
-});
+
+async function iniciarServidor() {
+    while (true) {
+        try {
+            const conexionPrueba =
+                await conexion.promise().getConnection();
+
+            conexionPrueba.release();
+
+            console.log(
+                "Conexión con MySQL establecida correctamente."
+            );
+
+            app.listen(PORT, () => {
+                console.log(
+                    `Servidor SIGESPAD ejecutándose en el puerto ${PORT}`
+                );
+            });
+
+            return;
+        } catch (error) {
+            console.error(
+                "No se pudo conectar con MySQL:",
+                error.code || error.message
+            );
+
+            console.log(
+                "Se intentará conectar nuevamente en 5 segundos."
+            );
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
+}
+
+iniciarServidor();

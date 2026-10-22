@@ -12,7 +12,12 @@ const configuracion = {
     user: process.env.DB_USER || process.env.MYSQLUSER,
     password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD,
     database: process.env.DB_NAME || process.env.MYSQLDATABASE,
-    port: Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306)
+    port: Number(process.env.DB_PORT || process.env.MYSQLPORT || 3306),
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0
 };
 
 // SSL para Aiven
@@ -31,24 +36,14 @@ if (process.env.DB_SSL === "true") {
     };
 }
 
-console.log("Diagnóstico de conexión MySQL:", {
+console.log("Configuración MySQL:", {
     host: configuracion.host,
     port: configuracion.port,
     database: configuracion.database,
-    user: configuracion.user,
     sslActivado: Boolean(configuracion.ssl),
     certificadoCargado: Boolean(configuracion.ssl?.ca)
 });
 
-const conexion = mysql.createConnection(configuracion);
-
-conexion.connect((error) => {
-    if (error) {
-        console.error("Error al conectar con MySQL:", error.message);
-        return;
-    }
-
-    console.log("Conexión con MySQL establecida correctamente.");
-});
+const conexion = mysql.createPool(configuracion);
 
 module.exports = conexion;
