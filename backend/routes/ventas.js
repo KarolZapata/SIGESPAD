@@ -191,15 +191,14 @@ router.get(
 // POST - CREAR UNA VENTA
 // ADMINISTRADOR Y VENDEDOR
 // =====================================================
+
 router.post(
     "/",
     verificarToken,
     verificarRol("ADMINISTRADOR", "VENDEDOR"),
-    (req, res) => {
+    async (req, res) => {
 
         const { detalles } = req.body;
-
-        // El usuario sale del token JWT
         const id_usuario = req.usuario.id_usuario;
 
         if (
@@ -207,160 +206,254 @@ router.post(
             detalles.length === 0
         ) {
             return res.status(400).json({
-                error:
-                    "Debe indicar al menos un producto"
+                error: "Debe indicar al menos un producto"
             });
         }
 
-        const sqlUsuario = `
-            SELECT id_usuario
-            FROM usuarios
-            WHERE id_usuario = ?
-            AND estado = 1
-        `;
+        // Evitar cantidades inválidas antes de iniciar
+        // la transacción.
+        for (const detalle of detalles) {
+            if (
+                !detalle.id_producto ||
+                !Number.isInteger(Number(detalle.cantidad)) ||
+                Number(detalle.cantidad) <= 0
+            ) {
+                return res.status(400).json({
+                    error:
+                        "Cada producto debe tener un ID válido y una cantidad entera mayor que cero"
+                });
+            }
+        }
 
-        conexion.query(
-            sqlUsuario,
-            [id_usuario],
-            (error, usuarios) => {
+        let connection;
+        let transaccionIniciada = false;
 
-                if (error) {
-                    console.error(
-                        "Error al verificar usuario:",
-                        error.message
+        try {
+            // Obtener una conexión individual del pool.
+            connection = await conexion.promise().getConnection();
+
+            await connection.beginTransaction();
+            transaccionIniciada = true;
+
+            // Verificar usuario activo.
+            const [usuarios] = await connection.query(
+                `SELECT id_usuario
+                 FROM usuarios
+                 WHERE id_usuario = ?
+                 AND estado = 1`,
+                [id_usuario]
+            );
+
+            if (usuarios.length === 0) {
+                const error = new Error(
+                    "El usuario no existe o está inactivo"
+                );
+                error.status = 400;
+                throw error;
+            }
+
+            let total = 0;
+            const detallesProcesados = [];
+
+            // Consultar y bloquear los productos.
+            for (const detalle of detalles) {
+
+                const id_producto = Number(
+                    detalle.id_producto
+                );
+
+                const cantidad = Number(detalle.cantidad);
+
+                const [productos] = await connection.query(
+                    `SELECT
+                        id_producto,
+                        nombre,
+                        precio,
+                        precio_mayorista,
+                        stock,
+                        estado
+                     FROM productos
+                     WHERE id_producto = ?
+                     FOR UPDATE`,
+                    [id_producto]
+                );
+
+                if (productos.length === 0) {
+                    const error = new Error(
+                        `El producto ${id_producto} no existe`
                     );
-
-                    return res.status(500).json({
-                        error:
-                            "Error al verificar el usuario"
-                    });
+                    error.status = 400;
+                    throw error;
                 }
 
-                if (usuarios.length === 0) {
-                    return res.status(400).json({
-                        error:
-                            "El usuario no existe o está inactivo"
-                    });
+                const producto = productos[0];
+
+                if (Number(producto.estado) !== 1) {
+                    const error = new Error(
+                        `El producto "${producto.nombre}" está inactivo`
+                    );
+                    error.status = 400;
+                    throw error;
                 }
 
-                conexion.beginTransaction((error) => {
+                if (Number(producto.stock) < cantidad) {
+                    const error = new Error(
+                        `Stock insuficiente para "${producto.nombre}". Stock disponible: ${producto.stock}`
+                    );
+                    error.status = 400;
+                    throw error;
+                }
 
-                    if (error) {
-                        console.error(
-                            "Error al iniciar transacción:",
-                            error.message
-                        );
+                // Precio mayorista desde 6 unidades.
+                const precioUnitario =
+                    cantidad >= 6 &&
+                    producto.precio_mayorista !== null
+                        ? Number(producto.precio_mayorista)
+                        : Number(producto.precio);
 
-                        return res.status(500).json({
-                            error:
-                                "No se pudo iniciar la venta"
-                        });
-                    }
+                const subtotal = precioUnitario * cantidad;
 
-                    let total = 0;
-                    let procesados = 0;
+                total += subtotal;
 
-                    const detallesProcesados = [];
+                detallesProcesados.push({
+                    id_producto: Number(producto.id_producto),
+                    nombre: producto.nombre,
+                    cantidad,
+                    precio_unitario: precioUnitario,
+                    subtotal
+                });
+            }
 
-                    let respondido = false;
+            // Crear la venta.
+            const [resultadoVenta] = await connection.query(
+                `INSERT INTO ventas
+                    (id_usuario, total, estado)
+                 VALUES (?, ?, 'COMPLETADA')`,
+                [id_usuario, total]
+            );
 
-                    const rollback = (
-                        mensaje,
-                        status = 400
-                    ) => {
+            const idVenta = resultadoVenta.insertId;
 
-                        if (respondido) return;
+            // Registrar detalle, actualizar stock
+            // y registrar cada movimiento.
+            for (const item of detallesProcesados) {
 
-                        respondido = true;
-
-                        conexion.rollback(() => {
-                            return res.status(status).json({
-                                error: mensaje
-                            });
-                        });
-                    };
-
-
-                    detalles.forEach((detalle) => {
-
-                        const {
+                await connection.query(
+                    `INSERT INTO detalle_venta
+                        (
+                            id_venta,
                             id_producto,
-                            cantidad
-                        } = detalle;
+                            cantidad,
+                            precio_unitario,
+                            subtotal
+                        )
+                     VALUES (?, ?, ?, ?, ?)`,
+                    [
+                        idVenta,
+                        item.id_producto,
+                        item.cantidad,
+                        item.precio_unitario,
+                        item.subtotal
+                    ]
+                );
 
+                const [resultadoStock] = await connection.query(
+                    `UPDATE productos
+                     SET stock = stock - ?
+                     WHERE id_producto = ?
+                     AND stock >= ?`,
+                    [
+                        item.cantidad,
+                        item.id_producto,
+                        item.cantidad
+                    ]
+                );
 
-                        // Validar cantidad
-                        if (
-                            !id_producto ||
-                            !cantidad ||
-                            Number(cantidad) <= 0
-                        ) {
-                            return rollback(
-                                "Cada producto debe tener un ID válido y una cantidad mayor que cero"
-                            );
-                        }
+                if (resultadoStock.affectedRows !== 1) {
+                    const error = new Error(
+                        `No fue posible actualizar el stock de "${item.nombre}"`
+                    );
+                    error.status = 400;
+                    throw error;
+                }
 
+                // Registrar salida en el historial.
+                await connection.query(
+                    `INSERT INTO movimientos_inventario
+                        (
+                            id_producto,
+                            tipo,
+                            cantidad,
+                            stock_anterior,
+                            stock_nuevo,
+                            motivo,
+                            id_venta
+                        )
+                     SELECT
+                        ?,
+                        'SALIDA',
+                        ?,
+                        stock + ?,
+                        stock,
+                        'Venta',
+                        ?
+                     FROM productos
+                     WHERE id_producto = ?`,
+                    [
+                        item.id_producto,
+                        item.cantidad,
+                        item.cantidad,
+                        idVenta,
+                        item.id_producto
+                    ]
+                );
+            }
 
-                        const sqlProducto = `
-                            SELECT
-                                id_producto,
-                                nombre,
-                                precio,
-                                precio_mayorista,
-                                stock,
-                                estado
-                            FROM productos
-                            WHERE id_producto = ?
-                            FOR UPDATE
-                        `;
+            // Confirmar todos los cambios juntos.
+            await connection.commit();
+            transaccionIniciada = false;
 
+            return res.status(201).json({
+                mensaje: "Venta creada correctamente",
+                id_venta: idVenta,
+                id_usuario,
+                total
+            });
 
-                        conexion.query(
-                            sqlProducto,
-                            [id_producto],
-                            (error, productos) => {
+        } catch (error) {
 
-                                if (error) {
-                                    return rollback(
-                                        "Error al consultar el producto",
-                                        500
-                                    );
-                                }
+            if (connection && transaccionIniciada) {
+                try {
+                    await connection.rollback();
+                } catch (errorRollback) {
+                    console.error(
+                        "Error al deshacer la venta:",
+                        errorRollback.message
+                    );
+                }
+            }
 
+            console.error(
+                "Error al registrar venta:",
+                error.message
+            );
 
-                                if (
-                                    productos.length === 0
-                                ) {
-                                    return rollback(
-                                        `El producto ${id_producto} no existe`
-                                    );
-                                }
+            return res.status(error.status || 500).json({
+                error: error.status
+                    ? error.message
+                    : "No fue posible registrar la venta"
+            });
 
+        } finally {
 
-                                const producto =
-                                    productos[0];
+            // Devolver la conexión al pool.
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+);
 
-
-                                if (
-                                    producto.estado !== 1
-                                ) {
-                                    return rollback(
-                                        `El producto "${producto.nombre}" está inactivo`
-                                    );
-                                }
-
-
-                                if (
-                                    Number(producto.stock) <
-                                    Number(cantidad)
-                                ) {
-                                    return rollback(
-                                        `Stock insuficiente para "${producto.nombre}". Stock disponible: ${producto.stock}`
-                                    );
-                                }
-
-
-                                const cantidadNumerica = Number(cantidad);
 
 // =====================================================
 // PRECIO SEGÚN CANTIDAD
