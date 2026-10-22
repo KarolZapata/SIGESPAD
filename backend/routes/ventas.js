@@ -287,9 +287,22 @@ router.post(
                     throw error;
                 }
 
-                if (Number(producto.stock) < cantidad) {
+                const [reservas] = await connection.query(
+                    `SELECT COALESCE(SUM(cantidad), 0) AS reservado
+                    FROM reservas_inventario
+                    WHERE id_producto = ?
+                    AND estado = 'ACTIVA'
+                    AND fecha_expiracion > UTC_TIMESTAMP()`,
+                    [id_producto]
+                );
+
+                const reservado = Number(reservas[0].reservado);
+                const disponible = Math.max(0, Number(producto.stock) - reservado);
+
+                if (disponible < cantidad) {
                     const error = new Error(
-                        `Stock insuficiente para "${producto.nombre}". Stock disponible: ${producto.stock}`
+                        `Stock insuficiente para "${producto.nombre}". ` +
+                        `Disponible para venta: ${disponible}`
                     );
                     error.status = 400;
                     throw error;
@@ -477,7 +490,8 @@ router.put(
         const sqlBuscar = `
             SELECT
                 id_venta,
-                estado
+                estado,
+                canal
             FROM ventas
             WHERE id_venta = ?
         `;
@@ -503,6 +517,12 @@ router.put(
                     });
                 }
 
+                // BLOQUE NUEVO: proteger las ventas web
+                if (ventas[0].canal === "WEB") {
+                    return res.status(409).json({
+                        error: "Las ventas web deben gestionarse mediante la integración de pagos."
+                    });
+                }
 
                 const estadoAnterior =
                     ventas[0].estado;
@@ -766,7 +786,7 @@ router.delete(
 
 
         const sqlBuscar = `
-            SELECT estado
+            SELECT estado, canal
             FROM ventas
             WHERE id_venta = ?
         `;
@@ -792,6 +812,12 @@ router.delete(
                     });
                 }
 
+                // BLOQUE NUEVO: proteger las ventas web
+                if (ventas[0].canal === "WEB") {
+                    return res.status(409).json({
+                        error: "Las ventas web deben gestionarse mediante la integración de pagos."
+                    });
+                }
 
                 const estadoActual = ventas[0].estado;
 
