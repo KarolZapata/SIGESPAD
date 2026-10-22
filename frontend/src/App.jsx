@@ -26,6 +26,7 @@ import RecuperarContrasena from "./pages/RecuperarContrasena";
 import RestablecerContrasena from "./pages/RestablecerContrasena";
 import Registro from "./pages/Registro";
 import VerificarCorreo from "./pages/VerificarCorreo";
+import ResultadoPago from "./pages/ResultadoPago";
 
 import Navegacion from "./components/Navegacion";
 
@@ -118,6 +119,11 @@ function App() {
             <Route
               path="/carrito"
               element={<Carrito />}
+            />
+
+            <Route
+              path="/resultado-pago"
+              element={<ResultadoPago />}
             />
 
             <Route

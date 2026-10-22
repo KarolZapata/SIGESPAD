@@ -264,7 +264,7 @@ router.post(
             checkoutUrl.searchParams.set("expiration-time", expiracion);
             checkoutUrl.searchParams.set(
                 "redirect-url",
-                `${FRONTEND_URL.replace(/\/$/, "")}/resultado-pago`
+                `${FRONTEND_URL.replace(/\/$/, "")}/resultado-pago?reference=${encodeURIComponent(referencia)}`
             );
 
             return res.status(201).json({
@@ -292,6 +292,52 @@ router.post(
         }
     }
 );
+
+
+router.get(
+    "/estado/:referencia",
+    verificarToken,
+    verificarRol("CLIENTE"),
+    async (req, res) => {
+        try {
+            const idUsuario = Number(req.usuario.id_usuario);
+            const { referencia } = req.params;
+
+            const [resultados] = await conexion.promise().query(
+                `SELECT
+                    v.id_venta,
+                    v.estado AS estado_venta,
+                    p.estado AS estado_pago,
+                    p.referencia_wompi
+                 FROM pagos p
+                 INNER JOIN ventas v ON v.id_venta = p.id_venta
+                 WHERE p.referencia_wompi = ?
+                   AND v.id_usuario = ?
+                   AND v.canal = 'WEB'
+                 LIMIT 1`,
+                [referencia, idUsuario]
+            );
+
+            if (!resultados.length) {
+                return res.status(404).json({
+                    error: "No se encontró la compra"
+                });
+            }
+
+            return res.json({
+                id_venta: resultados[0].id_venta,
+                estado_venta: resultados[0].estado_venta,
+                estado_pago: resultados[0].estado_pago
+            });
+        } catch (error) {
+            console.error("Error consultando el pago:", error.message);
+            return res.status(500).json({
+                error: "No fue posible consultar el pago"
+            });
+        }
+    }
+);
+
 
 // =====================================================
 // POST /api/wompi/webhook
