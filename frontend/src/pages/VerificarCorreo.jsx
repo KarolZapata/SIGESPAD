@@ -1,4 +1,4 @@
-
+import { API_URL } from "../services/api";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./VerificarCorreo.css";
@@ -24,7 +24,7 @@ export default function VerificarCorreo() {
             return;
         }
 
-        fetch("http://localhost:3000/api/usuarios/verificar-correo", {
+        fetch(`${API_URL}/usuarios/verificar-correo`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

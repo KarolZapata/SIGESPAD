@@ -1,3 +1,4 @@
+import { SERVER_URL } from "../services/api";
 import { useEffect, useState } from "react";
 import {
   useNavigate,
@@ -149,7 +150,7 @@ function Productos() {
               const imagenPrincipal =
                 producto.imagenes &&
                 producto.imagenes.length > 0
-                  ? `http://localhost:3000/imagenes-productos/${producto.imagenes[0].nombre}`
+                  ? `${SERVER_URL}/imagenes-productos/${producto.imagenes[0].nombre}`
                   : "https://placehold.co/600x400?text=Producto";
 
               return (

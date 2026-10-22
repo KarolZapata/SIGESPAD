@@ -1,4 +1,4 @@
-
+import { SERVER_URL } from "../services/api";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -54,7 +54,7 @@ function DetalleProducto() {
   const imagenActual = imagenes[imagenSeleccionada];
 
   const imagenUrl = imagenActual
-    ? `http://localhost:3000/imagenes-productos/${imagenActual.nombre}`
+    ? `${SERVER_URL}/imagenes-productos/${imagenActual.nombre}`
     : null;
 
   const stock = Number(producto.stock) || 0;
@@ -105,7 +105,7 @@ function DetalleProducto() {
                   onClick={() => setImagenSeleccionada(indice)}
                 >
                   <img
-                    src={`http://localhost:3000/imagenes-productos/${imagen.nombre}`}
+                    src={`${SERVER_URL}/imagenes-productos/${imagen.nombre}`}
                     alt={`${producto.nombre} ${indice + 1}`}
                   />
                 </button>

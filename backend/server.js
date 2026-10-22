@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(
     "/imagenes-productos",
     express.static(
-        path.join(__dirname, "../Catalogo/imagenes_productos")
+        path.join(__dirname, "../Catalogo/Imagenes_Productos")
     )
 );
 

@@ -1,3 +1,4 @@
+import api from "../services/api";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MisCompras.css";
@@ -13,27 +14,12 @@ function MisCompras() {
     cargarCompras();
   }, []);
 
+
+
   const cargarCompras = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      const respuesta = await fetch(
-        "http://localhost:3000/api/ventas/mis-compras",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!respuesta.ok) {
-        throw new Error("No se pudieron cargar las compras.");
-      }
-
-      const datos = await respuesta.json();
-
-      setCompras(datos);
+      const respuesta = await api.get("/ventas/mis-compras");
+      setCompras(respuesta.data);
     } catch (error) {
       console.error("Error al cargar compras:", error);
       setMensaje("No fue posible cargar tus compras.");
@@ -41,6 +27,7 @@ function MisCompras() {
       setCargando(false);
     }
   };
+
 
   const formatearFecha = (fecha) => {
     return new Date(fecha).toLocaleDateString("es-CO", {

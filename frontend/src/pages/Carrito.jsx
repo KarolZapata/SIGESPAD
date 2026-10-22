@@ -1,4 +1,4 @@
-
+import { SERVER_URL } from "../services/api";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import "./Carrito.css";
@@ -75,7 +75,7 @@ function Carrito() {
               const imagen = producto.imagenes?.[0]?.nombre;
 
               const imagenUrl = imagen
-                ? `http://localhost:3000/imagenes-productos/${imagen}`
+                ? `${SERVER_URL}/imagenes-productos/${imagen}`
                 : null;
 
               const precioUnitario = obtenerPrecio(producto);
