@@ -246,16 +246,17 @@ router.get(
 );
 
 
-// =====================================================
-// POST - Crear producto con imágenes
-// SOLO ADMINISTRADOR
-// =====================================================
+ // =====================================================
+ // POST - Crear producto con imágenes
+ // SOLO ADMINISTRADOR
+ // =====================================================
+
 router.post(
     "/",
     verificarToken,
     verificarRol("ADMINISTRADOR"),
     uploadImagenes.array("imagenes", 10),
-    (req, res) => {
+    async (req, res) => {
 
         const {
             codigo,
@@ -270,7 +271,7 @@ router.post(
 
         const archivos = req.files || [];
 
-        // Validar campos obligatorios
+        // Validar campos obligatorios.
         if (
             !codigo ||
             !nombre ||
@@ -284,7 +285,7 @@ router.post(
             });
         }
 
-        // Validar precios
+        // Validar precio normal.
         if (
             !Number.isFinite(Number(precio)) ||
             Number(precio) < 0
@@ -296,6 +297,7 @@ router.post(
             });
         }
 
+        // Validar precio mayorista.
         if (
             precio_mayorista !== undefined &&
             precio_mayorista !== "" &&
@@ -311,14 +313,17 @@ router.post(
             });
         }
 
-        const cantidadStock = stock === undefined || stock === ""
-            ? 0
-            : Number(stock);
+        const cantidadStock =
+            stock === undefined || stock === ""
+                ? 0
+                : Number(stock);
 
-        const minimoStock = stock_minimo === undefined || stock_minimo === ""
-            ? 5
-            : Number(stock_minimo);
+        const minimoStock =
+            stock_minimo === undefined || stock_minimo === ""
+                ? 5
+                : Number(stock_minimo);
 
+        // Validar existencias.
         if (
             !Number.isInteger(cantidadStock) ||
             cantidadStock < 0 ||
@@ -328,7 +333,8 @@ router.post(
             eliminarArchivosSubidos(archivos);
 
             return res.status(400).json({
-                error: "El stock y el stock mínimo deben ser enteros no negativos"
+                error:
+                    "El stock y el stock mínimo deben ser enteros no negativos"
             });
         }
 
@@ -353,122 +359,124 @@ router.post(
             descripcion || null,
             categoria || null,
             Number(precio),
-            precio_mayorista === undefined || precio_mayorista === ""
+            precio_mayorista === undefined ||
+            precio_mayorista === ""
                 ? null
                 : Number(precio_mayorista),
             cantidadStock,
             minimoStock
         ];
 
-        conexion.beginTransaction((error) => {
-            if (error) {
-                eliminarArchivosSubidos(archivos);
+        let connection;
+        let transaccionIniciada = false;
+        let archivosEliminados = false;
 
-                return res.status(500).json({
-                    error: "No se pudo iniciar la operación"
+        try {
+            // Obtener conexión individual del pool.
+            connection = await conexion.promise().getConnection();
+
+            await connection.beginTransaction();
+            transaccionIniciada = true;
+
+            // Insertar producto.
+            const [resultado] = await connection.query(
+                sqlProducto,
+                valoresProducto
+            );
+
+            const idProducto = resultado.insertId;
+
+            // Si no hay imágenes, confirmar el producto.
+            if (archivos.length === 0) {
+                await connection.commit();
+                transaccionIniciada = false;
+
+                return res.status(201).json({
+                    mensaje: "Producto creado correctamente",
+                    id_producto: idProducto
                 });
             }
 
-            conexion.query(
-                sqlProducto,
-                valoresProducto,
-                (error, resultado) => {
+            // Preparar los registros de las imágenes.
+            const valoresImagenes = archivos.map(
+                (archivo, indice) => [
+                    idProducto,
+                    archivo.filename,
+                    indice + 1
+                ]
+            );
 
-                    if (error) {
-                        return conexion.rollback(() => {
-                            eliminarArchivosSubidos(archivos);
+            const sqlImagenes = `
+                INSERT INTO producto_imagenes
+                    (id_producto, nombre_imagen, orden)
+                VALUES ?
+            `;
 
-                            if (error.code === "ER_DUP_ENTRY") {
-                                return res.status(409).json({
-                                    error: "Ya existe un producto con ese código"
-                                });
-                            }
+            // Guardar imágenes en la base de datos.
+            await connection.query(
+                sqlImagenes,
+                [valoresImagenes]
+            );
 
-                            console.error("Error al crear producto:", error.message);
+            // Confirmar producto e imágenes juntos.
+            await connection.commit();
+            transaccionIniciada = false;
 
-                            return res.status(500).json({
-                                error: "Error al crear el producto"
-                            });
-                        });
-                    }
+            return res.status(201).json({
+                mensaje:
+                    "Producto e imágenes creados correctamente",
+                id_producto: idProducto,
+                imagenes: archivos.map(
+                    archivo => archivo.filename
+                )
+            });
 
-                    const idProducto = resultado.insertId;
+        } catch (error) {
 
-                    if (archivos.length === 0) {
-                        return conexion.commit((errorCommit) => {
-                            if (errorCommit) {
-                                return conexion.rollback(() => {
-                                    res.status(500).json({
-                                        error: "No se pudo guardar el producto"
-                                    });
-                                });
-                            }
-
-                            res.status(201).json({
-                                mensaje: "Producto creado correctamente",
-                                id_producto: idProducto
-                            });
-                        });
-                    }
-
-                    const valoresImagenes = archivos.map((archivo, indice) => [
-                        idProducto,
-                        archivo.filename,
-                        indice + 1
-                    ]);
-
-                    const sqlImagenes = `
-                        INSERT INTO producto_imagenes
-                        (id_producto, nombre_imagen, orden)
-                        VALUES ?
-                    `;
-
-                    conexion.query(
-                        sqlImagenes,
-                        [valoresImagenes],
-                        (errorImagenes) => {
-
-                            if (errorImagenes) {
-                                return conexion.rollback(() => {
-                                    eliminarArchivosSubidos(archivos);
-
-                                    console.error(
-                                        "Error al guardar imágenes:",
-                                        errorImagenes.message
-                                    );
-
-                                    res.status(500).json({
-                                        error: "No se pudieron guardar las imágenes"
-                                    });
-                                });
-                            }
-
-                            conexion.commit((errorCommit) => {
-                                if (errorCommit) {
-                                    return conexion.rollback(() => {
-                                        eliminarArchivosSubidos(archivos);
-
-                                        res.status(500).json({
-                                            error: "No se pudo completar el registro"
-                                        });
-                                    });
-                                }
-
-                                res.status(201).json({
-                                    mensaje: "Producto e imágenes creados correctamente",
-                                    id_producto: idProducto,
-                                    imagenes: archivos.map(
-                                        archivo => archivo.filename
-                                    )
-                                });
-                            });
-                        }
+            // Deshacer cambios en la base de datos.
+            if (connection && transaccionIniciada) {
+                try {
+                    await connection.rollback();
+                } catch (errorRollback) {
+                    console.error(
+                        "Error al deshacer el registro del producto:",
+                        errorRollback.message
                     );
                 }
+            }
+
+            // Eliminar archivos si la operación falló.
+            if (!archivosEliminados) {
+                eliminarArchivosSubidos(archivos);
+                archivosEliminados = true;
+            }
+
+            if (error.code === "ER_DUP_ENTRY") {
+                return res.status(409).json({
+                    error:
+                        "Ya existe un producto con ese código"
+                });
+            }
+
+            console.error(
+                "Error al crear producto:",
+                error.message
             );
-        });
+
+            return res.status(500).json({
+                error: "No fue posible guardar el producto"
+            });
+
+        } finally {
+
+            // Devolver conexión al pool.
+            if (connection) {
+                connection.release();
+            }
+        }
     }
 );
+
 
 // =====================================================
 // PUT - Actualizar producto
