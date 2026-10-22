@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { SERVER_URL } from "../services/api";
@@ -26,12 +27,19 @@ function Carrito() {
   const [tipoEntrega, setTipoEntrega] = useState("RECOGIDA");
   const [ciudad, setCiudad] = useState("Bogotá");
   const [direccion, setDireccion] = useState("");
+  const [procesandoPago, setProcesandoPago] = useState(false);
+  const [errorPago, setErrorPago] = useState("");
+
+  const navigate = useNavigate();
+
   const costoEnvio = tipoEntrega === "DOMICILIO" ? 10000 : 0;
   const totalConEnvio = obtenerTotal() + costoEnvio;
 
-  const navigate = useNavigate();
-  const [procesandoPago, setProcesandoPago] = useState(false);
-  const [errorPago, setErrorPago] = useState("");
+  const totalUnidades = carrito.reduce(
+    (total, producto) => total + Number(producto.cantidad || 0),
+    0
+  );
+
   const iniciarPagoWompi = async () => {
     if (carrito.length === 0 || procesandoPago) return;
 
@@ -41,11 +49,8 @@ function Carrito() {
       navigate("/login");
       return;
     }
-    
-    if (
-      tipoEntrega === "DOMICILIO" &&
-      !direccion.trim()
-    ) {
+
+    if (tipoEntrega === "DOMICILIO" && !direccion.trim()) {
       setErrorPago("Ingresa la dirección de entrega.");
       return;
     }
@@ -54,26 +59,23 @@ function Carrito() {
     setErrorPago("");
 
     try {
-      const respuesta = await fetch(
-        `${SERVER_URL}/api/wompi/iniciar`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-
-          body: JSON.stringify({
-            detalles: carrito.map((producto) => ({
-              id_producto: producto.id_producto,
-              cantidad: Number(producto.cantidad),
-            })),
-            tipo_entrega: tipoEntrega,
-            ciudad: tipoEntrega === "DOMICILIO" ? ciudad : null,
-            direccion: tipoEntrega === "DOMICILIO" ? direccion.trim() : null,
-          }),
-        }
-      );
+      const respuesta = await fetch(`${SERVER_URL}/api/wompi/iniciar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          detalles: carrito.map((producto) => ({
+            id_producto: producto.id_producto,
+            cantidad: Number(producto.cantidad),
+          })),
+          tipo_entrega: tipoEntrega,
+          ciudad: tipoEntrega === "DOMICILIO" ? ciudad : null,
+          direccion:
+            tipoEntrega === "DOMICILIO" ? direccion.trim() : null,
+        }),
+      });
 
       const datos = await respuesta.json();
 
@@ -94,17 +96,13 @@ function Carrito() {
     }
   };
 
-
-  const totalUnidades = carrito.reduce(
-    (total, producto) => total + Number(producto.cantidad || 0),
-    0
-  );
-
   return (
     <main className="carrito-page">
       <header className="carrito-header">
         <div>
-          <span className="carrito-etiqueta">PAPELERÍA SAN DIEGO</span>
+          <span className="carrito-etiqueta">
+            PAPELERÍA SAN DIEGO
+          </span>
           <h1>Mi carrito</h1>
           <p>Revisa tus productos antes de continuar con tu compra.</p>
         </div>
@@ -136,204 +134,241 @@ function Carrito() {
         </section>
       ) : (
         <div className="carrito-contenido">
-          <section className="carrito-lista">
-            <div className="carrito-lista-header">
-              <h2>Productos seleccionados</h2>
-              <span>{totalUnidades} unidades</span>
-            </div>
+          <div className="carrito-columna-principal">
+            <section className="carrito-lista">
+              <div className="carrito-lista-header">
+                <h2>Productos seleccionados</h2>
+                <span>{totalUnidades} unidades</span>
+              </div>
 
-            {carrito.map((producto) => {
-              const imagen = producto.imagenes?.[0]?.nombre;
+              {carrito.map((producto) => {
+                const imagen = producto.imagenes?.[0]?.nombre;
 
-              const imagenUrl = imagen
-                ? `${SERVER_URL}/imagenes-productos/${imagen}`
-                : null;
+                const imagenUrl = imagen
+                  ? `${SERVER_URL}/imagenes-productos/${imagen}`
+                  : null;
 
-              const precioUnitario = obtenerPrecio(producto);
-              const aplicaMayorista =
-                Number(producto.cantidad) >= 6 &&
-                producto.precio_mayorista !== null &&
-                producto.precio_mayorista !== undefined &&
-                producto.precio_mayorista !== "";
+                const precioUnitario = obtenerPrecio(producto);
 
-              return (
-                <article
-                  className="carrito-item"
-                  key={producto.id_producto}
-                >
-                  <div className="carrito-imagen">
-                    {imagenUrl ? (
-                      <img src={imagenUrl} alt={producto.nombre} />
-                    ) : (
-                      <div className="carrito-imagen-vacia">
-                        Sin imagen
-                      </div>
-                    )}
-                  </div>
+                const aplicaMayorista =
+                  Number(producto.cantidad) >= 6 &&
+                  producto.precio_mayorista !== null &&
+                  producto.precio_mayorista !== undefined &&
+                  producto.precio_mayorista !== "";
 
-                  <div className="carrito-info">
-                    <span className="carrito-categoria">
-                      {producto.categoria || "Producto"}
-                    </span>
-
-                    <h3>{producto.nombre}</h3>
-
-                    {producto.codigo && (
-                      <p className="carrito-codigo">
-                        Código: {producto.codigo}
-                      </p>
-                    )}
-
-                    <p className="carrito-descripcion">
-                      {producto.descripcion}
-                    </p>
-
-                    <div className="carrito-precio-linea">
-                      <span>Precio unitario</span>
-                      <strong>{formatearPrecio(precioUnitario)}</strong>
+                return (
+                  <article
+                    className="carrito-item"
+                    key={producto.id_producto}
+                  >
+                    <div className="carrito-imagen">
+                      {imagenUrl ? (
+                        <img src={imagenUrl} alt={producto.nombre} />
+                      ) : (
+                        <div className="carrito-imagen-vacia">
+                          Sin imagen
+                        </div>
+                      )}
                     </div>
 
-                    {aplicaMayorista && (
-                      <span className="precio-mayorista-carrito">
-                        ✓ Precio mayorista aplicado
+                    <div className="carrito-info">
+                      <span className="carrito-categoria">
+                        {producto.categoria || "Producto"}
                       </span>
-                    )}
-                  </div>
 
-                  <div className="carrito-controles">
-                    <span className="carrito-control-label">
-                      Cantidad
-                    </span>
+                      <h3>{producto.nombre}</h3>
 
-                    <div className="carrito-cantidad">
+                      {producto.codigo && (
+                        <p className="carrito-codigo">
+                          Código: {producto.codigo}
+                        </p>
+                      )}
+
+                      <p className="carrito-descripcion">
+                        {producto.descripcion}
+                      </p>
+
+                      <div className="carrito-precio-linea">
+                        <span>Precio unitario</span>
+                        <strong>
+                          {formatearPrecio(precioUnitario)}
+                        </strong>
+                      </div>
+
+                      {aplicaMayorista && (
+                        <span className="precio-mayorista-carrito">
+                          ✓ Precio mayorista aplicado
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="carrito-controles">
+                      <span className="carrito-control-label">
+                        Cantidad
+                      </span>
+
+                      <div className="carrito-cantidad">
+                        <button
+                          onClick={() =>
+                            disminuirCantidad(producto.id_producto)
+                          }
+                          disabled={Number(producto.cantidad) <= 1}
+                          aria-label={`Disminuir ${producto.nombre}`}
+                        >
+                          −
+                        </button>
+
+                        <span>{producto.cantidad}</span>
+
+                        <button
+                          onClick={() =>
+                            aumentarCantidad(producto.id_producto)
+                          }
+                          aria-label={`Aumentar ${producto.nombre}`}
+                        >
+                          +
+                        </button>
+                      </div>
+
                       <button
+                        className="btn-eliminar"
                         onClick={() =>
-                          disminuirCantidad(producto.id_producto)
+                          eliminarDelCarrito(producto.id_producto)
                         }
-                        disabled={Number(producto.cantidad) <= 1}
-                        aria-label={`Disminuir ${producto.nombre}`}
                       >
-                        −
-                      </button>
-
-                      <span>{producto.cantidad}</span>
-
-                      <button
-                        onClick={() =>
-                          aumentarCantidad(producto.id_producto)
-                        }
-                        aria-label={`Aumentar ${producto.nombre}`}
-                      >
-                        +
+                        Eliminar
                       </button>
                     </div>
 
-                    <button
-                      className="btn-eliminar"
-                      onClick={() =>
-                        eliminarDelCarrito(producto.id_producto)
-                      }
-                    >
-                      Eliminar
-                    </button>
-                  </div>
+                    <div className="carrito-subtotal">
+                      <span>Subtotal</span>
+                      <strong>
+                        {formatearPrecio(obtenerSubtotal(producto))}
+                      </strong>
+                    </div>
+                  </article>
+                );
+              })}
 
-                  <div className="carrito-subtotal">
-                    <span>Subtotal</span>
-                    <strong>
-                      {formatearPrecio(obtenerSubtotal(producto))}
-                    </strong>
-                  </div>
-                </article>
-              );
-            })}
+              <button
+                className="btn-vaciar"
+                onClick={vaciarCarrito}
+              >
+                Vaciar carrito
+              </button>
+            </section>
 
-            <button
-              className="btn-vaciar"
-              onClick={vaciarCarrito}
-            >
-              Vaciar carrito
-            </button>
-          </section>
+            <section className="entrega-opciones">
+              <h2>¿Cómo quieres recibir tu pedido?</h2>
+              <p className="entrega-descripcion">
+                Elige la opción más cómoda para ti.
+              </p>
 
-
-          <section className="entrega-opciones">
-            <h2>¿Cómo quieres recibir tu pedido?</h2>
-
-            <label>
-              <input
-                type="radio"
-                name="tipoEntrega"
-                checked={tipoEntrega === "RECOGIDA"}
-                onChange={() => setTipoEntrega("RECOGIDA")}
-              />
-              Recoger en Papelería San Diego — Gratis
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                name="tipoEntrega"
-                checked={tipoEntrega === "DOMICILIO"}
-                onChange={() => setTipoEntrega("DOMICILIO")}
-              />
-              Envío a domicilio — $10.000
-            </label>
-
-            {tipoEntrega === "DOMICILIO" && (
-              <div>
-                <label htmlFor="ciudadEntrega">Ciudad</label>
-                <select
-                  id="ciudadEntrega"
-                  value={ciudad}
-                  onChange={(e) => setCiudad(e.target.value)}
-                >
-                  <option value="Bogotá">Bogotá</option>
-                  <option value="Soacha">Soacha</option>
-                </select>
-
-                <label htmlFor="direccionEntrega">Dirección completa</label>
+              <label
+                className={`entrega-opcion ${
+                  tipoEntrega === "RECOGIDA" ? "seleccionada" : ""
+                }`}
+              >
                 <input
-                  id="direccionEntrega"
-                  type="text"
-                  value={direccion}
-                  onChange={(e) => setDireccion(e.target.value)}
-                  placeholder="Dirección, barrio y detalles"
-                  maxLength={255}
+                  type="radio"
+                  name="tipoEntrega"
+                  checked={tipoEntrega === "RECOGIDA"}
+                  onChange={() => setTipoEntrega("RECOGIDA")}
                 />
 
-                <p>Tiempo estimado: hasta 3 días hábiles.</p>
-              </div>
-            )}
-          </section>
+                <span className="entrega-icono">🏪</span>
+
+                <span className="entrega-texto">
+                  <strong>Recoger en tienda</strong>
+                  <small>Papelería San Diego</small>
+                </span>
+
+                <strong className="entrega-precio">Gratis</strong>
+              </label>
+
+              <label
+                className={`entrega-opcion ${
+                  tipoEntrega === "DOMICILIO" ? "seleccionada" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="tipoEntrega"
+                  checked={tipoEntrega === "DOMICILIO"}
+                  onChange={() => setTipoEntrega("DOMICILIO")}
+                />
+
+                <span className="entrega-icono">🚚</span>
+
+                <span className="entrega-texto">
+                  <strong>Envío a domicilio</strong>
+                  <small>
+                    Bogotá y Soacha · Hasta 3 días hábiles
+                  </small>
+                </span>
+
+                <strong className="entrega-precio">
+                  $10.000
+                </strong>
+              </label>
+
+              {tipoEntrega === "DOMICILIO" && (
+                <div className="entrega-formulario">
+                  <label htmlFor="ciudadEntrega">
+                    Ciudad de entrega
+                  </label>
+
+                  <select
+                    id="ciudadEntrega"
+                    value={ciudad}
+                    onChange={(e) => setCiudad(e.target.value)}
+                  >
+                    <option value="Bogotá">Bogotá</option>
+                    <option value="Soacha">Soacha</option>
+                  </select>
+
+                  <label htmlFor="direccionEntrega">
+                    Dirección completa
+                  </label>
+
+                  <input
+                    id="direccionEntrega"
+                    type="text"
+                    value={direccion}
+                    onChange={(e) => setDireccion(e.target.value)}
+                    placeholder="Dirección, barrio y detalles"
+                    maxLength={255}
+                  />
+                </div>
+              )}
+            </section>
+          </div>
 
           <aside className="carrito-resumen">
+            <span className="resumen-etiqueta">TU PEDIDO</span>
             <h2>Resumen de compra</h2>
 
             <div className="resumen-fila">
-              <span>Productos</span>
-              <strong>{totalUnidades} unidades</strong>
+              <span>Productos ({totalUnidades} unidades)</span>
+              <strong>{formatearPrecio(obtenerTotal())}</strong>
             </div>
 
             <div className="resumen-fila">
-              <span>Artículos diferentes</span>
-              <strong>{carrito.length}</strong>
+              <span>Entrega</span>
+              <strong>
+                {costoEnvio === 0
+                  ? "Gratis"
+                  : formatearPrecio(costoEnvio)}
+              </strong>
             </div>
 
             <div className="resumen-total">
               <span>Total estimado</span>
-              <strong>{formatearPrecio(obtenerTotal())}</strong>
-            <div>
-              <p>Productos: {formatearPrecio(obtenerTotal())}</p>
-              <p>Domicilio: {formatearPrecio(costoEnvio)}</p>
-              <strong>Total estimado: {formatearPrecio(totalConEnvio)}</strong>
-            </div>
+              <strong>{formatearPrecio(totalConEnvio)}</strong>
             </div>
 
             <p className="resumen-nota">
-              El total se calcula según las cantidades seleccionadas y
-              los precios aplicables. El valor final será validado por
-              el servidor al procesar la compra.
+              El precio final se valida al iniciar el pago.
             </p>
 
             <button
@@ -341,7 +376,9 @@ function Carrito() {
               disabled={carrito.length === 0 || procesandoPago}
               onClick={iniciarPagoWompi}
             >
-              {procesandoPago ? "Conectando con Wompi..." : "Pagar con Wompi"}
+              {procesandoPago
+                ? "Conectando con Wompi..."
+                : "Continuar con Wompi →"}
             </button>
 
             {errorPago && (

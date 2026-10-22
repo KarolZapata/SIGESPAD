@@ -58,6 +58,12 @@ function Navegacion() {
                 {nombrePanel[usuario?.rol] || "Mi cuenta"}
               </Link>
 
+              {["ADMINISTRADOR", "VENDEDOR"].includes(usuario?.rol) && (
+                <Link to="/pedidos-despacho" className="navbar-link">
+                  Pedidos por despachar
+                </Link>
+              )}
+
               <span className="navbar-link">
                 Hola, {usuario?.nombre}
               </span>
