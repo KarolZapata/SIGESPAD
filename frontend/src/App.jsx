@@ -27,6 +27,7 @@ import RestablecerContrasena from "./pages/RestablecerContrasena";
 import Registro from "./pages/Registro";
 import VerificarCorreo from "./pages/VerificarCorreo";
 import ResultadoPago from "./pages/ResultadoPago";
+import PedidosDespacho from "./pages/PedidosDespacho";
 
 import Navegacion from "./components/Navegacion";
 
@@ -233,6 +234,17 @@ function App() {
             />
 
             <Route
+              path="/pedidos-despacho"
+              element={
+                <RutaProtegida>
+                  <RutaVendedorOAdministrador>
+                    <PedidosDespacho />
+                  </RutaVendedorOAdministrador>
+                </RutaProtegida>
+              }
+            />
+
+            <Route
               path="/comprobantes"
               element={
                 <RutaProtegida>
@@ -242,6 +254,17 @@ function App() {
                 </RutaProtegida>
               }
             />
+
+
+            <Route
+              path="/mi-comprobante"
+              element={
+                <RutaProtegida>
+                  <Comprobantes />
+                </RutaProtegida>
+              }
+            />
+
 
             <Route
               path="/pagos"

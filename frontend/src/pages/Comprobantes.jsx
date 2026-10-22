@@ -8,6 +8,7 @@ function Comprobantes() {
   const navigate = useNavigate();
 
   const ventaInicial = searchParams.get("venta");
+  const esCliente = window.location.pathname === "/mi-comprobante";
 
   const [ventas, setVentas] = useState([]);
   const [idVenta, setIdVenta] = useState(ventaInicial || "");
@@ -28,7 +29,11 @@ function Comprobantes() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    obtenerVentas();
+    if (!esCliente) {
+      obtenerVentas();
+    } else {
+      setCargandoVentas(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -67,11 +72,19 @@ function Comprobantes() {
       setCargandoComprobante(true);
       setError("");
 
-      const [respuestaVenta, respuestaPagos] =
-        await Promise.all([
-          api.get(`/ventas/${id}`),
-          api.get(`/pagos/venta/${id}`),
-        ]);
+const [respuestaVenta, respuestaPagos] =
+  await Promise.all([
+    api.get(
+      esCliente
+        ? `/ventas/mis-compras/${id}`
+        : `/ventas/${id}`
+    ),
+    api.get(
+      esCliente
+        ? `/pagos/mis-compras/${id}`
+        : `/pagos/venta/${id}`
+    ),
+  ]);
 
       setVenta(respuestaVenta.data.venta);
       setDetalles(respuestaVenta.data.detalles || []);
@@ -207,7 +220,7 @@ function Comprobantes() {
       {/* =====================================================
           SELECTOR DE VENTA
       ===================================================== */}
-
+      {!esCliente && (
       <section className="comprobantes-selector">
 
         <div className="selector-icono">
@@ -325,6 +338,7 @@ function Comprobantes() {
         </div>
 
       </section>
+      )}
 
       {/* =====================================================
           MENSAJES
@@ -694,10 +708,14 @@ function Comprobantes() {
               type="button"
               className="btn-volver"
               onClick={() =>
-                navigate("/ventas-vendedor")
+                navigate(
+                  esCliente
+                    ? "/mis-compras"
+                    : "/ventas-vendedor"
+                )
               }
             >
-              ← Volver a ventas
+              ← {esCliente ? "Volver a mis compras" : "Volver a ventas"}
             </button>
 
             <button

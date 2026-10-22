@@ -99,6 +99,197 @@ router.get(
     }
 );
 
+
+router.get(
+    "/mis-compras/:id",
+    verificarToken,
+    verificarRol("CLIENTE"),
+    async (req, res) => {
+        try {
+            const idUsuario = Number(req.usuario.id_usuario);
+            const idVenta = Number(req.params.id);
+
+            if (!Number.isSafeInteger(idVenta) || idVenta <= 0) {
+                return res.status(400).json({
+                    error: "Identificador de compra no válido"
+                });
+            }
+
+            const [ventas] = await conexion.promise().query(
+                `SELECT
+                    v.id_venta,
+                    v.id_usuario,
+                    u.nombre AS usuario,
+                    v.fecha_venta,
+                    v.total,
+                    v.estado,
+                    v.canal
+                 FROM ventas v
+                 INNER JOIN usuarios u ON u.id_usuario = v.id_usuario
+                 WHERE v.id_venta = ?
+                   AND v.id_usuario = ?
+                 LIMIT 1`,
+                [idVenta, idUsuario]
+            );
+
+            if (!ventas.length) {
+                return res.status(404).json({
+                    error: "Compra no encontrada"
+                });
+            }
+
+            const [detalles] = await conexion.promise().query(
+                `SELECT
+                    d.id_detalle,
+                    d.id_producto,
+                    p.nombre AS producto,
+                    d.cantidad,
+                    d.precio_unitario,
+                    d.subtotal
+                 FROM detalle_venta d
+                 INNER JOIN productos p
+                    ON p.id_producto = d.id_producto
+                 WHERE d.id_venta = ?`,
+                [idVenta]
+            );
+
+            return res.json({
+                venta: ventas[0],
+                detalles
+            });
+        } catch (error) {
+            console.error("Error consultando compra del cliente:", error.message);
+            return res.status(500).json({
+                error: "No fue posible consultar la compra"
+            });
+        }
+    }
+);
+
+
+/* =====================================================
+   PEDIDOS POR DESPACHAR
+   ADMINISTRADOR Y VENDEDOR
+===================================================== */
+router.get(
+    "/despachos",
+    verificarToken,
+    verificarRol("ADMINISTRADOR", "VENDEDOR"),
+    async (req, res) => {
+        try {
+            const [pedidos] = await conexion.promise().query(`
+                SELECT
+                    e.id_entrega,
+                    e.id_venta,
+                    e.tipo_entrega,
+                    e.ciudad,
+                    e.direccion,
+                    e.costo,
+                    e.estado_despacho,
+                    e.fecha_envio,
+                    e.fecha_entrega,
+                    e.observaciones,
+                    v.fecha_venta,
+                    v.total,
+                    v.estado AS estado_pago_venta,
+                    u.nombre AS cliente
+                FROM entregas e
+                INNER JOIN ventas v ON v.id_venta = e.id_venta
+                INNER JOIN usuarios u ON u.id_usuario = v.id_usuario
+                WHERE v.canal = 'WEB'
+                AND v.estado = 'COMPLETADA'
+                AND e.estado_despacho <> 'ENTREGADO'
+                ORDER BY v.fecha_venta ASC
+            `);
+
+            res.json(pedidos);
+        } catch (error) {
+            console.error("Error consultando despachos:", error.message);
+            res.status(500).json({
+                error: "No fue posible consultar los despachos"
+            });
+        }
+    }
+);
+
+/* =====================================================
+   ACTUALIZAR ESTADO DEL DESPACHO
+   ADMINISTRADOR Y VENDEDOR
+===================================================== */
+router.put(
+    "/despachos/:id",
+    verificarToken,
+    verificarRol("ADMINISTRADOR", "VENDEDOR"),
+    async (req, res) => {
+        const idEntrega = Number(req.params.id);
+        const { estado_despacho, observaciones } = req.body;
+
+        const estadosPermitidos = [
+            "PENDIENTE",
+            "PREPARANDO",
+            "ENVIADO",
+            "LISTO_RECOGER",
+            "ENTREGADO"
+        ];
+
+        if (
+            !Number.isSafeInteger(idEntrega) ||
+            idEntrega <= 0 ||
+            !estadosPermitidos.includes(estado_despacho)
+        ) {
+            return res.status(400).json({
+                error: "El identificador o el estado no son válidos"
+            });
+        }
+
+        try {
+            const [resultado] = await conexion.promise().query(
+                `UPDATE entregas e
+                 INNER JOIN ventas v ON v.id_venta = e.id_venta
+                 SET
+                    e.estado_despacho = ?,
+                    e.observaciones = ?,
+                    e.fecha_envio = CASE
+                        WHEN ? = 'ENVIADO'
+                        THEN COALESCE(e.fecha_envio, UTC_TIMESTAMP())
+                        ELSE e.fecha_envio
+                    END,
+                    e.fecha_entrega = CASE
+                        WHEN ? = 'ENTREGADO'
+                        THEN COALESCE(e.fecha_entrega, UTC_TIMESTAMP())
+                        ELSE e.fecha_entrega
+                    END
+                 WHERE e.id_entrega = ?
+                   AND v.canal = 'WEB'
+                   AND v.estado = 'COMPLETADA'`,
+                [
+                    estado_despacho,
+                    observaciones || null,
+                    estado_despacho,
+                    estado_despacho,
+                    idEntrega
+                ]
+            );
+
+            if (!resultado.affectedRows) {
+                return res.status(404).json({
+                    error: "No se encontró el despacho o la compra no está pagada"
+                });
+            }
+
+            res.json({
+                mensaje: "Estado del despacho actualizado correctamente"
+            });
+        } catch (error) {
+            console.error("Error actualizando despacho:", error.message);
+            res.status(500).json({
+                error: "No fue posible actualizar el despacho"
+            });
+        }
+    }
+);
+
+
 router.get(
     "/:id",
     verificarToken,

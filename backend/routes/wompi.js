@@ -48,7 +48,41 @@ router.post(
     verificarRol("CLIENTE"),
     async (req, res) => {
         const idUsuario = Number(req.usuario.id_usuario);
-        const { detalles } = req.body;
+        const {
+            detalles,
+            tipo_entrega = "RECOGIDA",
+            ciudad,
+            direccion
+        } = req.body;
+
+        if (!["RECOGIDA", "DOMICILIO"].includes(tipo_entrega)) {
+            return res.status(400).json({
+                error: "El tipo de entrega no es válido"
+            });
+        }
+
+        if (
+            tipo_entrega === "DOMICILIO" &&
+            (
+                !["Bogotá", "Soacha"].includes(ciudad) ||
+                typeof direccion !== "string" ||
+                !direccion.trim() ||
+                direccion.trim().length > 255
+            )
+        ) {
+            return res.status(400).json({
+                error: "Para el domicilio, selecciona Bogotá o Soacha e ingresa una dirección válida"
+            });
+        }
+
+        const ciudadEntrega =
+            tipo_entrega === "DOMICILIO" ? ciudad : null;
+
+        const direccionEntrega =
+            tipo_entrega === "DOMICILIO" ? direccion.trim() : null;
+
+        const costoEnvio =
+            tipo_entrega === "DOMICILIO" ? 10000 : 0;
 
         if (!WOMPI_PUBLIC_KEY || !WOMPI_INTEGRITY_SECRET || !FRONTEND_URL) {
             return res.status(500).json({
@@ -198,6 +232,15 @@ router.post(
                 throw error;
             }
 
+            // El total está expresado en centavos para Wompi.
+            total += costoEnvio * 100;
+
+            if (!Number.isSafeInteger(total)) {
+                const error = new Error("El total de la compra es demasiado grande");
+                error.status = 400;
+                throw error;
+            }
+
             // Crear la venta sin descontar stock todavía.
             const [venta] = await connection.query(
                 `INSERT INTO ventas
@@ -210,6 +253,19 @@ router.post(
             const referencia = `SIGESPAD-${idVenta}-${crypto
                 .randomBytes(8)
                 .toString("hex")}`;
+
+            await connection.query(
+                `INSERT INTO entregas
+                    (id_venta, tipo_entrega, ciudad, direccion, costo, estado_despacho)
+                VALUES (?, ?, ?, ?, ?, 'PENDIENTE')`,
+                [
+                    idVenta,
+                    tipo_entrega,
+                    ciudadEntrega,
+                    direccionEntrega,
+                    costoEnvio
+                ]
+            );
 
             const expiracionDate = new Date(Date.now() + MINUTOS_RESERVA * 60000);
             const expiracion = expiracionDate.toISOString();

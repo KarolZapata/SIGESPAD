@@ -152,8 +152,22 @@ function MisCompras() {
                       {compra.estado}
                     </span>
                   </div>
+
+                </div>
+
+                <div className="compra-card-acciones">
+                  <button
+                    type="button"
+                    className="mis-compras-boton"
+                    onClick={() =>
+                      navigate(`/mi-comprobante?venta=${compra.id_venta}`)
+                    }
+                  >
+                    Ver comprobante
+                  </button>
                 </div>
               </article>
+
             ))}
           </section>
         )}

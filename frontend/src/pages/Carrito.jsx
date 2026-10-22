@@ -23,6 +23,12 @@ function Carrito() {
     obtenerTotal,
   } = useCart();
 
+  const [tipoEntrega, setTipoEntrega] = useState("RECOGIDA");
+  const [ciudad, setCiudad] = useState("Bogotá");
+  const [direccion, setDireccion] = useState("");
+  const costoEnvio = tipoEntrega === "DOMICILIO" ? 10000 : 0;
+  const totalConEnvio = obtenerTotal() + costoEnvio;
+
   const navigate = useNavigate();
   const [procesandoPago, setProcesandoPago] = useState(false);
   const [errorPago, setErrorPago] = useState("");
@@ -33,6 +39,14 @@ function Carrito() {
 
     if (!token) {
       navigate("/login");
+      return;
+    }
+    
+    if (
+      tipoEntrega === "DOMICILIO" &&
+      !direccion.trim()
+    ) {
+      setErrorPago("Ingresa la dirección de entrega.");
       return;
     }
 
@@ -48,11 +62,15 @@ function Carrito() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+
           body: JSON.stringify({
             detalles: carrito.map((producto) => ({
               id_producto: producto.id_producto,
               cantidad: Number(producto.cantidad),
             })),
+            tipo_entrega: tipoEntrega,
+            ciudad: tipoEntrega === "DOMICILIO" ? ciudad : null,
+            direccion: tipoEntrega === "DOMICILIO" ? direccion.trim() : null,
           }),
         }
       );
@@ -238,6 +256,57 @@ function Carrito() {
             </button>
           </section>
 
+
+          <section className="entrega-opciones">
+            <h2>¿Cómo quieres recibir tu pedido?</h2>
+
+            <label>
+              <input
+                type="radio"
+                name="tipoEntrega"
+                checked={tipoEntrega === "RECOGIDA"}
+                onChange={() => setTipoEntrega("RECOGIDA")}
+              />
+              Recoger en Papelería San Diego — Gratis
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                name="tipoEntrega"
+                checked={tipoEntrega === "DOMICILIO"}
+                onChange={() => setTipoEntrega("DOMICILIO")}
+              />
+              Envío a domicilio — $10.000
+            </label>
+
+            {tipoEntrega === "DOMICILIO" && (
+              <div>
+                <label htmlFor="ciudadEntrega">Ciudad</label>
+                <select
+                  id="ciudadEntrega"
+                  value={ciudad}
+                  onChange={(e) => setCiudad(e.target.value)}
+                >
+                  <option value="Bogotá">Bogotá</option>
+                  <option value="Soacha">Soacha</option>
+                </select>
+
+                <label htmlFor="direccionEntrega">Dirección completa</label>
+                <input
+                  id="direccionEntrega"
+                  type="text"
+                  value={direccion}
+                  onChange={(e) => setDireccion(e.target.value)}
+                  placeholder="Dirección, barrio y detalles"
+                  maxLength={255}
+                />
+
+                <p>Tiempo estimado: hasta 3 días hábiles.</p>
+              </div>
+            )}
+          </section>
+
           <aside className="carrito-resumen">
             <h2>Resumen de compra</h2>
 
@@ -254,6 +323,11 @@ function Carrito() {
             <div className="resumen-total">
               <span>Total estimado</span>
               <strong>{formatearPrecio(obtenerTotal())}</strong>
+            <div>
+              <p>Productos: {formatearPrecio(obtenerTotal())}</p>
+              <p>Domicilio: {formatearPrecio(costoEnvio)}</p>
+              <strong>Total estimado: {formatearPrecio(totalConEnvio)}</strong>
+            </div>
             </div>
 
             <p className="resumen-nota">

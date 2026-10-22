@@ -165,6 +165,58 @@ router.get(
 );
 
 
+router.get(
+    "/mis-compras/:idVenta",
+    verificarToken,
+    verificarRol("CLIENTE"),
+    (req, res) => {
+        const idVenta = Number(req.params.idVenta);
+        const idUsuario = Number(req.usuario.id_usuario);
+
+        if (!Number.isSafeInteger(idVenta) || idVenta <= 0) {
+            return res.status(400).json({
+                error: "Identificador de compra no válido"
+            });
+        }
+
+        const sql = `
+            SELECT
+                p.id_pago,
+                p.id_venta,
+                p.tipo_pago,
+                p.monto,
+                p.estado,
+                p.fecha_pago
+            FROM pagos p
+            INNER JOIN ventas v
+                ON p.id_venta = v.id_venta
+            WHERE p.id_venta = ?
+              AND v.id_usuario = ?
+            ORDER BY p.id_pago DESC
+        `;
+
+        conexion.query(
+            sql,
+            [idVenta, idUsuario],
+            (error, resultados) => {
+                if (error) {
+                    console.error(
+                        "Error consultando pagos del cliente:",
+                        error.message
+                    );
+
+                    return res.status(500).json({
+                        error: "No fue posible consultar los pagos"
+                    });
+                }
+
+                res.json(resultados);
+            }
+        );
+    }
+);
+
+
 // ======================================================
 // POST - REGISTRAR UN PAGO
 // ADMINISTRADOR Y VENDEDOR
