@@ -15,8 +15,7 @@ const MINUTOS_RESERVA = 10;
 
 function crearFirmaIntegridad(referencia, montoCentavos, expiracion) {
     const contenido =
-        `${referencia}${montoCentavos}COP${WOMPI_INTEGRITY_SECRET}` +
-        (expiracion || "");
+        `${referencia}${montoCentavos}COP${expiracion}${WOMPI_INTEGRITY_SECRET}`;
 
     return crypto
         .createHash("sha256")
