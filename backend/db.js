@@ -31,6 +31,15 @@ if (process.env.DB_SSL === "true") {
     };
 }
 
+console.log("Diagnóstico de conexión MySQL:", {
+    host: configuracion.host,
+    port: configuracion.port,
+    database: configuracion.database,
+    user: configuracion.user,
+    sslActivado: Boolean(configuracion.ssl),
+    certificadoCargado: Boolean(configuracion.ssl?.ca)
+});
+
 const conexion = mysql.createConnection(configuracion);
 
 conexion.connect((error) => {
