@@ -268,6 +268,8 @@ router.post("/registro", async (req, res) => {
                                 "http://localhost:5173"
                             ).replace(/\/$/, "");
 
+                            console.log("URL del frontend para verificación:", frontendURL);
+
                             const enlace =
                                 `${frontendURL}/verificar-correo?token=${token}`;
 
