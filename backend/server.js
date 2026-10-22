@@ -11,6 +11,7 @@ const pagosRoutes = require("./routes/pagos");
 const categoriasRoutes = require("./routes/categorias");
 const reportesRoutes = require("./routes/reportes");
 const inventarioRoutes = require("./routes/inventario");
+const wompiRoutes = require("./routes/wompi");
 
 const {
     verificarToken,
@@ -27,7 +28,7 @@ app.use(express.json());
 // IMÁGENES DE PRODUCTOS
 // =====================================================
 app.use(
-    "/Imagenes-productos",
+    "/imagenes-productos",
     express.static(
         path.join(__dirname, "../Catalogo/Imagenes_Productos")
     )
@@ -43,6 +44,7 @@ app.use("/api/pagos", pagosRoutes);
 app.use("/api/categorias", categoriasRoutes);
 app.use("/api/reportes", reportesRoutes);
 app.use("/api/inventario", inventarioRoutes);
+app.use("/api/wompi", wompiRoutes);
 
 app.get("/", (req, res) => {
     res.json({

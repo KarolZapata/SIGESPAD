@@ -1,5 +1,6 @@
-import { SERVER_URL } from "../services/api";
+import { useState } from "react";
 import { useCart } from "../context/CartContext";
+import { SERVER_URL } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "./Carrito.css";
 
@@ -23,6 +24,58 @@ function Carrito() {
   } = useCart();
 
   const navigate = useNavigate();
+  const [procesandoPago, setProcesandoPago] = useState(false);
+  const [errorPago, setErrorPago] = useState("");
+  const iniciarPagoWompi = async () => {
+    if (carrito.length === 0 || procesandoPago) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setProcesandoPago(true);
+    setErrorPago("");
+
+    try {
+      const respuesta = await fetch(
+        `${SERVER_URL}/api/wompi/iniciar`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            detalles: carrito.map((producto) => ({
+              id_producto: producto.id_producto,
+              cantidad: Number(producto.cantidad),
+            })),
+          }),
+        }
+      );
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(
+          datos.error || "No fue posible iniciar el pago."
+        );
+      }
+
+      if (!datos.checkoutUrl) {
+        throw new Error("El servidor no devolvió el enlace de pago.");
+      }
+
+      window.location.href = datos.checkoutUrl;
+    } catch (error) {
+      setErrorPago(error.message || "Error al conectar con Wompi.");
+      setProcesandoPago(false);
+    }
+  };
+
 
   const totalUnidades = carrito.reduce(
     (total, producto) => total + Number(producto.cantidad || 0),
@@ -211,20 +264,21 @@ function Carrito() {
 
             <button
               className="btn-comprar"
-              disabled
-              title="La integración de Wompi está pendiente"
+              disabled={carrito.length === 0 || procesandoPago}
+              onClick={iniciarPagoWompi}
             >
-              Pagar con Wompi
+              {procesandoPago ? "Conectando con Wompi..." : "Pagar con Wompi"}
             </button>
 
-            <p className="wompi-pendiente">
-              La pasarela de pagos se habilitará cuando terminemos su
-              configuración.
-            </p>
+            {errorPago && (
+              <p role="alert" className="wompi-pendiente">
+                {errorPago}
+              </p>
+            )}
 
             <div className="carrito-seguridad">
               <span>🔒</span>
-              <p>Pago seguro al completar la integración de Wompi.</p>
+              <p>Pago seguro mediante Wompi.</p>
             </div>
           </aside>
         </div>
