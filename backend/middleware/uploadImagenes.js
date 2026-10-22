@@ -5,7 +5,7 @@ const fs = require("fs");
 
 const carpetaImagenes = path.join(
   __dirname,
-  "../../Catalogo/imagenes_productos"
+  "../../Catalogo/Imagenes_productos"
 );
 
 if (!fs.existsSync(carpetaImagenes)) {

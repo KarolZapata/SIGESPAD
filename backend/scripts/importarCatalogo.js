@@ -14,7 +14,7 @@ const rutaCSV = path.join(
 
 const carpetaImagenes = path.join(
   __dirname,
-  "../../Catalogo/imagenes_productos"
+  "../../Catalogo/Imagenes_productos"
 );
 
 // =====================================================

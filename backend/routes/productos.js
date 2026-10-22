@@ -786,7 +786,7 @@ router.get(
 function eliminarArchivosSubidos(archivos) {
     const carpetaImagenes = path.join(
         __dirname,
-        "../../Catalogo/imagenes_productos"
+        "../../Catalogo/Imagenes_productos"
     );
 
     archivos.forEach((archivo) => {

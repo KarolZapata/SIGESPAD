@@ -27,9 +27,9 @@ app.use(express.json());
 // IMÁGENES DE PRODUCTOS
 // =====================================================
 app.use(
-    "/imagenes-productos",
+    "/Imagenes-productos",
     express.static(
-        path.join(__dirname, "../Catalogo/imagenes_Productos")
+        path.join(__dirname, "../Catalogo/Imagenes_Productos")
     )
 );
 
